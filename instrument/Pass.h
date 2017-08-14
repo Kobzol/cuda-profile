@@ -12,6 +12,5 @@ public:
     virtual bool runOnModule(llvm::Module& module) override;
 
     void instrumentCuda(llvm::Module &module);
-
     void instrumentCpp(llvm::Module &module);
 };

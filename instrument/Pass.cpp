@@ -1,10 +1,10 @@
 #include "Pass.h"
-#include <iostream>
+#include "Store.h"
 
 #include <llvm/IR/Module.h>
-#include <llvm/IR/Instructions.h>
-#include <llvm/IR/Constants.h>
 #include <llvm/IR/IRBuilder.h>
+#include <Target/NVPTX/NVPTXUtilities.h>
+#include <iostream>
 
 using namespace llvm;
 
@@ -29,47 +29,20 @@ void CudaPass::instrumentCuda(Module& module)
 {
     for (Function& fn : module.getFunctionList())
     {
-        std::string name = fn.getName().str();
-        if (name.find("__cu_") != std::string::npos)
+        if (isKernelFunction(fn))
         {
-            continue;
+            StoreHandler handler;
+            handler.handleKernel(&fn);
+
+            fn.dump();
         }
-
-        for (BasicBlock& bb : fn.getBasicBlockList())
-        {
-            for (Instruction& inst : bb.getInstList())
-            {
-                if (auto* store = dyn_cast<StoreInst>(&inst))
-                {
-                    Type* typeInt32 = Type::getInt32Ty(module.getContext());
-                    PointerType* typeInt8ptr = Type::getInt8Ty(module.getContext())->getPointerTo();
-
-                    Function* fnCall = cast<Function>(module.getOrInsertFunction("__cu_store",
-                                                                                 Type::getVoidTy(module.getContext()),
-                                                                                 typeInt32,
-                                                                                 typeInt8ptr,
-                                                                                 nullptr));
-                    Constant* fnTid = cast<Constant>(module.getOrInsertFunction("llvm.nvvm.read.ptx.sreg.tid.x",
-                                                                                typeInt32,
-                                                                                nullptr
-                    ));
-
-                    IRBuilder<> builder(store);
-                    builder.CreateCall(fnCall, {
-                            builder.CreateCall(fnTid),
-                            ConstantPointerNull::get(typeInt8ptr)
-                    });
-                }
-            }
-        }
-
-        fn.dump();
     }
 }
 
 void CudaPass::instrumentCpp(Module& module)
 {
-    /*for (Function& fn : module.getFunctionList())
+    return;
+    for (Function& fn : module.getFunctionList())
     {
         for (BasicBlock& bb : fn.getBasicBlockList())
         {
@@ -78,9 +51,9 @@ void CudaPass::instrumentCpp(Module& module)
                 if (auto* call = dyn_cast<CallInst>(&inst))
                 {
                     auto calledName = call->getCalledFunction()->getName().str();
-                    if (calledName.find("kernel") != std::string::npos)
+                    if (calledName.find("kernel") != std::string::npos && calledName.find("__cu") == std::string::npos)
                     {
-                        Function* fnCall = cast<Function>(module.getOrInsertFunction("__cu_pullDevice",
+                        auto* fnCall = cast<Function>(module.getOrInsertFunction("__cu_kernelEnd",
                                                                                    Type::getVoidTy(module.getContext()),
                                                                                    nullptr));
 
@@ -92,7 +65,5 @@ void CudaPass::instrumentCpp(Module& module)
                 }
             }
         }
-
-        fn.dump();
-    }*/
+    }
 }

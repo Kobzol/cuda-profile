@@ -6,15 +6,19 @@ INSTRUMENTED_KERNEL_BC="kernel-instrumented.bc"
 
 pushd cmake-build-debug
     # remove existing files
-    rm -rf *.bc *.ll *.o
+    # rm -rf *.bc *.ll *.o
 
     # build pass
     make
 
-    clang++ -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
+    # clang++ -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
 
     # run pass and compile
-    clang++ -std=c++14 --cuda-gpu-arch=sm_30 -Xclang -load -Xclang ./instrument/libllvmCuda.so -I/usr/local/cuda/include -L/usr/local/cuda/lib64 -lcudart -ldl -lrt -pthread -xcuda ${SRC_FILES} -o cuda
+    clang++ -std=c++14 --cuda-gpu-arch=sm_30 \
+            -I/usr/local/cuda/include -L/usr/local/cuda/lib64 \
+            -Xclang -load -Xclang ./instrument/libllvmCuda.so \
+            -lcudart -ldl -lrt -pthread -xcuda \
+            ${SRC_FILES} -o cuda
 
     # run instrumented program
     ./cuda
