@@ -28,7 +28,7 @@ public:
                llvm::Value* size
     );
     void kernelStart();
-    void kernelEnd();
+    void kernelEnd(const std::string& kernelName);
 
 
     llvm::Value* readInt32(const std::string& name);

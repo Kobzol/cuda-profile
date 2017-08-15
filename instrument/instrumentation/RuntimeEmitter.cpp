@@ -1,8 +1,9 @@
 #include "RuntimeEmitter.h"
 #include "../util/Types.h"
+#include "../util/Values.h"
 
 #include <llvm/IR/Module.h>
-#include <llvm/IR/IRBuilder.h>
+
 
 using namespace llvm;
 
@@ -32,9 +33,13 @@ void RuntimeEmitter::kernelStart()
     this->builder.CreateCall(this->getKernelStartFunction());
 }
 
-void RuntimeEmitter::kernelEnd()
+void RuntimeEmitter::kernelEnd(const std::string& kernelName)
 {
-    this->builder.CreateCall(this->getKernelEndFunction());
+    GlobalVariable* global = Values::createGlobalCString(this->module, "__cuProfileKernel_" + kernelName, kernelName);
+
+    this->builder.CreateCall(this->getKernelEndFunction(), {
+        global
+    });
 }
 
 llvm::Value* RuntimeEmitter::readInt32(const std::string& name)
@@ -73,5 +78,6 @@ Function* RuntimeEmitter::getKernelEndFunction()
     return cast<Function>(this->module->getOrInsertFunction(
             prefix("kernelEnd"),
             Types::voidType(this->module),
+            Types::int8Ptr(this->module),
             nullptr));
 }

@@ -15,35 +15,34 @@ static size_t kernelCounter = 0;
 __device__ StoreRecord* devRecordsPtr;
 __device__ uint32_t devRecordIndex;
 
+static void emitKernelData(const std::string& kernelName, const std::vector<StoreRecord>& records)
+{
+    std::fstream kernelOutput(std::string(kernelName) + "-" + std::to_string(kernelCounter++) + ".json", std::fstream::out);
+    kernelOutput << records << std::endl;
+    kernelOutput.flush();
+}
+
 extern "C" void PREFIX(kernelStart)()
 {
     cudaMalloc((void**) &deviceRecords, sizeof(StoreRecord) * bufferSize);
 
     const uint32_t zero = 0;
-    cudaMemcpyToSymbol(devRecordsPtr, &deviceRecords, sizeof(deviceRecords));
-    cudaMemcpyToSymbol(devRecordIndex, &zero, sizeof(zero));
+    CHECK_CUDA_CALL(cudaMemcpyToSymbol(devRecordsPtr, &deviceRecords, sizeof(deviceRecords)));
+    CHECK_CUDA_CALL(cudaMemcpyToSymbol(devRecordIndex, &zero, sizeof(zero)));
 }
-extern "C" void PREFIX(kernelEnd)()
+extern "C" void PREFIX(kernelEnd)(const char* kernelName)
 {
     std::vector<StoreRecord> records;
     records.resize(bufferSize);
     uint32_t count = 0;
 
-    cudaDeviceSynchronize();
+    CHECK_CUDA_CALL(cudaDeviceSynchronize());
     CHECK_CUDA_CALL(cudaMemcpy(records.data(), deviceRecords, sizeof(StoreRecord) * bufferSize, cudaMemcpyDeviceToHost));
     CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&count, devRecordIndex, sizeof(uint32_t)));
-
-    for (int i = 0; i < count; i++)
-    {
-        std::cout << records[i] << std::endl;
-    }
-
-    cudaFree(deviceRecords);
+    CHECK_CUDA_CALL(cudaFree(deviceRecords));
     deviceRecords = nullptr;
 
-    std::fstream kernelOutput("kernel-" + std::to_string(kernelCounter++) + ".json", std::fstream::out);
-    kernelOutput << records << std::endl;
-    kernelOutput.flush();
+    emitKernelData(kernelName, records);
 }
 
 extern "C" __device__ void PREFIX(store)(uint32_t blockX, uint32_t blockY, uint32_t blockZ,

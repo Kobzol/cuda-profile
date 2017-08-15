@@ -41,7 +41,8 @@ std::fstream& operator<<(std::fstream& fs, const StoreRecord& record)
             {"event", picojson::value({
                     {"address", picojson::value((double)((size_t) record.address))},
                     {"type", picojson::value((record.accessType == AccessType::Read ? "read" : "write"))},
-                    {"size", picojson::value((double) record.size)}
+                    {"size", picojson::value((double) record.size)},
+                    {"timestamp", picojson::value((double) record.timestamp)}
             })}
     };
 
