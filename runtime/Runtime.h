@@ -1,44 +1,56 @@
 #pragma once
 
-#include "cudautil.h"
-#include "StoreRecord.h"
 #include <cstddef>
 #include <vector>
 #include <iostream>
 
-static StoreRecord* devMemory;
-static size_t bufferSize = 1024;
-static __device__ StoreRecord* devPointer;
-static __device__ uint32_t storeIndex = 0;
+#include "prefix.h"
+#include "StoreRecord.h"
+#include "format.h"
 
-extern "C" void PREFIX(initMemory)()
-{
-    cudaMalloc((void**) &devMemory, sizeof(StoreRecord) * bufferSize);
-    cudaMemcpyToSymbol(devPointer, &devMemory, sizeof(devMemory));
-}
+
+static StoreRecord* deviceRecords = nullptr;
+static size_t bufferSize = 1024;
+static size_t kernelCounter = 0;
+__device__ StoreRecord* devRecordsPtr;
+__device__ uint32_t devRecordIndex;
 
 extern "C" void PREFIX(kernelStart)()
 {
+    cudaMalloc((void**) &deviceRecords, sizeof(StoreRecord) * bufferSize);
 
+    const uint32_t zero = 0;
+    cudaMemcpyToSymbol(devRecordsPtr, &deviceRecords, sizeof(deviceRecords));
+    cudaMemcpyToSymbol(devRecordIndex, &zero, sizeof(zero));
 }
-
 extern "C" void PREFIX(kernelEnd)()
 {
-    StoreRecord* data = new StoreRecord[1024];
+    std::vector<StoreRecord> records;
+    records.resize(bufferSize);
+    uint32_t count = 0;
 
     cudaDeviceSynchronize();
-    CHECK_CUDA(cudaMemcpy(data, devMemory, sizeof(StoreRecord) * bufferSize, cudaMemcpyDeviceToHost));
+    CHECK_CUDA_CALL(cudaMemcpy(records.data(), deviceRecords, sizeof(StoreRecord) * bufferSize, cudaMemcpyDeviceToHost));
+    CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&count, devRecordIndex, sizeof(uint32_t)));
 
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < count; i++)
     {
-        std::cout << data[i] << std::endl;
+        std::cout << records[i] << std::endl;
     }
+
+    cudaFree(deviceRecords);
+    deviceRecords = nullptr;
+
+    std::fstream kernelOutput("kernel-" + std::to_string(kernelCounter++) + ".json", std::fstream::out);
+    kernelOutput << records << std::endl;
+    kernelOutput.flush();
 }
 
 extern "C" __device__ void PREFIX(store)(uint32_t blockX, uint32_t blockY, uint32_t blockZ,
                                          uint32_t threadX, uint32_t threadY, uint32_t threadZ,
                                          void *address, size_t size)
 {
-    uint32_t index = atomicInc(&storeIndex, 1024);
-    devPointer[index] = StoreRecord(dim3(blockX, blockY, blockZ), dim3(threadX, threadY, threadZ), address, size);
+    uint32_t index = atomicInc(&devRecordIndex, 1024);
+    devRecordsPtr[index] = StoreRecord(AccessType::Write, dim3(blockX, blockY, blockZ), dim3(threadX, threadY, threadZ),
+                                       address, size, static_cast<int64_t>(clock64()));
 }

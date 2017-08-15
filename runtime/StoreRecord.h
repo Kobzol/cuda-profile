@@ -4,13 +4,20 @@
 #include <cstdint>
 #include <ostream>
 
+enum class AccessType
+{
+    Read = 0,
+    Write = 1
+};
 
 struct StoreRecord
 {
 public:
     StoreRecord() = default;
-    __universal__ StoreRecord(dim3 blockIdx, dim3 threadIdx, void* memory, size_t size):
-        blockIdx(blockIdx), threadIdx(threadIdx), memory(memory), size(size)
+    __universal__ StoreRecord(AccessType accessType, dim3 blockIdx, dim3 threadIdx,
+                              void* memory, size_t size, int64_t timestamp):
+            accessType(accessType), blockIdx(blockIdx), threadIdx(threadIdx),
+            address(memory), size(size), timestamp(timestamp)
     {
 
     }
@@ -18,22 +25,9 @@ public:
     dim3 blockIdx;
     dim3 threadIdx;
 
-    void* memory;
-    size_t size;
+    AccessType accessType = AccessType::Read;
+    void* address = nullptr;
+    size_t size = 0;
+
+    int64_t timestamp = 0;
 };
-
-std::ostream& operator<<(std::ostream& os, const dim3& dimension)
-{
-    os << dimension.x << ";" << dimension.y << ";" << dimension.z;
-    return os;
-}
-
-std::ostream& operator<<(std::ostream& os, StoreRecord& record)
-{
-    os << "Store(";
-    os << record.blockIdx << ", ";
-    os << record.threadIdx << ", ";
-    os << record.memory << ", " << record.size << ")";
-
-    return os;
-}

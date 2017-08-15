@@ -10,7 +10,7 @@ find_package(LLVM CONFIG)
 add_definitions(${LLVM_DEFINITIONS})
 
 set(CMAKE_CXX_COMPILER "${LLVM_TOOLS_BINARY_DIR}/clang++")
-# set(CUDA_HOST_COMPILER "${LLVM_TOOLS_BINARY_DIR}/clang++")
+set(CUDA_HOST_COMPILER "g++")
 
 # Instrumentation
 add_subdirectory("instrument")

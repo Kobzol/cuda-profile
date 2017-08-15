@@ -15,6 +15,4 @@ public:
 
 private:
     void handleStore(llvm::StoreInst* store);
-
-    llvm::Function* getStoreFunction(llvm::Module* module);
 };

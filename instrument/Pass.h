@@ -1,6 +1,7 @@
 #pragma once
 
 #include <llvm/Pass.h>
+#include <unordered_map>
 
 struct CudaPass : public llvm::ModulePass
 {
@@ -9,8 +10,13 @@ public:
 
     CudaPass();
 
-    virtual bool runOnModule(llvm::Module& module) override;
+    bool runOnModule(llvm::Module& module) override;
 
-    void instrumentCuda(llvm::Module &module);
-    void instrumentCpp(llvm::Module &module);
+private:
+    void instrumentCuda(llvm::Module& module);
+    void instrumentCpp(llvm::Module& module);
+
+    llvm::Function* augmentKernel(llvm::Function* fn);
+
+    std::unordered_map<llvm::Function*, llvm::Function*> kernelMap;
 };
