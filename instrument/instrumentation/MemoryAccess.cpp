@@ -1,13 +1,15 @@
 #include "MemoryAccess.h"
+
+#include <iostream>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/TypeFinder.h>
+
 #include "../util/Types.h"
 #include "../util/Values.h"
 #include "RuntimeEmitter.h"
 
-#include <llvm/IR/Module.h>
-#include <llvm/IR/IRBuilder.h>
-#include <iostream>
-
 using namespace llvm;
+
 
 std::string threadIdx(const std::string& dim)
 {
@@ -16,6 +18,10 @@ std::string threadIdx(const std::string& dim)
 std::string blockIdx(const std::string& dim)
 {
     return "llvm.nvvm.read.ptx.sreg.ctaid." + dim;
+}
+std::string warpId()
+{
+    return "llvm.nvvm.read.ptx.sreg.warpid";
 }
 
 
@@ -41,8 +47,6 @@ void StoreHandler::handleKernel(Function* kernel)
             }
         }
     }
-
-    kernel->dump();
 }
 
 
@@ -55,6 +59,7 @@ void StoreHandler::handleStore(StoreInst* store)
                   emitter.readInt32(threadIdx("x")),
                   emitter.readInt32(threadIdx("y")),
                   emitter.readInt32(threadIdx("z")),
+                  emitter.readInt32(warpId()),
                   emitter.getBuilder().CreatePointerCast(store->getPointerOperand(), Types::voidPtr(store->getModule())),
                   Values::int64(store->getModule(), store->getValueOperand()->getType()->getPrimitiveSizeInBits() / 8));
 }
@@ -62,11 +67,12 @@ void StoreHandler::handleLoad(LoadInst* load)
 {
     RuntimeEmitter emitter(load);
     emitter.load(emitter.readInt32(blockIdx("x")),
-                  emitter.readInt32(blockIdx("y")),
-                  emitter.readInt32(blockIdx("z")),
-                  emitter.readInt32(threadIdx("x")),
-                  emitter.readInt32(threadIdx("y")),
-                  emitter.readInt32(threadIdx("z")),
-                  emitter.getBuilder().CreatePointerCast(load->getPointerOperand(), Types::voidPtr(load->getModule())),
-                  Values::int64(load->getModule(), load->getPointerOperand()->getType()->getPrimitiveSizeInBits() / 8));
+                 emitter.readInt32(blockIdx("y")),
+                 emitter.readInt32(blockIdx("z")),
+                 emitter.readInt32(threadIdx("x")),
+                 emitter.readInt32(threadIdx("y")),
+                 emitter.readInt32(threadIdx("z")),
+                 emitter.readInt32(warpId()),
+                 emitter.getBuilder().CreatePointerCast(load->getPointerOperand(), Types::voidPtr(load->getModule())),
+                 Values::int64(load->getModule(), load->getPointerOperand()->getType()->getPrimitiveSizeInBits() / 8));
 }

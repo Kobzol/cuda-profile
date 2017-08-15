@@ -18,6 +18,7 @@ void RuntimeEmitter::store(Value* blockX,
                            Value* threadX,
                            Value* threadY,
                            Value* threadZ,
+                           Value* warpId,
                            Value* address,
                            Value* size
 )
@@ -25,23 +26,24 @@ void RuntimeEmitter::store(Value* blockX,
     this->builder.CreateCall(this->getStoreFunction(), {
             blockX, blockY, blockZ,
             threadX, threadY, threadZ,
-            address, size
+            warpId, address, size
     });
 }
 void RuntimeEmitter::load(Value* blockX,
-                           Value* blockY,
-                           Value* blockZ,
-                           Value* threadX,
-                           Value* threadY,
-                           Value* threadZ,
-                           Value* address,
-                           Value* size
+                          Value* blockY,
+                          Value* blockZ,
+                          Value* threadX,
+                          Value* threadY,
+                          Value* threadZ,
+                          Value* warpId,
+                          Value* address,
+                          Value* size
 )
 {
     this->builder.CreateCall(this->getLoadFunction(), {
             blockX, blockY, blockZ,
             threadX, threadY, threadZ,
-            address, size
+            warpId, address, size
     });
 }
 void RuntimeEmitter::kernelStart()
@@ -78,6 +80,7 @@ Function* RuntimeEmitter::getStoreFunction()
             Types::int32(this->module),
             Types::int32(this->module),
             Types::int32(this->module),
+            Types::int32(this->module),
             Types::voidPtr(this->module),
             Types::int64(this->module),
             nullptr));
@@ -87,6 +90,7 @@ llvm::Function* RuntimeEmitter::getLoadFunction()
     return cast<Function>(this->module->getOrInsertFunction(
             prefix("load"),
             Types::voidType(this->module),
+            Types::int32(this->module),
             Types::int32(this->module),
             Types::int32(this->module),
             Types::int32(this->module),

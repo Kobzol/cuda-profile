@@ -1,6 +1,7 @@
 #include "Types.h"
 
 #include <llvm/IR/Module.h>
+#include <llvm/IR/TypeFinder.h>
 
 using namespace llvm;
 
@@ -41,4 +42,19 @@ PointerType* Types::int32Ptr(Module* module)
 PointerType* Types::int64Ptr(Module* module)
 {
     return Types::int64(module)->getPointerTo();
+}
+
+llvm::StructType* Types::getStruct(llvm::Module* module, const std::string& name)
+{
+    TypeFinder structFinder;
+    structFinder.run(*module, true);
+    for (auto* structType : structFinder)
+    {
+        if (structType->getStructName() == "struct." + name)
+        {
+            return structType;
+        }
+    }
+
+    return nullptr;
 }

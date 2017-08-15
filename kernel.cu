@@ -8,7 +8,7 @@ __global__ void kernel(int* p, int p2)
 
 void cudaTest()
 {
-    const int COUNT = 10;
+    const int COUNT = 64;
 
     int* dPtr;
     int data[COUNT] = { 0 };

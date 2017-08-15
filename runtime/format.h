@@ -19,6 +19,7 @@ std::ostream& operator<<(std::ostream& os, const AccessRecord& record)
     os << "Store(";
     os << record.blockIdx << ", ";
     os << record.threadIdx << ", ";
+    os << record.warpId << ", ";
     os << (record.accessType == AccessType::Read ? "read" : "write") << "[" << record.address;
     os << ", " << record.size << ", " << record.timestamp << "])";
 
@@ -38,6 +39,7 @@ std::fstream& operator<<(std::fstream& fs, const AccessRecord& record)
                     {"y", picojson::value((double) record.blockIdx.y)},
                     {"z", picojson::value((double) record.blockIdx.z)}
             })},
+            {"warpId", picojson::value((double) record.warpId)},
             {"event", picojson::value({
                     {"address", picojson::value((double)((size_t) record.address))},
                     {"type", picojson::value((record.accessType == AccessType::Read ? "read" : "write"))},

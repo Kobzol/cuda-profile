@@ -15,9 +15,10 @@ struct AccessRecord
 public:
     AccessRecord() = default;
     __universal__ AccessRecord(AccessType accessType, dim3 blockIdx, dim3 threadIdx,
-                              void* memory, size_t size, int64_t timestamp):
+                               uint32_t warpId, void* memory, size_t size,
+                               int64_t timestamp):
             accessType(accessType), blockIdx(blockIdx), threadIdx(threadIdx),
-            address(memory), size(size), timestamp(timestamp)
+            warpId(warpId), address(memory), size(size), timestamp(timestamp)
     {
 
     }
@@ -28,6 +29,7 @@ public:
     AccessType accessType = AccessType::Read;
     void* address = nullptr;
     size_t size = 0;
+    uint32_t warpId = 0;
 
     int64_t timestamp = 0;
 };
