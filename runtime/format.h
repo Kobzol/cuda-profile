@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "cudautil.h"
-#include "StoreRecord.h"
+#include "AccessRecord.h"
 #include "picojson.h"
 
 std::ostream& operator<<(std::ostream& os, const dim3& dimension)
@@ -14,7 +14,7 @@ std::ostream& operator<<(std::ostream& os, const dim3& dimension)
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const StoreRecord& record)
+std::ostream& operator<<(std::ostream& os, const AccessRecord& record)
 {
     os << "Store(";
     os << record.blockIdx << ", ";
@@ -25,7 +25,7 @@ std::ostream& operator<<(std::ostream& os, const StoreRecord& record)
     return os;
 }
 
-std::fstream& operator<<(std::fstream& fs, const StoreRecord& record)
+std::fstream& operator<<(std::fstream& fs, const AccessRecord& record)
 {
     picojson::object root = {
             {"threadIdx", picojson::value({

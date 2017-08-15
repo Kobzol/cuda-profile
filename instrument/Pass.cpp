@@ -1,5 +1,5 @@
 #include "Pass.h"
-#include "instrumentation/Store.h"
+#include "instrumentation/MemoryAccess.h"
 #include "util/Types.h"
 #include "instrumentation/KernelLaunch.h"
 

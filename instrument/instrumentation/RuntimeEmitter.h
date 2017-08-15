@@ -27,6 +27,15 @@ public:
                llvm::Value* address,
                llvm::Value* size
     );
+    void load(llvm::Value* blockX,
+               llvm::Value* blockY,
+               llvm::Value* blockZ,
+               llvm::Value* threadX,
+               llvm::Value* threadY,
+               llvm::Value* threadZ,
+               llvm::Value* address,
+               llvm::Value* size
+    );
     void kernelStart();
     void kernelEnd(const std::string& kernelName);
 
@@ -40,6 +49,7 @@ public:
 
 private:
     llvm::Function* getStoreFunction();
+    llvm::Function* getLoadFunction();
     llvm::Function* getKernelStartFunction();
     llvm::Function* getKernelEndFunction();
 

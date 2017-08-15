@@ -28,6 +28,22 @@ void RuntimeEmitter::store(Value* blockX,
             address, size
     });
 }
+void RuntimeEmitter::load(Value* blockX,
+                           Value* blockY,
+                           Value* blockZ,
+                           Value* threadX,
+                           Value* threadY,
+                           Value* threadZ,
+                           Value* address,
+                           Value* size
+)
+{
+    this->builder.CreateCall(this->getLoadFunction(), {
+            blockX, blockY, blockZ,
+            threadX, threadY, threadZ,
+            address, size
+    });
+}
 void RuntimeEmitter::kernelStart()
 {
     this->builder.CreateCall(this->getKernelStartFunction());
@@ -55,6 +71,21 @@ Function* RuntimeEmitter::getStoreFunction()
 {
     return cast<Function>(this->module->getOrInsertFunction(
             prefix("store"),
+            Types::voidType(this->module),
+            Types::int32(this->module),
+            Types::int32(this->module),
+            Types::int32(this->module),
+            Types::int32(this->module),
+            Types::int32(this->module),
+            Types::int32(this->module),
+            Types::voidPtr(this->module),
+            Types::int64(this->module),
+            nullptr));
+}
+llvm::Function* RuntimeEmitter::getLoadFunction()
+{
+    return cast<Function>(this->module->getOrInsertFunction(
+            prefix("load"),
             Types::voidType(this->module),
             Types::int32(this->module),
             Types::int32(this->module),

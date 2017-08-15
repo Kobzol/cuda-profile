@@ -1,4 +1,4 @@
-#include "Store.h"
+#include "MemoryAccess.h"
 #include "../util/Types.h"
 #include "../util/Values.h"
 #include "RuntimeEmitter.h"
@@ -35,8 +35,14 @@ void StoreHandler::handleKernel(Function* kernel)
 
                 this->handleStore(store);
             }
+            else if (auto* load = dyn_cast<LoadInst>(&inst))
+            {
+                this->handleLoad(load);
+            }
         }
     }
+
+    kernel->dump();
 }
 
 
@@ -51,4 +57,16 @@ void StoreHandler::handleStore(StoreInst* store)
                   emitter.readInt32(threadIdx("z")),
                   emitter.getBuilder().CreatePointerCast(store->getPointerOperand(), Types::voidPtr(store->getModule())),
                   Values::int64(store->getModule(), store->getValueOperand()->getType()->getPrimitiveSizeInBits() / 8));
+}
+void StoreHandler::handleLoad(LoadInst* load)
+{
+    RuntimeEmitter emitter(load);
+    emitter.load(emitter.readInt32(blockIdx("x")),
+                  emitter.readInt32(blockIdx("y")),
+                  emitter.readInt32(blockIdx("z")),
+                  emitter.readInt32(threadIdx("x")),
+                  emitter.readInt32(threadIdx("y")),
+                  emitter.readInt32(threadIdx("z")),
+                  emitter.getBuilder().CreatePointerCast(load->getPointerOperand(), Types::voidPtr(load->getModule())),
+                  Values::int64(load->getModule(), load->getPointerOperand()->getType()->getPrimitiveSizeInBits() / 8));
 }

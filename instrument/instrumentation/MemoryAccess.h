@@ -1,11 +1,10 @@
 #pragma once
 
-#include <llvm/IR/Instructions.h>
-
 namespace llvm {
-    class StoreInst;
     class Function;
+    class LoadInst;
     class Module;
+    class StoreInst;
 }
 
 class StoreHandler
@@ -15,4 +14,5 @@ public:
 
 private:
     void handleStore(llvm::StoreInst* store);
+    void handleLoad(llvm::LoadInst* load);
 };

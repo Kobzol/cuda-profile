@@ -10,11 +10,11 @@ enum class AccessType
     Write = 1
 };
 
-struct StoreRecord
+struct AccessRecord
 {
 public:
-    StoreRecord() = default;
-    __universal__ StoreRecord(AccessType accessType, dim3 blockIdx, dim3 threadIdx,
+    AccessRecord() = default;
+    __universal__ AccessRecord(AccessType accessType, dim3 blockIdx, dim3 threadIdx,
                               void* memory, size_t size, int64_t timestamp):
             accessType(accessType), blockIdx(blockIdx), threadIdx(threadIdx),
             address(memory), size(size), timestamp(timestamp)
