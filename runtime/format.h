@@ -50,8 +50,9 @@ picojson::value jsonify(const AccessRecord& record)
             {"warpId", picojson::value((double) record.warpId)},
             {"event", picojson::value({
                     {"address", picojson::value(hexPointer(record.address))},
-                    {"type", picojson::value((record.accessType == AccessType::Read ? "read" : "write"))},
+                    {"kind", picojson::value((record.accessType == AccessType::Read ? "read" : "write"))},
                     {"size", picojson::value((double) record.size)},
+                    {"type", picojson::value(record.type)},
                     {"timestamp", picojson::value((double) record.timestamp)}
             })}
     });

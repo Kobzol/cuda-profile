@@ -66,17 +66,19 @@ extern "C" void PREFIX(free)(void* address)
 
 extern "C" __device__ void PREFIX(store)(uint32_t blockX, uint32_t blockY, uint32_t blockZ,
                                          uint32_t threadX, uint32_t threadY, uint32_t threadZ,
-                                         uint32_t warpId, void* address, size_t size)
+                                         uint32_t warpId, void* address, size_t size,
+                                         const char* type)
 {
     uint32_t index = atomicInc(&devRecordIndex, 1024);
     devRecordsPtr[index] = AccessRecord(AccessType::Write, dim3(blockX, blockY, blockZ), dim3(threadX, threadY, threadZ),
-                                        warpId, address, size, static_cast<int64_t>(clock64()));
+                                        warpId, address, size, static_cast<int64_t>(clock64()), type);
 }
 extern "C" __device__ void PREFIX(load)(uint32_t blockX, uint32_t blockY, uint32_t blockZ,
                                          uint32_t threadX, uint32_t threadY, uint32_t threadZ,
-                                        uint32_t warpId, void* address, size_t size)
+                                        uint32_t warpId, void* address, size_t size,
+                                        const char* type)
 {
     uint32_t index = atomicInc(&devRecordIndex, 1024);
     devRecordsPtr[index] = AccessRecord(AccessType::Read, dim3(blockX, blockY, blockZ), dim3(threadX, threadY, threadZ),
-                                       warpId, address, size, static_cast<int64_t>(clock64()));
+                                       warpId, address, size, static_cast<int64_t>(clock64()), type);
 }

@@ -20,13 +20,15 @@ void RuntimeEmitter::store(Value* blockX,
                            Value* threadZ,
                            Value* warpId,
                            Value* address,
-                           Value* size
+                           Value* size,
+                           Value* type
 )
 {
     this->builder.CreateCall(this->getStoreFunction(), {
             blockX, blockY, blockZ,
             threadX, threadY, threadZ,
-            warpId, address, size
+            warpId, address, size,
+            type
     });
 }
 void RuntimeEmitter::load(Value* blockX,
@@ -37,13 +39,15 @@ void RuntimeEmitter::load(Value* blockX,
                           Value* threadZ,
                           Value* warpId,
                           Value* address,
-                          Value* size
+                          Value* size,
+                          Value* type
 )
 {
     this->builder.CreateCall(this->getLoadFunction(), {
             blockX, blockY, blockZ,
             threadX, threadY, threadZ,
-            warpId, address, size
+            warpId, address, size,
+            type
     });
 }
 
@@ -95,6 +99,7 @@ Function* RuntimeEmitter::getStoreFunction()
             Types::int32(this->module),
             Types::voidPtr(this->module),
             Types::int64(this->module),
+            Types::int8Ptr(this->module),
             nullptr));
 }
 llvm::Function* RuntimeEmitter::getLoadFunction()
@@ -111,6 +116,7 @@ llvm::Function* RuntimeEmitter::getLoadFunction()
             Types::int32(this->module),
             Types::voidPtr(this->module),
             Types::int64(this->module),
+            Types::int8Ptr(this->module),
             nullptr));
 }
 Function* RuntimeEmitter::getKernelStartFunction()

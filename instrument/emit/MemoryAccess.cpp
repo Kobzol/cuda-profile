@@ -53,6 +53,9 @@ void StoreHandler::handleKernel(Function* kernel)
 
 void StoreHandler::handleStore(StoreInst* store)
 {
+    std::string type = Types::print(store->getValueOperand()->getType());
+    auto* typeCString = Values::createGlobalCString(store->getModule(), "__cu_ProfileDevType" + type, type);
+
     RuntimeEmitter emitter(store);
     emitter.store(emitter.readInt32(blockIdx("x")),
                   emitter.readInt32(blockIdx("y")),
@@ -62,10 +65,15 @@ void StoreHandler::handleStore(StoreInst* store)
                   emitter.readInt32(threadIdx("z")),
                   emitter.readInt32(warpId()),
                   emitter.getBuilder().CreatePointerCast(store->getPointerOperand(), Types::voidPtr(store->getModule())),
-                  Values::int64(store->getModule(), store->getValueOperand()->getType()->getPrimitiveSizeInBits() / 8));
+                  Values::int64(store->getModule(), store->getValueOperand()->getType()->getPrimitiveSizeInBits() / 8),
+                  typeCString
+    );
 }
 void StoreHandler::handleLoad(LoadInst* load)
 {
+    std::string type = Types::print(load->getType());
+    auto* typeCString = Values::createGlobalCString(load->getModule(), "__cu_ProfileDevType" + type, type);
+
     RuntimeEmitter emitter(load);
     emitter.load(emitter.readInt32(blockIdx("x")),
                  emitter.readInt32(blockIdx("y")),
@@ -75,5 +83,7 @@ void StoreHandler::handleLoad(LoadInst* load)
                  emitter.readInt32(threadIdx("z")),
                  emitter.readInt32(warpId()),
                  emitter.getBuilder().CreatePointerCast(load->getPointerOperand(), Types::voidPtr(load->getModule())),
-                 Values::int64(load->getModule(), load->getPointerOperand()->getType()->getPrimitiveSizeInBits() / 8));
+                 Values::int64(load->getModule(), load->getPointerOperand()->getType()->getPrimitiveSizeInBits() / 8),
+                 typeCString
+    );
 }

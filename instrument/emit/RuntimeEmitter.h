@@ -26,7 +26,8 @@ public:
                llvm::Value* threadZ,
                llvm::Value* warpId,
                llvm::Value* address,
-               llvm::Value* size
+               llvm::Value* size,
+               llvm::Value* type
     );
     void load(llvm::Value* blockX,
               llvm::Value* blockY,
@@ -36,7 +37,8 @@ public:
               llvm::Value* threadZ,
               llvm::Value* warpId,
               llvm::Value* address,
-              llvm::Value* size
+              llvm::Value* size,
+              llvm::Value* type
     );
 
     void kernelStart();
