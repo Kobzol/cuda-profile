@@ -1,3 +1,2 @@
-- store element size in memory map
 - do not instrument parameter load/stores
 - optimize memory storage of access records (blockIdx, threadIdx flattening)

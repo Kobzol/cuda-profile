@@ -62,6 +62,7 @@ picojson::value jsonify(const AllocRecord& record)
     return picojson::value(picojson::object {
             {"address", picojson::value(hexPointer(record.address))},
             {"size", picojson::value((double) record.size)},
+            {"elementSize", picojson::value((double) record.elementSize)},
             {"type", picojson::value(record.type)},
             {"active", picojson::value(record.active)}
     });

@@ -50,9 +50,9 @@ extern "C" void PREFIX(kernelEnd)(const char* kernelName)
 
     emitKernelData(kernelName, records, allocations);
 }
-extern "C" void PREFIX(malloc)(void* address, size_t size, const char* type)
+extern "C" void PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type)
 {
-    allocations.emplace_back(address, size, type);
+    allocations.emplace_back(address, size, elementSize, type);
 }
 extern "C" void PREFIX(free)(void* address)
 {

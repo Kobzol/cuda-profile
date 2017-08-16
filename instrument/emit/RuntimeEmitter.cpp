@@ -43,10 +43,12 @@ void RuntimeEmitter::kernelEnd(Value* kernelName)
     });
 }
 
-void RuntimeEmitter::malloc(Value* address, Value* size, Value* type)
+void RuntimeEmitter::malloc(Value* address, Value* size,
+                            Value* elementSize, Value* type)
 {
     this->builder.CreateCall(this->getMallocFunction(), {
-            address, size, type
+            address, size,
+            elementSize, type
     });
 }
 
@@ -98,6 +100,7 @@ Function* RuntimeEmitter::getMallocFunction()
             prefix("malloc"),
             this->context.getTypes().voidType(),
             this->context.getTypes().int8Ptr(),
+            this->context.getTypes().int64(),
             this->context.getTypes().int64(),
             this->context.getTypes().int8Ptr(),
             nullptr));
