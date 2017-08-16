@@ -13,42 +13,22 @@ std::string prefix(const std::string& name)
     return PREFIX_STR + name;
 }
 
-void RuntimeEmitter::store(Value* blockX,
-                           Value* blockY,
-                           Value* blockZ,
-                           Value* threadX,
-                           Value* threadY,
-                           Value* threadZ,
-                           Value* warpId,
-                           Value* address,
+void RuntimeEmitter::store(Value* address,
                            Value* size,
                            Value* type
 )
 {
     this->builder.CreateCall(this->getStoreFunction(), {
-            blockX, blockY, blockZ,
-            threadX, threadY, threadZ,
-            warpId, address, size,
-            type
+            address, size, type
     });
 }
-void RuntimeEmitter::load(Value* blockX,
-                          Value* blockY,
-                          Value* blockZ,
-                          Value* threadX,
-                          Value* threadY,
-                          Value* threadZ,
-                          Value* warpId,
-                          Value* address,
+void RuntimeEmitter::load(Value* address,
                           Value* size,
                           Value* type
 )
 {
     this->builder.CreateCall(this->getLoadFunction(), {
-            blockX, blockY, blockZ,
-            threadX, threadY, threadZ,
-            warpId, address, size,
-            type
+            address, size, type
     });
 }
 
@@ -77,27 +57,11 @@ void RuntimeEmitter::free(Value* address)
     });
 }
 
-llvm::Value* RuntimeEmitter::readInt32(const std::string& name)
-{
-    return this->builder.CreateCall(cast<Constant>(this->context.getModule()->getOrInsertFunction(
-            name,
-            this->context.getTypes().int32(),
-            nullptr
-    )));
-}
-
 Function* RuntimeEmitter::getStoreFunction()
 {
     return cast<Function>(this->context.getModule()->getOrInsertFunction(
             prefix("store"),
             this->context.getTypes().voidType(),
-            this->context.getTypes().int32(),
-            this->context.getTypes().int32(),
-            this->context.getTypes().int32(),
-            this->context.getTypes().int32(),
-            this->context.getTypes().int32(),
-            this->context.getTypes().int32(),
-            this->context.getTypes().int32(),
             this->context.getTypes().voidPtr(),
             this->context.getTypes().int64(),
             this->context.getTypes().int8Ptr(),
@@ -108,13 +72,6 @@ llvm::Function* RuntimeEmitter::getLoadFunction()
     return cast<Function>(this->context.getModule()->getOrInsertFunction(
             prefix("load"),
             this->context.getTypes().voidType(),
-            this->context.getTypes().int32(),
-            this->context.getTypes().int32(),
-            this->context.getTypes().int32(),
-            this->context.getTypes().int32(),
-            this->context.getTypes().int32(),
-            this->context.getTypes().int32(),
-            this->context.getTypes().int32(),
             this->context.getTypes().voidPtr(),
             this->context.getTypes().int64(),
             this->context.getTypes().int8Ptr(),

@@ -20,25 +20,11 @@ public:
 
     }
 
-    void store(llvm::Value* blockX,
-               llvm::Value* blockY,
-               llvm::Value* blockZ,
-               llvm::Value* threadX,
-               llvm::Value* threadY,
-               llvm::Value* threadZ,
-               llvm::Value* warpId,
-               llvm::Value* address,
+    void store(llvm::Value* address,
                llvm::Value* size,
                llvm::Value* type
     );
-    void load(llvm::Value* blockX,
-              llvm::Value* blockY,
-              llvm::Value* blockZ,
-              llvm::Value* threadX,
-              llvm::Value* threadY,
-              llvm::Value* threadZ,
-              llvm::Value* warpId,
-              llvm::Value* address,
+    void load(llvm::Value* address,
               llvm::Value* size,
               llvm::Value* type
     );
@@ -48,8 +34,6 @@ public:
 
     void malloc(llvm::Value* address, llvm::Value* size, llvm::Value* type);
     void free(llvm::Value* address);
-
-    llvm::Value* readInt32(const std::string& name);
 
     llvm::IRBuilder<>& getBuilder()
     {

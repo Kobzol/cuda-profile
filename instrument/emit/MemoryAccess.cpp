@@ -57,14 +57,7 @@ void StoreHandler::handleStore(StoreInst* store)
     auto* typeCString = this->context.getValues().createGlobalCString(type);
 
     auto emitter = this->context.createEmitter(store);
-    emitter.store(emitter.readInt32(blockIdx("x")),
-                  emitter.readInt32(blockIdx("y")),
-                  emitter.readInt32(blockIdx("z")),
-                  emitter.readInt32(threadIdx("x")),
-                  emitter.readInt32(threadIdx("y")),
-                  emitter.readInt32(threadIdx("z")),
-                  emitter.readInt32(warpId()),
-                  emitter.getBuilder().CreatePointerCast(store->getPointerOperand(), this->context.getTypes().voidPtr()),
+    emitter.store(emitter.getBuilder().CreatePointerCast(store->getPointerOperand(), this->context.getTypes().voidPtr()),
                   this->context.getValues().int64(store->getValueOperand()->getType()->getPrimitiveSizeInBits() / 8),
                   typeCString
     );
@@ -75,14 +68,7 @@ void StoreHandler::handleLoad(LoadInst* load)
     auto* typeCString = this->context.getValues().createGlobalCString(type);
 
     auto emitter = this->context.createEmitter(load);
-    emitter.load(emitter.readInt32(blockIdx("x")),
-                 emitter.readInt32(blockIdx("y")),
-                 emitter.readInt32(blockIdx("z")),
-                 emitter.readInt32(threadIdx("x")),
-                 emitter.readInt32(threadIdx("y")),
-                 emitter.readInt32(threadIdx("z")),
-                 emitter.readInt32(warpId()),
-                 emitter.getBuilder().CreatePointerCast(load->getPointerOperand(), this->context.getTypes().voidPtr()),
+    emitter.load(emitter.getBuilder().CreatePointerCast(load->getPointerOperand(), this->context.getTypes().voidPtr()),
                  this->context.getValues().int64(load->getPointerOperand()->getType()->getPrimitiveSizeInBits() / 8),
                  typeCString
     );
