@@ -26,12 +26,11 @@ void KernelLaunch::handleKernelLaunch(CallInst* callSite)
 {
     auto kernelName = getKernelName(callSite);
 
-    RuntimeEmitter startEmitter(callSite);
+    auto startEmitter = this->context.createEmitter(callSite);
     startEmitter.kernelStart();
 
-    GlobalVariable* kernelNameCString = Values::createGlobalCString(callSite->getModule(),
-                                                         "__cuProfileKernel_" + kernelName, kernelName);
+    GlobalVariable* kernelNameCString = this->context.getValues().createGlobalCString(kernelName);
 
-    RuntimeEmitter endEmitter(callSite->getNextNode());
+    auto endEmitter = this->context.createEmitter(callSite->getNextNode());
     endEmitter.kernelEnd(kernelNameCString);
 }

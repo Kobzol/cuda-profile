@@ -1,6 +1,7 @@
 #pragma once
 
 #include <llvm/IR/IRBuilder.h>
+#include "../Context.h"
 
 namespace llvm {
     class Function;
@@ -9,11 +10,12 @@ namespace llvm {
     class Value;
 }
 
+
 class RuntimeEmitter
 {
 public:
-    explicit RuntimeEmitter(llvm::Instruction* insertionPoint)
-            : module(insertionPoint->getModule()), builder(insertionPoint)
+    explicit RuntimeEmitter(Context& context, llvm::Instruction* insertionPoint)
+            : context(context), builder(insertionPoint)
     {
 
     }
@@ -62,6 +64,6 @@ private:
     llvm::Function* getMallocFunction();
     llvm::Function* getFreeFunction();
 
-    llvm::Module* module;
+    Context& context;
     llvm::IRBuilder<> builder;
 };

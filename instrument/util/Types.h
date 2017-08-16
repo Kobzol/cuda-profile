@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 namespace llvm {
     class Module;
@@ -12,19 +13,36 @@ namespace llvm {
 class Types
 {
 public:
-    static llvm::Type* voidType(llvm::Module* module);
+    Types() = default;
+    explicit Types(llvm::Module* module): module(module)
+    {
 
-    static llvm::Type* int8(llvm::Module* module);
-    static llvm::Type* int32(llvm::Module* module);
-    static llvm::Type* int64(llvm::Module* module);
-    static llvm::Type* boolType(llvm::Module* module);
+    }
 
-    static llvm::PointerType* voidPtr(llvm::Module* module);
-    static llvm::PointerType* int8Ptr(llvm::Module* module);
-    static llvm::PointerType* int32Ptr(llvm::Module* module);
-    static llvm::PointerType* int64Ptr(llvm::Module* module);
+    void setModule(llvm::Module* module)
+    {
+        this->module = module;
+        this->structMap.clear();
+    }
+    
+    llvm::Type* voidType();
 
-    static llvm::StructType* getStruct(llvm::Module* module, const std::string& name);
+    llvm::Type* int8();
+    llvm::Type* int32();
+    llvm::Type* int64();
+    llvm::Type* boolType();
 
-    static std::string print(llvm::Type* type);
+    llvm::PointerType* voidPtr();
+    llvm::PointerType* int8Ptr();
+    llvm::PointerType* int32Ptr();
+    llvm::PointerType* int64Ptr();
+
+    llvm::StructType* getCompositeType(const std::string& name);
+
+    std::string print(llvm::Type* type);
+    
+private:
+    llvm::Module* module;
+
+    std::unordered_map<std::string, llvm::StructType*> structMap;
 };

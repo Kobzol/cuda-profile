@@ -17,18 +17,17 @@ Type* getMallocValueType(CallInst* malloc)
 
 void MemoryAlloc::handleCudaMalloc(CallInst* call)
 {
-    RuntimeEmitter emitter(call->getNextNode());
+    auto emitter = this->context.createEmitter(call->getNextNode());
 
     Value* addressLoad = emitter.getBuilder().CreateLoad(call->getOperand(0));
-    std::string type = Types::print(getMallocValueType(call));
-    GlobalVariable* typeCString = Values::createGlobalCString(
-            call->getModule(), "__cuProfileType_" + type, type);
+    std::string type = this->context.getTypes().print(getMallocValueType(call));
+    GlobalVariable* typeCString = this->context.getValues().createGlobalCString(type);
 
     emitter.malloc(addressLoad, call->getOperand(1), typeCString);
 }
 
 void MemoryAlloc::handleCudaFree(CallInst* call)
 {
-    RuntimeEmitter emitter(call);
+    auto emitter = this->context.createEmitter(call);
     emitter.free(call->getOperand(0));
 }

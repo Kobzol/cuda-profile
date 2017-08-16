@@ -11,10 +11,10 @@ pushd cmake-build-debug
     # build pass
     make
 
-    # clang++ -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
+    clang++ -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
 
     # run pass and compile
-    clang++ -std=c++14 --cuda-gpu-arch=sm_30 \
+    clang++ -g -O0 -std=c++14 --cuda-gpu-arch=sm_30 \
             -I/usr/local/cuda/include -L/usr/local/cuda/lib64 \
             -Xclang -load -Xclang ./instrument/libllvmCuda.so \
             -lcudart -ldl -lrt -pthread -xcuda \

@@ -1,6 +1,7 @@
 #include "RuntimeEmitter.h"
 #include "../util/Types.h"
 #include "../util/Values.h"
+#include "../../runtime/prefix.h"
 
 #include <llvm/IR/Module.h>
 
@@ -9,7 +10,7 @@ using namespace llvm;
 
 std::string prefix(const std::string& name)
 {
-    return "__cu_" + name;
+    return PREFIX_STR + name;
 }
 
 void RuntimeEmitter::store(Value* blockX,
@@ -78,77 +79,77 @@ void RuntimeEmitter::free(Value* address)
 
 llvm::Value* RuntimeEmitter::readInt32(const std::string& name)
 {
-    return this->builder.CreateCall(cast<Constant>(this->module->getOrInsertFunction(
+    return this->builder.CreateCall(cast<Constant>(this->context.getModule()->getOrInsertFunction(
             name,
-            Types::int32(this->module),
+            this->context.getTypes().int32(),
             nullptr
     )));
 }
 
 Function* RuntimeEmitter::getStoreFunction()
 {
-    return cast<Function>(this->module->getOrInsertFunction(
+    return cast<Function>(this->context.getModule()->getOrInsertFunction(
             prefix("store"),
-            Types::voidType(this->module),
-            Types::int32(this->module),
-            Types::int32(this->module),
-            Types::int32(this->module),
-            Types::int32(this->module),
-            Types::int32(this->module),
-            Types::int32(this->module),
-            Types::int32(this->module),
-            Types::voidPtr(this->module),
-            Types::int64(this->module),
-            Types::int8Ptr(this->module),
+            this->context.getTypes().voidType(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().voidPtr(),
+            this->context.getTypes().int64(),
+            this->context.getTypes().int8Ptr(),
             nullptr));
 }
 llvm::Function* RuntimeEmitter::getLoadFunction()
 {
-    return cast<Function>(this->module->getOrInsertFunction(
+    return cast<Function>(this->context.getModule()->getOrInsertFunction(
             prefix("load"),
-            Types::voidType(this->module),
-            Types::int32(this->module),
-            Types::int32(this->module),
-            Types::int32(this->module),
-            Types::int32(this->module),
-            Types::int32(this->module),
-            Types::int32(this->module),
-            Types::int32(this->module),
-            Types::voidPtr(this->module),
-            Types::int64(this->module),
-            Types::int8Ptr(this->module),
+            this->context.getTypes().voidType(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().int32(),
+            this->context.getTypes().voidPtr(),
+            this->context.getTypes().int64(),
+            this->context.getTypes().int8Ptr(),
             nullptr));
 }
 Function* RuntimeEmitter::getKernelStartFunction()
 {
-    return cast<Function>(this->module->getOrInsertFunction(
+    return cast<Function>(this->context.getModule()->getOrInsertFunction(
             prefix("kernelStart"),
-            Types::voidType(this->module),
+            this->context.getTypes().voidType(),
             nullptr));
 }
 Function* RuntimeEmitter::getKernelEndFunction()
 {
-    return cast<Function>(this->module->getOrInsertFunction(
+    return cast<Function>(this->context.getModule()->getOrInsertFunction(
             prefix("kernelEnd"),
-            Types::voidType(this->module),
-            Types::int8Ptr(this->module),
+            this->context.getTypes().voidType(),
+            this->context.getTypes().int8Ptr(),
             nullptr));
 }
 Function* RuntimeEmitter::getMallocFunction()
 {
-    return cast<Function>(this->module->getOrInsertFunction(
+    return cast<Function>(this->context.getModule()->getOrInsertFunction(
             prefix("malloc"),
-            Types::voidType(this->module),
-            Types::int8Ptr(this->module),
-            Types::int64(this->module),
-            Types::int8Ptr(this->module),
+            this->context.getTypes().voidType(),
+            this->context.getTypes().int8Ptr(),
+            this->context.getTypes().int64(),
+            this->context.getTypes().int8Ptr(),
             nullptr));
 }
 Function* RuntimeEmitter::getFreeFunction()
 {
-    return cast<Function>(this->module->getOrInsertFunction(
+    return cast<Function>(this->context.getModule()->getOrInsertFunction(
             prefix("free"),
-            Types::voidType(this->module),
-            Types::int8Ptr(this->module),
+            this->context.getTypes().voidType(),
+            this->context.getTypes().int8Ptr(),
             nullptr));
 }

@@ -8,58 +8,66 @@
 
 using namespace llvm;
 
-Type* Types::voidType(Module* module)
+
+Type* Types::voidType()
 {
-    return Type::getVoidTy(module->getContext());
+    return Type::getVoidTy(this->module->getContext());
 }
 
-Type* Types::int8(Module* module)
+Type* Types::int8()
 {
-    return Type::getInt8Ty(module->getContext());
+    return Type::getInt8Ty(this->module->getContext());
 }
-llvm::Type *Types::int32(Module* module)
+llvm::Type *Types::int32()
 {
-    return Type::getInt32Ty(module->getContext());
+    return Type::getInt32Ty(this->module->getContext());
 }
-Type* Types::int64(Module* module)
+Type* Types::int64()
 {
-    return Type::getInt64Ty(module->getContext());
+    return Type::getInt64Ty(this->module->getContext());
 }
-Type* Types::boolType(Module* module)
+Type* Types::boolType()
 {
-    return Type::getInt1Ty(module->getContext());
-}
-
-PointerType* Types::voidPtr(Module* module)
-{
-    return Types::int8Ptr(module);
-}
-PointerType* Types::int8Ptr(Module* module)
-{
-    return Types::int8(module)->getPointerTo();
-}
-PointerType* Types::int32Ptr(Module* module)
-{
-    return Types::int32(module)->getPointerTo();
-}
-PointerType* Types::int64Ptr(Module* module)
-{
-    return Types::int64(module)->getPointerTo();
+    return Type::getInt1Ty(this->module->getContext());
 }
 
-llvm::StructType* Types::getStruct(llvm::Module* module, const std::string& name)
+PointerType* Types::voidPtr()
 {
-    TypeFinder structFinder;
-    structFinder.run(*module, true);
-    for (auto* structType : structFinder)
+    return this->int8Ptr();
+}
+PointerType* Types::int8Ptr()
+{
+    return this->int8()->getPointerTo();
+}
+PointerType* Types::int32Ptr()
+{
+    return this->int32()->getPointerTo();
+}
+PointerType* Types::int64Ptr()
+{
+    return this->int64()->getPointerTo();
+}
+
+StructType* Types::getCompositeType(const std::string& name)
+{
+    if (this->structMap.find(name) == this->structMap.end())
     {
-        if (structType->getStructName() == "struct." + name)
+        TypeFinder structFinder;
+        structFinder.run(*this->module, true);
+        for (auto* structType : structFinder)
         {
-            return structType;
+            if (structType->getStructName() == "struct." + name ||
+                structType->getStructName() == "class." + name)
+            {
+                this->structMap[name] = structType;
+                return structType;
+            }
         }
+
+        return nullptr;
     }
 
-    return nullptr;
+    return this->structMap[name];
 }
 
 std::string Types::print(Type* type)

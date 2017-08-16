@@ -2,6 +2,7 @@
 
 #include <llvm/Pass.h>
 #include <unordered_map>
+#include "Context.h"
 
 namespace llvm {
     class CallInst;
@@ -27,4 +28,6 @@ private:
     std::unordered_map<llvm::Function*, llvm::Function*> kernelMap;
 
     void handleFunctionCall(llvm::CallInst* call);
+
+    Context context;
 };

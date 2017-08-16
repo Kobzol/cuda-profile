@@ -1,34 +1,48 @@
 #include "Values.h"
-#include "Types.h"
 
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/Module.h>
 
 using namespace llvm;
 
-Value* Values::int32(Module* module, int32_t value)
+Value* Values::int32(int32_t value)
 {
-    return ConstantInt::get(Types::int32(module), value, false);
+    return ConstantInt::get(this->types.int32(), value, false);
 }
-Value* Values::int64(Module* module, int64_t value)
+Value* Values::int64(int64_t value)
 {
-    return ConstantInt::get(Types::int64(module), value, false);
+    return ConstantInt::get(this->types.int64(), value, false);
 }
 
-GlobalVariable* Values::createGlobalCString(Module* module, const std::string& name, const std::string& value)
+GlobalVariable* Values::createGlobalCString(const std::string& value)
 {
-    GlobalVariable* global = module->getGlobalVariable(name, true);
-
-    if (global == nullptr)
+    if (this->cStringMap.find(value) == this->cStringMap.end())
     {
-        Constant* nameCString = ConstantDataArray::getString(module->getContext(), value, true);
-        Type* stringType = ArrayType::get(Types::int8(module), value.size() + 1);
+        Constant* nameCString = ConstantDataArray::getString(this->module->getContext(), value, true);
+        Type* stringType = ArrayType::get(this->types.int8(), value.size() + 1);
 
-        global = static_cast<GlobalVariable*>(module->getOrInsertGlobal(name, stringType));
+        auto* global = dyn_cast<GlobalVariable>(this->module->getOrInsertGlobal(this->generateGlobalName(), stringType));
         global->setLinkage(GlobalValue::LinkageTypes::PrivateLinkage);
         global->setConstant(true);
         global->setInitializer(nameCString);
+
+        this->cStringMap[value] = global;
+        return global;
     }
 
-    return global;
+    return this->cStringMap[value];
+}
+
+std::string Values::generateGlobalName()
+{
+    while (true)
+    {
+        std::string name = "__cu_ProfileGlobal_" + std::to_string(this->globalCounter++);
+        GlobalVariable* global = module->getGlobalVariable(name, true);
+
+        if (global == nullptr)
+        {
+            return name;
+        }
+    }
 }
