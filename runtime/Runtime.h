@@ -10,9 +10,9 @@
 #include "format.h"
 #include "../general.h"
 
+#define BUFFER_SIZE 1024
 
 static AccessRecord* deviceRecords = nullptr;
-static size_t bufferSize = 1024;
 static size_t kernelCounter = 0;
 static std::vector<AllocRecord> allocations;
 
@@ -32,7 +32,7 @@ static void emitKernelData(const std::string& kernelName,
 
 extern "C" void PREFIX(kernelStart)()
 {
-    cudaMalloc((void**) &deviceRecords, sizeof(AccessRecord) * bufferSize);
+    cudaMalloc((void**) &deviceRecords, sizeof(AccessRecord) * BUFFER_SIZE);
 
     const uint32_t zero = 0;
     CHECK_CUDA_CALL(cudaMemcpyToSymbol(devRecordsPtr, &deviceRecords, sizeof(deviceRecords)));
@@ -66,21 +66,21 @@ extern "C" void PREFIX(free)(void* address)
     }
 }
 
-__forceinline__ __device__ unsigned warpid()
+__forceinline__ __device__ uint32_t warpid()
 {
-    unsigned ret;
+    uint32_t ret;
     asm volatile ("mov.u32 %0, %%warpid;" : "=r"(ret));
     return ret;
 }
 extern "C" __device__ void PREFIX(store)(void* address, size_t size, const char* type)
 {
-    uint32_t index = atomicInc(&devRecordIndex, 1024);
+    uint32_t index = atomicInc(&devRecordIndex, BUFFER_SIZE);
     devRecordsPtr[index] = AccessRecord(AccessType::Write, blockIdx, threadIdx, warpid(), address, size,
                                         static_cast<int64_t>(clock64()), type);
 }
 extern "C" __device__ void PREFIX(load)(void* address, size_t size, const char* type)
 {
-    uint32_t index = atomicInc(&devRecordIndex, 1024);
+    uint32_t index = atomicInc(&devRecordIndex, BUFFER_SIZE);
     devRecordsPtr[index] = AccessRecord(AccessType::Read, blockIdx, threadIdx, warpid(), address, size,
                                         static_cast<int64_t>(clock64()), type);
 }

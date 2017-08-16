@@ -5,7 +5,7 @@
 #include <ostream>
 #include <cstring>
 
-enum class AccessType
+enum class AccessType: uint32_t
 {
     Read = 0,
     Write = 1
@@ -34,11 +34,11 @@ public:
     uint3 blockIdx;
     uint3 threadIdx;
 
-    AccessType accessType = AccessType::Read;
     void* address = nullptr;
     size_t size = 0;
-    char type[32];
-    uint32_t warpId = 0;
-
     int64_t timestamp = 0;
+    uint32_t warpId = 0;
+    AccessType accessType = AccessType::Read;
+
+    char type[32];
 };

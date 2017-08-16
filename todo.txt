@@ -1,2 +1,4 @@
 - do not instrument parameter load/stores
 - optimize memory storage of access records (blockIdx, threadIdx flattening)
+- handle/warn about buffer overflow (now it wraps)
+- combine namespace with prefix
