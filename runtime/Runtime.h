@@ -23,6 +23,8 @@ static void emitKernelData(const std::string& kernelName,
                            const std::vector<AccessRecord>& records,
                            const std::vector<AllocRecord>& allocations)
 {
+    std::cerr << "Emmitted " << records.size() << " accesses " << "in kernel " << kernelName << std::endl;
+
     std::fstream kernelOutput(std::string(kernelName) + "-" + std::to_string(kernelCounter++) + ".json", std::fstream::out);
     outputKernelRun(kernelOutput, records, allocations);
     kernelOutput.flush();
@@ -38,15 +40,14 @@ extern "C" void PREFIX(kernelStart)()
 }
 extern "C" void PREFIX(kernelEnd)(const char* kernelName)
 {
-    std::vector<AccessRecord> records;
-    records.resize(bufferSize);
-    uint32_t count = 0;
-
     CHECK_CUDA_CALL(cudaDeviceSynchronize());
-    CHECK_CUDA_CALL(cudaMemcpy(records.data(), deviceRecords, sizeof(AccessRecord) * bufferSize, cudaMemcpyDeviceToHost));
+
+    uint32_t count = 0;
     CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&count, devRecordIndex, sizeof(uint32_t)));
+
+    std::vector<AccessRecord> records(count);
+    CHECK_CUDA_CALL(cudaMemcpy(records.data(), deviceRecords, sizeof(AccessRecord) * count, cudaMemcpyDeviceToHost));
     CHECK_CUDA_CALL(cudaFree(deviceRecords));
-    deviceRecords = nullptr;
 
     emitKernelData(kernelName, records, allocations);
 }
