@@ -106,8 +106,6 @@ void CudaPass::instrumentCpp(Module& module)
                     }
                 }
             }
-
-            fn.dump();
         }
     }
 }

@@ -3,6 +3,7 @@
 #include "cudautil.h"
 #include <cstdint>
 #include <ostream>
+#include <cstring>
 
 enum class AccessType
 {
@@ -19,9 +20,15 @@ public:
                                int64_t timestamp, const char* type):
             accessType(accessType), blockIdx(blockIdx), threadIdx(threadIdx),
             warpId(warpId), address(memory), size(size),
-            timestamp(timestamp), type(type)
+            timestamp(timestamp)
     {
-
+        int i = 0;
+        for (; i < sizeof(this->type) - 1; i++)
+        {
+            if (*type == '\0') break;
+            this->type[i] = *type++;
+        }
+        this->type[i] = '\0';
     }
 
     dim3 blockIdx;
@@ -30,7 +37,7 @@ public:
     AccessType accessType = AccessType::Read;
     void* address = nullptr;
     size_t size = 0;
-    const char* type = nullptr;
+    char type[32];
     uint32_t warpId = 0;
 
     int64_t timestamp = 0;
