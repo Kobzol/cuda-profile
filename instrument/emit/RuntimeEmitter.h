@@ -40,9 +40,9 @@ public:
     );
 
     void kernelStart();
-    void kernelEnd(const std::string& kernelName);
+    void kernelEnd(llvm::Value* kernelName);
 
-    void malloc(llvm::Value* address, llvm::Value* size);
+    void malloc(llvm::Value* address, llvm::Value* size, llvm::Value* type);
     void free(llvm::Value* address);
 
     llvm::Value* readInt32(const std::string& name);

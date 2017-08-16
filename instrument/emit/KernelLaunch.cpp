@@ -5,6 +5,7 @@
 
 #include "RuntimeEmitter.h"
 #include "../util/Demangler.h"
+#include "../util/Values.h"
 
 using namespace llvm;
 
@@ -28,6 +29,9 @@ void KernelLaunch::handleKernelLaunch(CallInst* callSite)
     RuntimeEmitter startEmitter(callSite);
     startEmitter.kernelStart();
 
+    GlobalVariable* kernelNameCString = Values::createGlobalCString(callSite->getModule(),
+                                                         "__cuProfileKernel_" + kernelName, kernelName);
+
     RuntimeEmitter endEmitter(callSite->getNextNode());
-    endEmitter.kernelEnd(kernelName);
+    endEmitter.kernelEnd(kernelNameCString);
 }

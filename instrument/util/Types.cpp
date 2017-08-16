@@ -1,7 +1,10 @@
 #include "Types.h"
+#include "StringUtils.h"
 
 #include <llvm/IR/Module.h>
 #include <llvm/IR/TypeFinder.h>
+#include <llvm/Support/raw_ostream.h>
+#include <iostream>
 
 using namespace llvm;
 
@@ -57,4 +60,22 @@ llvm::StructType* Types::getStruct(llvm::Module* module, const std::string& name
     }
 
     return nullptr;
+}
+
+std::string Types::print(Type* type)
+{
+    if (isa<StructType>(type))
+    {
+        return StringUtils::trimStart(
+                StringUtils::trimStart(
+                        type->getStructName().str(),
+                        "class."),
+                "struct.");
+    }
+
+    std::string buffer;
+    llvm::raw_string_ostream stream(buffer);
+    type->print(stream, false, true);
+
+    return stream.str();
 }

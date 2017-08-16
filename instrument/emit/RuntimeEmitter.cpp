@@ -51,19 +51,17 @@ void RuntimeEmitter::kernelStart()
 {
     this->builder.CreateCall(this->getKernelStartFunction());
 }
-void RuntimeEmitter::kernelEnd(const std::string& kernelName)
+void RuntimeEmitter::kernelEnd(Value* kernelName)
 {
-    GlobalVariable* global = Values::createGlobalCString(this->module, "__cuProfileKernel_" + kernelName, kernelName);
-
     this->builder.CreateCall(this->getKernelEndFunction(), {
-        global
+        kernelName
     });
 }
 
-void RuntimeEmitter::malloc(Value* address, Value* size)
+void RuntimeEmitter::malloc(Value* address, Value* size, Value* type)
 {
     this->builder.CreateCall(this->getMallocFunction(), {
-            address, size
+            address, size, type
     });
 }
 
@@ -137,6 +135,7 @@ Function* RuntimeEmitter::getMallocFunction()
             Types::voidType(this->module),
             Types::int8Ptr(this->module),
             Types::int64(this->module),
+            Types::int8Ptr(this->module),
             nullptr));
 }
 Function* RuntimeEmitter::getFreeFunction()

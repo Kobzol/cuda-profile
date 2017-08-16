@@ -49,10 +49,9 @@ extern "C" void PREFIX(kernelEnd)(const char* kernelName)
 
     emitKernelData(kernelName, records, allocations);
 }
-extern "C" void PREFIX(malloc)(void* address, size_t size)
+extern "C" void PREFIX(malloc)(void* address, size_t size, const char* type)
 {
-    printf("Malloc: %p\n", address);
-    allocations.emplace_back(address, size);
+    allocations.emplace_back(address, size, type);
 }
 extern "C" void PREFIX(free)(void* address)
 {

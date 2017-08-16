@@ -3,6 +3,7 @@
 #include <iostream>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/TypeFinder.h>
+#include <llvm/Support/raw_ostream.h>
 
 #include "../util/Types.h"
 #include "../util/Values.h"
@@ -62,7 +63,6 @@ void StoreHandler::handleStore(StoreInst* store)
                   emitter.readInt32(warpId()),
                   emitter.getBuilder().CreatePointerCast(store->getPointerOperand(), Types::voidPtr(store->getModule())),
                   Values::int64(store->getModule(), store->getValueOperand()->getType()->getPrimitiveSizeInBits() / 8));
-    store->getFunction()->dump();
 }
 void StoreHandler::handleLoad(LoadInst* load)
 {

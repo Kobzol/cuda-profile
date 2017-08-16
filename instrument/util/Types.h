@@ -3,10 +3,10 @@
 #include <string>
 
 namespace llvm {
-    class Type;
     class Module;
     class PointerType;
     class StructType;
+    class Type;
 }
 
 class Types
@@ -25,4 +25,6 @@ public:
     static llvm::PointerType* int64Ptr(llvm::Module* module);
 
     static llvm::StructType* getStruct(llvm::Module* module, const std::string& name);
+
+    static std::string print(llvm::Type* type);
 };
