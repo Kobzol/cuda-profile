@@ -1,7 +1,4 @@
 #include "Pass.h"
-#include "instrumentation/MemoryAccess.h"
-#include "util/Types.h"
-#include "instrumentation/KernelLaunch.h"
 
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
@@ -9,9 +6,21 @@
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <iostream>
 
+#include "util/Types.h"
+#include "emit/MemoryAccess.h"
+#include "emit/KernelLaunch.h"
+#include "emit/MemoryAlloc.h"
+#include "../runtime/prefix.h"
+
 using namespace llvm;
 
+
 char CudaPass::ID = 0;
+
+bool isInstrumentationFunction(Function& fn)
+{
+    return fn.getName().find(PREFIX_STR) == 0;
+}
 
 CudaPass::CudaPass(): ModulePass(CudaPass::ID)
 {
@@ -79,20 +88,44 @@ void CudaPass::instrumentCpp(Module& module)
 {
     for (Function& fn : module.getFunctionList())
     {
-        for (BasicBlock& bb : fn.getBasicBlockList())
+        if (!isInstrumentationFunction(fn))
         {
-            for (Instruction& inst : bb.getInstList())
+            for (BasicBlock& bb : fn.getBasicBlockList())
             {
-                if (auto* call = dyn_cast<CallInst>(&inst))
+                for (Instruction& inst : bb.getInstList())
                 {
-                    auto calledFn = call->getCalledFunction();
-                    if (calledFn != nullptr && calledFn->getName() == "cudaLaunch")
+                    if (auto* call = dyn_cast<CallInst>(&inst))
                     {
-                        KernelLaunch kernelLaunch;
-                        kernelLaunch.handleKernelLaunch(call);
+                        auto calledFn = call->getCalledFunction();
+                        if (calledFn != nullptr)
+                        {
+                            this->handleFunctionCall(call);
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+void CudaPass::handleFunctionCall(CallInst* call)
+{
+    Function* calledFn = call->getCalledFunction();
+    auto name = calledFn->getName();
+
+    if (name == "cudaLaunch")
+    {
+        KernelLaunch kernelLaunch;
+        kernelLaunch.handleKernelLaunch(call);
+    }
+    else if (name == "cudaMalloc")
+    {
+        MemoryAlloc memoryAlloc;
+        memoryAlloc.handleCudaMalloc(call);
+    }
+    else if (name == "cudaFree")
+    {
+        MemoryAlloc memoryAlloc;
+        memoryAlloc.handleCudaFree(call);
     }
 }

@@ -62,6 +62,7 @@ void StoreHandler::handleStore(StoreInst* store)
                   emitter.readInt32(warpId()),
                   emitter.getBuilder().CreatePointerCast(store->getPointerOperand(), Types::voidPtr(store->getModule())),
                   Values::int64(store->getModule(), store->getValueOperand()->getType()->getPrimitiveSizeInBits() / 8));
+    store->getFunction()->dump();
 }
 void StoreHandler::handleLoad(LoadInst* load)
 {

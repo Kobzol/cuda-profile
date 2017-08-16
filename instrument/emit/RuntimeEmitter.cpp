@@ -46,17 +46,31 @@ void RuntimeEmitter::load(Value* blockX,
             warpId, address, size
     });
 }
+
 void RuntimeEmitter::kernelStart()
 {
     this->builder.CreateCall(this->getKernelStartFunction());
 }
-
 void RuntimeEmitter::kernelEnd(const std::string& kernelName)
 {
     GlobalVariable* global = Values::createGlobalCString(this->module, "__cuProfileKernel_" + kernelName, kernelName);
 
     this->builder.CreateCall(this->getKernelEndFunction(), {
         global
+    });
+}
+
+void RuntimeEmitter::malloc(Value* address, Value* size)
+{
+    this->builder.CreateCall(this->getMallocFunction(), {
+            address, size
+    });
+}
+
+void RuntimeEmitter::free(Value* address)
+{
+    this->builder.CreateCall(this->getFreeFunction(), {
+            address
     });
 }
 
@@ -112,6 +126,23 @@ Function* RuntimeEmitter::getKernelEndFunction()
 {
     return cast<Function>(this->module->getOrInsertFunction(
             prefix("kernelEnd"),
+            Types::voidType(this->module),
+            Types::int8Ptr(this->module),
+            nullptr));
+}
+Function* RuntimeEmitter::getMallocFunction()
+{
+    return cast<Function>(this->module->getOrInsertFunction(
+            prefix("malloc"),
+            Types::voidType(this->module),
+            Types::int8Ptr(this->module),
+            Types::int64(this->module),
+            nullptr));
+}
+Function* RuntimeEmitter::getFreeFunction()
+{
+    return cast<Function>(this->module->getOrInsertFunction(
+            prefix("free"),
             Types::voidType(this->module),
             Types::int8Ptr(this->module),
             nullptr));

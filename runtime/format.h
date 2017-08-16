@@ -3,10 +3,12 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <sstream>
 
 #include "cudautil.h"
 #include "AccessRecord.h"
 #include "picojson.h"
+#include "AllocRecord.h"
 
 std::ostream& operator<<(std::ostream& os, const dim3& dimension)
 {
@@ -26,9 +28,15 @@ std::ostream& operator<<(std::ostream& os, const AccessRecord& record)
     return os;
 }
 
-std::fstream& operator<<(std::fstream& fs, const AccessRecord& record)
+std::string hexPointer(const void* ptr)
 {
-    picojson::object root = {
+    std::ostringstream address;
+    address << ptr;
+    return address.str();
+}
+picojson::value jsonify(const AccessRecord& record)
+{
+    return picojson::value(picojson::object{
             {"threadIdx", picojson::value({
                     {"x", picojson::value((double) record.threadIdx.x)},
                     {"y", picojson::value((double) record.threadIdx.y)},
@@ -41,29 +49,41 @@ std::fstream& operator<<(std::fstream& fs, const AccessRecord& record)
             })},
             {"warpId", picojson::value((double) record.warpId)},
             {"event", picojson::value({
-                    {"address", picojson::value((double)((size_t) record.address))},
+                    {"address", picojson::value(hexPointer(record.address))},
                     {"type", picojson::value((record.accessType == AccessType::Read ? "read" : "write"))},
                     {"size", picojson::value((double) record.size)},
                     {"timestamp", picojson::value((double) record.timestamp)}
             })}
-    };
-
-    picojson::value output(root);
-
-    fs << output.serialize(true);
-
-    return fs;
+    });
+}
+picojson::value jsonify(const AllocRecord& record)
+{
+    return picojson::value(picojson::object {
+            {"address", picojson::value(hexPointer(record.address))},
+            {"size", picojson::value((double) record.size)},
+            {"active", picojson::value(record.active)}
+    });
 }
 
 template <typename T>
-std::fstream& operator<<(std::fstream& fs, const std::vector<T>& items)
+picojson::value jsonify(const std::vector<T>& items)
 {
-    fs << "[";
+    std::vector<picojson::value> jsonified;
     for (auto& item: items)
     {
-        fs << item << ", ";
+        jsonified.push_back(jsonify(item));
     }
-    fs << "]" << std::endl;
 
-    return fs;
+    return picojson::value(jsonified);
+}
+
+void outputKernelRun(std::ostream& os, const std::vector<AccessRecord>& accesses,
+                     const std::vector<AllocRecord>& allocations)
+{
+    auto value = picojson::value(picojson::object {
+            {"memoryMap", jsonify(allocations)},
+            {"accesses", jsonify(accesses)}
+    });
+
+    os << value.serialize(true);
 }

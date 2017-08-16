@@ -38,9 +38,12 @@ public:
               llvm::Value* address,
               llvm::Value* size
     );
+
     void kernelStart();
     void kernelEnd(const std::string& kernelName);
 
+    void malloc(llvm::Value* address, llvm::Value* size);
+    void free(llvm::Value* address);
 
     llvm::Value* readInt32(const std::string& name);
 
@@ -54,6 +57,8 @@ private:
     llvm::Function* getLoadFunction();
     llvm::Function* getKernelStartFunction();
     llvm::Function* getKernelEndFunction();
+    llvm::Function* getMallocFunction();
+    llvm::Function* getFreeFunction();
 
     llvm::Module* module;
     llvm::IRBuilder<> builder;

@@ -3,6 +3,12 @@
 #include <llvm/Pass.h>
 #include <unordered_map>
 
+namespace llvm {
+    class CallInst;
+    class Function;
+    class Module;
+}
+
 struct CudaPass : public llvm::ModulePass
 {
 public:
@@ -19,4 +25,6 @@ private:
     llvm::Function* augmentKernel(llvm::Function* fn);
 
     std::unordered_map<llvm::Function*, llvm::Function*> kernelMap;
+
+    void handleFunctionCall(llvm::CallInst* call);
 };

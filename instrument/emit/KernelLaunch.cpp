@@ -3,7 +3,6 @@
 #include <llvm/IR/Module.h>
 #include <iostream>
 
-
 #include "RuntimeEmitter.h"
 #include "../util/Demangler.h"
 
