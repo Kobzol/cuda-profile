@@ -15,20 +15,22 @@ std::string prefix(const std::string& name)
 
 void RuntimeEmitter::store(Value* address,
                            Value* size,
-                           Value* type
+                           Value* type,
+                           Value* debugIndex
 )
 {
     this->builder.CreateCall(this->getStoreFunction(), {
-            address, size, type
+            address, size, type, debugIndex
     });
 }
 void RuntimeEmitter::load(Value* address,
                           Value* size,
-                          Value* type
+                          Value* type,
+                          Value* debugIndex
 )
 {
     this->builder.CreateCall(this->getLoadFunction(), {
-            address, size, type
+            address, size, type, debugIndex
     });
 }
 
@@ -67,6 +69,7 @@ Function* RuntimeEmitter::getStoreFunction()
             this->context.getTypes().voidPtr(),
             this->context.getTypes().int64(),
             this->context.getTypes().int8Ptr(),
+            this->context.getTypes().int32(),
             nullptr));
 }
 llvm::Function* RuntimeEmitter::getLoadFunction()
@@ -77,6 +80,7 @@ llvm::Function* RuntimeEmitter::getLoadFunction()
             this->context.getTypes().voidPtr(),
             this->context.getTypes().int64(),
             this->context.getTypes().int8Ptr(),
+            this->context.getTypes().int32(),
             nullptr));
 }
 Function* RuntimeEmitter::getKernelStartFunction()

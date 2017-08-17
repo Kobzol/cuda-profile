@@ -72,15 +72,15 @@ __forceinline__ __device__ uint32_t warpid()
     asm volatile ("mov.u32 %0, %%warpid;" : "=r"(ret));
     return ret;
 }
-extern "C" __device__ void PREFIX(store)(void* address, size_t size, const char* type)
+extern "C" __device__ void PREFIX(store)(void* address, size_t size, const char* type, int32_t debugIndex)
 {
     uint32_t index = atomicInc(&devRecordIndex, BUFFER_SIZE);
     devRecordsPtr[index] = AccessRecord(AccessType::Write, blockIdx, threadIdx, warpid(), address, size,
-                                        static_cast<int64_t>(clock64()), type);
+                                        static_cast<int64_t>(clock64()), type, debugIndex);
 }
-extern "C" __device__ void PREFIX(load)(void* address, size_t size, const char* type)
+extern "C" __device__ void PREFIX(load)(void* address, size_t size, const char* type, int32_t debugIndex)
 {
     uint32_t index = atomicInc(&devRecordIndex, BUFFER_SIZE);
     devRecordsPtr[index] = AccessRecord(AccessType::Read, blockIdx, threadIdx, warpid(), address, size,
-                                        static_cast<int64_t>(clock64()), type);
+                                        static_cast<int64_t>(clock64()), type, debugIndex);
 }

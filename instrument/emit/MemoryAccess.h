@@ -17,8 +17,8 @@ public:
 
     }
 
-    void handleStore(llvm::StoreInst* store);
-    void handleLoad(llvm::LoadInst* load);
+    void handleStore(llvm::StoreInst* store, size_t debugIndex);
+    void handleLoad(llvm::LoadInst* load, size_t debugIndex);
 
 private:
     Context& context;

@@ -11,7 +11,7 @@ pushd cmake-build-debug
     # build pass
     make
 
-    clang++ -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
+    clang++ -g -O0 -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
 
     # run pass and compile
     clang++ -g -O0 -std=c++14 --cuda-gpu-arch=sm_30 \

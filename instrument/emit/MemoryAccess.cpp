@@ -26,7 +26,7 @@ std::string warpId()
 }
 
 
-void MemoryAccess::handleStore(StoreInst* store)
+void MemoryAccess::handleStore(StoreInst* store, size_t debugIndex)
 {
     std::string type = this->context.getTypes().print(store->getValueOperand()->getType());
     auto* typeCString = this->context.getValues().createGlobalCString(type);
@@ -34,10 +34,11 @@ void MemoryAccess::handleStore(StoreInst* store)
     auto emitter = this->context.createEmitter(store);
     emitter.store(emitter.getBuilder().CreatePointerCast(store->getPointerOperand(), this->context.getTypes().voidPtr()),
                   this->context.getValues().int64(store->getValueOperand()->getType()->getPrimitiveSizeInBits() / 8),
-                  typeCString
+                  typeCString,
+                  this->context.getValues().int32(debugIndex)
     );
 }
-void MemoryAccess::handleLoad(LoadInst* load)
+void MemoryAccess::handleLoad(LoadInst* load, size_t debugIndex)
 {
     std::string type = this->context.getTypes().print(load->getType());
     auto* typeCString = this->context.getValues().createGlobalCString(type);
@@ -45,6 +46,7 @@ void MemoryAccess::handleLoad(LoadInst* load)
     auto emitter = this->context.createEmitter(load);
     emitter.load(emitter.getBuilder().CreatePointerCast(load->getPointerOperand(), this->context.getTypes().voidPtr()),
                  this->context.getValues().int64(load->getPointerOperand()->getType()->getPrimitiveSizeInBits() / 8),
-                 typeCString
+                 typeCString,
+                 this->context.getValues().int32(debugIndex)
     );
 }

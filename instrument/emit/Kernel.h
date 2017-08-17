@@ -1,9 +1,13 @@
 #pragma once
 
+#include <vector>
+
 #include "../Context.h"
+#include "../util/DebugInfo.h"
 
 namespace llvm {
     class Function;
+    class Instruction;
     class LoadInst;
     class StoreInst;
 }
@@ -22,11 +26,16 @@ public:
 private:
     Context& context;
 
-    void handleStore(llvm::StoreInst* store);
-    void handleLoad(llvm::LoadInst* load);
+    std::vector<llvm::Instruction*> collectInstructions(llvm::Function* function);
+    std::vector<DebugInfo> instrumentInstructions(const std::vector<llvm::Instruction*>& instructions);
+    void emitDebugInfo(llvm::Function* function, const std::vector<DebugInfo>& debugRecods);
 
-    void traverseInstructions(llvm::Function* function);
+    void instrumentStore(llvm::StoreInst* store, size_t debugIndex);
+    void instrumentLoad(llvm::LoadInst* load, size_t debugIndex);
 
     bool isLocalStore(llvm::StoreInst* store);
     bool isLocalLoad(llvm::LoadInst* load);
+
+    bool isInstrumentable(llvm::Instruction& instruction);
+    void instrumentInstruction(llvm::Instruction* instruction, size_t debugIndex);
 };

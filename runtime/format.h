@@ -48,6 +48,7 @@ picojson::value jsonify(const AccessRecord& record)
                     {"z", picojson::value((double) record.blockIdx.z)}
             })},
             {"warpId", picojson::value((double) record.warpId)},
+            {"debugId", picojson::value((double) record.debugIndex)},
             {"event", picojson::value({
                     {"address", picojson::value(hexPointer(record.address))},
                     {"kind", picojson::value((record.accessType == AccessType::Read ? "read" : "write"))},

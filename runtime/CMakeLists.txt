@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.8)
 
 set(CMAKE_CXX_STANDARD 14)
 set(SOURCE_FILES Runtime.h prefix.h format.h cudautil.h AccessRecord.h AllocRecord.h)
