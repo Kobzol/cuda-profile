@@ -1,4 +1,6 @@
 - do not instrument parameter load/stores
+- do not instrument local variable access
+- store debugging information
 - optimize memory storage of access records (blockIdx, threadIdx flattening)
 - handle/warn about buffer overflow (now it wraps)
 - combine namespace with prefix

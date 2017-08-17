@@ -11,6 +11,7 @@
 #include "emit/KernelLaunch.h"
 #include "emit/MemoryAlloc.h"
 #include "../runtime/prefix.h"
+#include "emit/Kernel.h"
 
 using namespace llvm;
 
@@ -45,8 +46,8 @@ void CudaPass::instrumentCuda(Module& module)
     {
         if (isKernelFunction(fn))
         {
-            StoreHandler handler(this->context);
-            handler.handleKernel(&fn);
+            Kernel kernel(this->context);
+            kernel.handleKernel(&fn);
         }
     }
 }

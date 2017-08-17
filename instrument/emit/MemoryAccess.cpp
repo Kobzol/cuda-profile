@@ -26,32 +26,7 @@ std::string warpId()
 }
 
 
-void StoreHandler::handleKernel(Function* kernel)
-{
-    for (BasicBlock& bb : kernel->getBasicBlockList())
-    {
-        size_t index = 0;
-        for (Instruction& inst : bb.getInstList())
-        {
-            if (auto* store = dyn_cast<StoreInst>(&inst))
-            {
-                if (index++ == 0)
-                {
-                    continue;
-                }
-
-                this->handleStore(store);
-            }
-            else if (auto* load = dyn_cast<LoadInst>(&inst))
-            {
-                this->handleLoad(load);
-            }
-        }
-    }
-}
-
-
-void StoreHandler::handleStore(StoreInst* store)
+void MemoryAccess::handleStore(StoreInst* store)
 {
     std::string type = this->context.getTypes().print(store->getValueOperand()->getType());
     auto* typeCString = this->context.getValues().createGlobalCString(type);
@@ -62,7 +37,7 @@ void StoreHandler::handleStore(StoreInst* store)
                   typeCString
     );
 }
-void StoreHandler::handleLoad(LoadInst* load)
+void MemoryAccess::handleLoad(LoadInst* load)
 {
     std::string type = this->context.getTypes().print(load->getType());
     auto* typeCString = this->context.getValues().createGlobalCString(type);
