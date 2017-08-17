@@ -3,12 +3,12 @@
 
 __global__ void kernel(int* p)
 {
-    p[threadIdx.x] = threadIdx.x;
+    int a = *p;
 }
 
 void cudaTest()
 {
-    const int COUNT = 128;
+    const int COUNT = 1;
 
     int* dPtr;
     int data[COUNT] = { 0 };

@@ -26,4 +26,7 @@ private:
     void handleLoad(llvm::LoadInst* load);
 
     void traverseInstructions(llvm::Function* function);
+
+    bool isLocalStore(llvm::StoreInst* store);
+    bool isLocalLoad(llvm::LoadInst* load);
 };

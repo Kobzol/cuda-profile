@@ -29,22 +29,31 @@ void Kernel::traverseInstructions(Function* function)
 {
     for (BasicBlock& bb : function->getBasicBlockList())
     {
-        size_t index = 0;
         for (Instruction& inst : bb.getInstList())
         {
             if (auto* store = dyn_cast<StoreInst>(&inst))
             {
-                if (index++ == 0)
+                if (!this->isLocalStore(store))
                 {
-                    continue;
+                    this->handleStore(store);
                 }
-
-                this->handleStore(store);
             }
             else if (auto* load = dyn_cast<LoadInst>(&inst))
             {
-                this->handleLoad(load);
+                if (!this->isLocalLoad(load))
+                {
+                    this->handleLoad(load);
+                }
             }
         }
     }
+}
+
+bool Kernel::isLocalStore(StoreInst* store)
+{
+    return isa<AllocaInst>(store->getPointerOperand());
+}
+bool Kernel::isLocalLoad(LoadInst* load)
+{
+    return isa<AllocaInst>(load->getPointerOperand());
 }
