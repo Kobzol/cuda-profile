@@ -1,4 +1,5 @@
-- store debugging information
 - optimize memory storage of access records (blockIdx, threadIdx flattening)
 - handle/warn about buffer overflow (now it wraps)
 - combine namespace with prefix
+- solve link issues (enable profiling of more than one file)
+- write tests

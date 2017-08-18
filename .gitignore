@@ -1,3 +1,6 @@
 # IntelliJ project files
 .idea
 cmake-build-*
+.cache
+__pycache__
+*.pyc

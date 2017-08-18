@@ -26,7 +26,7 @@ std::string warpId()
 }
 
 
-void MemoryAccess::handleStore(StoreInst* store, size_t debugIndex)
+void MemoryAccess::handleStore(StoreInst* store, int32_t debugIndex)
 {
     std::string type = this->context.getTypes().print(store->getValueOperand()->getType());
     auto* typeCString = this->context.getValues().createGlobalCString(type);
@@ -38,7 +38,7 @@ void MemoryAccess::handleStore(StoreInst* store, size_t debugIndex)
                   this->context.getValues().int32(debugIndex)
     );
 }
-void MemoryAccess::handleLoad(LoadInst* load, size_t debugIndex)
+void MemoryAccess::handleLoad(LoadInst* load, int32_t debugIndex)
 {
     std::string type = this->context.getTypes().print(load->getType());
     auto* typeCString = this->context.getValues().createGlobalCString(type);

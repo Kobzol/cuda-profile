@@ -16,7 +16,7 @@ pushd cmake-build-debug
     # run pass and compile
     clang++ -g -O0 -std=c++14 --cuda-gpu-arch=sm_30 \
             -I/usr/local/cuda/include -L/usr/local/cuda/lib64 \
-            -Xclang -load -Xclang ./instrument/libllvmCuda.so \
+            -Xclang -load -Xclang ./instrument/libinstrument.so \
             -lcudart -ldl -lrt -pthread -xcuda \
             ${SRC_FILES} -o cuda
 

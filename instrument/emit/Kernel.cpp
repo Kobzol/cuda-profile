@@ -42,10 +42,10 @@ std::vector<DebugInfo> Kernel::instrumentInstructions(const std::vector<Instruct
     DebugExtractor extractor;
     std::vector<DebugInfo> debugInfo;
 
+    int32_t debugIndex = 0;
     for (auto* inst : instructions)
     {
         DebugInfo info = extractor.getInstructionLocation(inst);
-        size_t debugIndex = 0;
         if (info.isValid())
         {
             debugInfo.push_back(info);
@@ -87,7 +87,7 @@ bool Kernel::isInstrumentable(Instruction& instruction)
     return false;
 }
 
-void Kernel::instrumentInstruction(Instruction* instruction, size_t debugIndex)
+void Kernel::instrumentInstruction(Instruction* instruction, int32_t debugIndex)
 {
     if (auto* store = dyn_cast<StoreInst>(instruction))
     {
@@ -99,13 +99,13 @@ void Kernel::instrumentInstruction(Instruction* instruction, size_t debugIndex)
     }
 }
 
-void Kernel::instrumentStore(StoreInst* store, size_t debugIndex)
+void Kernel::instrumentStore(StoreInst* store, int32_t debugIndex)
 {
     MemoryAccess handler(this->context);
     handler.handleStore(store, debugIndex);
 }
 
-void Kernel::instrumentLoad(LoadInst* load, size_t debugIndex)
+void Kernel::instrumentLoad(LoadInst* load, int32_t debugIndex)
 {
     MemoryAccess handler(this->context);
     handler.handleLoad(load, debugIndex);

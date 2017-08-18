@@ -6,7 +6,6 @@
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <iostream>
 
-#include "util/Types.h"
 #include "emit/MemoryAccess.h"
 #include "emit/KernelLaunch.h"
 #include "emit/MemoryAlloc.h"
