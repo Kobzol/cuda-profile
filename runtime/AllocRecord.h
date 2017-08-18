@@ -12,9 +12,9 @@ public:
 
     }
 
-    void* address;
-    size_t size;
-    size_t elementSize;
-    const char* type;
+    void* address = nullptr;
+    size_t size = 0;
+    size_t elementSize = 0;
+    const char* type = nullptr;
     bool active = true;
 };
