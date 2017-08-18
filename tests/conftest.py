@@ -6,7 +6,8 @@ import os
 import shutil
 import pytest
 
-PROJECT_DIR = "/home/kobzol/projects/cuda/cuda-profile"
+PROJECT_DIR = os.path.dirname(os.path.dirname(__file__))
+INSTRUMENT_LIB = "cmake-build-debug/instrument/libinstrument.so"
 INPUT_FILENAME = "input.cu"
 
 
@@ -14,7 +15,7 @@ def create_test_dir():
     return tempfile.mkdtemp("cu")
 
 
-def compile(root, dir, code):
+def compile(root, lib, dir, code):
     inputname = INPUT_FILENAME
     outputname = "cuda"
 
@@ -35,7 +36,7 @@ def compile(root, dir, code):
                                 "-Xclang",
                                 "-load",
                                 "-Xclang",
-                                os.path.join(root, "cmake-build-debug/instrument/libinstrument.so"),
+                                os.path.join(root, lib),
                                 "-lcudart",
                                 "-ldl",
                                 "-lrt",
@@ -67,7 +68,7 @@ def compile_and_run(code):
     tmpdir = create_test_dir()
 
     try:
-        (exe, retcode, out, err) = compile(PROJECT_DIR, tmpdir, code)
+        (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code)
 
         if retcode != 0:
             raise Exception(str(retcode) + "\n" + out + "\n" + err)
