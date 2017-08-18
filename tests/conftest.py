@@ -46,12 +46,16 @@ def compile(root, lib, dir, code):
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
                                cwd=dir)
-    (err, out) = process.communicate()
+    (out, err) = process.communicate()
     return (os.path.join(dir, outputname), process.returncode, out, err)
 
 
 def run(dir, exe):
-    retcode = subprocess.Popen([exe], cwd=dir).wait()
+    process = subprocess.Popen([exe],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
+                               cwd=dir)
+    (out, err) = process.communicate()
 
     mappings = {}
 
@@ -59,30 +63,37 @@ def run(dir, exe):
         with open(json_file) as f:
             mappings[os.path.basename(json_file)] = json.load(f)
 
-    return (retcode, mappings)
+    return (mappings, process.returncode, out, err)
 
 
-def compile_and_run(code, add_include=True):
+def compile_and_run(code, add_include=True, capture_io=False):
     tmpdir = create_test_dir()
 
     if add_include:
         code = "#include <Runtime.h>\n" + code
+
+    print(code)
 
     try:
         (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code)
 
         if retcode != 0:
             raise Exception(str(retcode) + "\n" + out + "\n" + err)
-        if err != "":
-            raise Exception(str(retcode) + "\n" + out + "\n" + err)
 
-        (retcode, mappings) = run(tmpdir, exe)
+        (mappings, retcode, out, err) = run(tmpdir, exe)
         if retcode != 0:
             raise Exception(retcode)
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
-    return mappings
+    if capture_io:
+        return {
+            "mappings": mappings,
+            "stdout": out,
+            "stderr": err
+        }
+    else:
+        return mappings
 
 
 def offset_line(line):
