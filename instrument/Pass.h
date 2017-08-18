@@ -30,4 +30,8 @@ private:
     void handleFunctionCall(llvm::CallInst* call);
 
     Context context;
+
+    bool isInstrumentableCuda(llvm::Module& module);
+
+    bool isInstrumentableCpp(llvm::Module& module);
 };

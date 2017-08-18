@@ -19,8 +19,6 @@ def compile(root, lib, dir, code):
     inputname = INPUT_FILENAME
     outputname = "cuda"
 
-    code = "#include <Runtime.h>\n" + code
-
     with open(os.path.join(dir, inputname), "w") as f:
         f.write(code)
         f.write("\n")
@@ -64,8 +62,11 @@ def run(dir, exe):
     return (retcode, mappings)
 
 
-def compile_and_run(code):
+def compile_and_run(code, add_include=True):
     tmpdir = create_test_dir()
+
+    if add_include:
+        code = "#include <Runtime.h>\n" + code
 
     try:
         (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code)

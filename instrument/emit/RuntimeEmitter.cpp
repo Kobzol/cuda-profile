@@ -1,6 +1,4 @@
 #include "RuntimeEmitter.h"
-#include "../util/Types.h"
-#include "../util/Values.h"
 #include "../../runtime/prefix.h"
 
 #include <llvm/IR/Module.h>
@@ -8,7 +6,7 @@
 
 using namespace llvm;
 
-std::string prefix(const std::string& name)
+std::string RuntimeEmitter::runtimePrefix(const std::string& name)
 {
     return PREFIX_STR + name;
 }
@@ -64,7 +62,7 @@ void RuntimeEmitter::free(Value* address)
 Function* RuntimeEmitter::getStoreFunction()
 {
     return cast<Function>(this->context.getModule()->getOrInsertFunction(
-            prefix("store"),
+            RuntimeEmitter::runtimePrefix("store"),
             this->context.getTypes().voidType(),
             this->context.getTypes().voidPtr(),
             this->context.getTypes().int64(),
@@ -75,7 +73,7 @@ Function* RuntimeEmitter::getStoreFunction()
 llvm::Function* RuntimeEmitter::getLoadFunction()
 {
     return cast<Function>(this->context.getModule()->getOrInsertFunction(
-            prefix("load"),
+            RuntimeEmitter::runtimePrefix("load"),
             this->context.getTypes().voidType(),
             this->context.getTypes().voidPtr(),
             this->context.getTypes().int64(),
@@ -86,14 +84,14 @@ llvm::Function* RuntimeEmitter::getLoadFunction()
 Function* RuntimeEmitter::getKernelStartFunction()
 {
     return cast<Function>(this->context.getModule()->getOrInsertFunction(
-            prefix("kernelStart"),
+            RuntimeEmitter::runtimePrefix("kernelStart"),
             this->context.getTypes().voidType(),
             nullptr));
 }
 Function* RuntimeEmitter::getKernelEndFunction()
 {
     return cast<Function>(this->context.getModule()->getOrInsertFunction(
-            prefix("kernelEnd"),
+            RuntimeEmitter::runtimePrefix("kernelEnd"),
             this->context.getTypes().voidType(),
             this->context.getTypes().int8Ptr(),
             nullptr));
@@ -101,7 +99,7 @@ Function* RuntimeEmitter::getKernelEndFunction()
 Function* RuntimeEmitter::getMallocFunction()
 {
     return cast<Function>(this->context.getModule()->getOrInsertFunction(
-            prefix("malloc"),
+            RuntimeEmitter::runtimePrefix("malloc"),
             this->context.getTypes().voidType(),
             this->context.getTypes().int8Ptr(),
             this->context.getTypes().int64(),
@@ -112,7 +110,7 @@ Function* RuntimeEmitter::getMallocFunction()
 Function* RuntimeEmitter::getFreeFunction()
 {
     return cast<Function>(this->context.getModule()->getOrInsertFunction(
-            prefix("free"),
+            RuntimeEmitter::runtimePrefix("free"),
             this->context.getTypes().voidType(),
             this->context.getTypes().int8Ptr(),
             nullptr));

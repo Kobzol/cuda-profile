@@ -14,6 +14,8 @@ namespace llvm {
 class RuntimeEmitter
 {
 public:
+    static std::string runtimePrefix(const std::string& name);
+
     explicit RuntimeEmitter(Context& context, llvm::Instruction* insertionPoint)
             : context(context), builder(insertionPoint)
     {

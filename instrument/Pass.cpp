@@ -11,6 +11,7 @@
 #include "emit/MemoryAlloc.h"
 #include "../runtime/prefix.h"
 #include "emit/Kernel.h"
+#include "emit/RuntimeEmitter.h"
 
 using namespace llvm;
 
@@ -41,6 +42,11 @@ bool CudaPass::runOnModule(Module& module)
 
 void CudaPass::instrumentCuda(Module& module)
 {
+    if (!this->isInstrumentableCuda(module))
+    {
+        return;
+    }
+
     for (Function& fn : module.getFunctionList())
     {
         if (isKernelFunction(fn))
@@ -88,6 +94,11 @@ Function* CudaPass::augmentKernel(Function* fn)
 
 void CudaPass::instrumentCpp(Module& module)
 {
+    if (!this->isInstrumentableCpp(module))
+    {
+        return;
+    }
+
     for (Function& fn : module.getFunctionList())
     {
         if (!isInstrumentationFunction(fn))
@@ -130,4 +141,13 @@ void CudaPass::handleFunctionCall(CallInst* call)
         MemoryAlloc memoryAlloc(this->context);
         memoryAlloc.handleCudaFree(call);
     }
+}
+
+bool CudaPass::isInstrumentableCuda(Module& module)
+{
+    return module.getFunction(RuntimeEmitter::runtimePrefix("store")) != nullptr;
+}
+bool CudaPass::isInstrumentableCpp(Module& module)
+{
+    return module.getFunction(RuntimeEmitter::runtimePrefix("kernelStart")) != nullptr;
 }
