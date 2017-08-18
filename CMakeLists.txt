@@ -18,7 +18,11 @@ add_subdirectory("instrument")
 # Runtime
 add_subdirectory("runtime")
 
+# Tests
+add_custom_target(tests COMMAND py.test ../tests)
+add_dependencies(tests instrument)
+
 # CUDA program
 set(SOURCE_FILES main.cpp kernel.cu general.h)
 cuda_add_executable(cuda ${SOURCE_FILES} OPTIONS "-arch sm_30 -std=c++11")
-target_link_libraries(cuda runtime ${CUDA_LIBRARIES})
+target_link_libraries(cuda runtime)
