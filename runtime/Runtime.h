@@ -10,26 +10,29 @@
 #include "AccessRecord.h"
 #include "AllocRecord.h"
 #include "format.h"
+#include "CudaTimer.h"
 
 #define BUFFER_SIZE 1024
 
 static AccessRecord* deviceRecords = nullptr;
 static size_t kernelCounter = 0;
 static std::vector<AllocRecord> allocations;
+static CudaTimer timer;
 
 __device__ AccessRecord* devRecordsPtr;
 __device__ uint32_t devRecordIndex;
 
 inline static void emitKernelData(const std::string& kernelName,
-                           const std::vector<AccessRecord>& records,
-                           const std::vector<AllocRecord>& allocations)
+                                  const std::vector<AccessRecord>& records,
+                                  const std::vector<AllocRecord>& allocations,
+                                  float kernelTime)
 {
     std::cerr << "Emmitted " << records.size() << " accesses " << "in kernel " << kernelName << std::endl;
 
     std::fstream kernelOutput(std::string(kernelName) + "-" + std::to_string(kernelCounter++) + ".json", std::fstream::out);
 
     Formatter formatter;
-    formatter.outputKernelRun(kernelOutput, records, allocations);
+    formatter.outputKernelRun(kernelOutput, records, allocations, kernelTime);
     kernelOutput.flush();
 }
 extern "C" {
@@ -40,6 +43,7 @@ extern "C" {
         const uint32_t zero = 0;
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(devRecordsPtr, &deviceRecords, sizeof(deviceRecords)));
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(devRecordIndex, &zero, sizeof(zero)));
+        timer.start();
     }
     void PREFIX(kernelEnd)(const char* kernelName)
     {
@@ -52,7 +56,9 @@ extern "C" {
         CHECK_CUDA_CALL(cudaMemcpy(records.data(), deviceRecords, sizeof(AccessRecord) * count, cudaMemcpyDeviceToHost));
         CHECK_CUDA_CALL(cudaFree(deviceRecords));
 
-        emitKernelData(kernelName, records, allocations);
+        timer.stop_wait();
+
+        emitKernelData(kernelName, records, allocations, timer.get_time());
     }
     void PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type)
     {

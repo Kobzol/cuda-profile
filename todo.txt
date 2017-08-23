@@ -1,5 +1,6 @@
 - optimize memory storage of access records (blockIdx, threadIdx flattening)
 - handle/warn about buffer overflow (now it wraps)
 - combine namespace with prefix
-- solve link issues (enable profiling of more than one file)
+- solve link issues (link switch, nvcc hook, module link/clone, #define for includes)
 - write tests
+- create separate context object for kernel launches

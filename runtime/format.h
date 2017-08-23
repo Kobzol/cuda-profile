@@ -62,11 +62,13 @@ public:
 
     void outputKernelRun(std::ostream& os,
                          const std::vector<AccessRecord>& accesses,
-                         const std::vector<AllocRecord>& allocations)
+                         const std::vector<AllocRecord>& allocations,
+                         float kernelTime)
     {
         auto value = picojson::value(picojson::object {
                 {"memoryMap", this->jsonify(allocations)},
-                {"accesses", this->jsonify(accesses)}
+                {"accesses", this->jsonify(accesses)},
+                {"kernelTime", picojson::value(kernelTime)}
         });
 
         os << value.serialize(true);
