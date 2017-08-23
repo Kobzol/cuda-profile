@@ -11,13 +11,12 @@
 #include "AllocRecord.h"
 #include "format.h"
 #include "CudaTimer.h"
+#include "KernelContext.h"
 
 #define BUFFER_SIZE 1024
 
-static AccessRecord* deviceRecords = nullptr;
 static size_t kernelCounter = 0;
 static std::vector<AllocRecord> allocations;
-static CudaTimer timer;
 
 __device__ AccessRecord* devRecordsPtr;
 __device__ uint32_t devRecordIndex;
@@ -36,29 +35,38 @@ inline static void emitKernelData(const std::string& kernelName,
     kernelOutput.flush();
 }
 extern "C" {
-    void PREFIX(kernelStart)()
+    void PREFIX(initKernelContext)(KernelContext* context, const char* kernelName)
     {
-        cudaMalloc((void**) &deviceRecords, sizeof(AccessRecord) * BUFFER_SIZE);
+        context->kernelName = kernelName;
+        context->timer = new CudaTimer();
+    }
+    void PREFIX(disposeKernelContext)(KernelContext* context)
+    {
+        delete context->timer;
+    }
+    void PREFIX(kernelStart)(KernelContext* context)
+    {
+        cudaMalloc((void**) &context->deviceRecords, sizeof(AccessRecord) * BUFFER_SIZE);
 
         const uint32_t zero = 0;
-        CHECK_CUDA_CALL(cudaMemcpyToSymbol(devRecordsPtr, &deviceRecords, sizeof(deviceRecords)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(devRecordsPtr, &context->deviceRecords, sizeof(context->deviceRecords)));
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(devRecordIndex, &zero, sizeof(zero)));
-        timer.start();
+
+        context->timer->start();
     }
-    void PREFIX(kernelEnd)(const char* kernelName)
+    void PREFIX(kernelEnd)(KernelContext* context)
     {
+        context->timer->stop_wait();
         CHECK_CUDA_CALL(cudaDeviceSynchronize());
 
         uint32_t count = 0;
         CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&count, devRecordIndex, sizeof(uint32_t)));
 
         std::vector<AccessRecord> records(count);
-        CHECK_CUDA_CALL(cudaMemcpy(records.data(), deviceRecords, sizeof(AccessRecord) * count, cudaMemcpyDeviceToHost));
-        CHECK_CUDA_CALL(cudaFree(deviceRecords));
+        CHECK_CUDA_CALL(cudaMemcpy(records.data(), context->deviceRecords, sizeof(AccessRecord) * count, cudaMemcpyDeviceToHost));
+        CHECK_CUDA_CALL(cudaFree(context->deviceRecords));
 
-        timer.stop_wait();
-
-        emitKernelData(kernelName, records, allocations, timer.get_time());
+        emitKernelData(context->kernelName, records, allocations, context->timer->get_time());
     }
     void PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type)
     {

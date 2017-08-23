@@ -33,8 +33,8 @@ public:
               llvm::Value* debugIndex
     );
 
-    void kernelStart();
-    void kernelEnd(llvm::Value* kernelName);
+    void kernelStart(llvm::Value* kernelContext);
+    void kernelEnd(llvm::Value* kernelContext);
 
     void malloc(llvm::Value* address, llvm::Value* size,
                 llvm::Value* elementSize, llvm::Value* type);
@@ -44,6 +44,8 @@ public:
     {
         return this->builder;
     }
+
+    llvm::Value* createKernelContext(llvm::Value* kernelName);
 
 private:
     llvm::Function* getStoreFunction();
@@ -55,4 +57,8 @@ private:
 
     Context& context;
     llvm::IRBuilder<> builder;
+
+    llvm::Function* getCreateKernelContextFunction();
+
+    llvm::Function* getDestroyKernelContextFunction();
 };

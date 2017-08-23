@@ -5,7 +5,6 @@
 
 #include "RuntimeEmitter.h"
 #include "../util/Demangler.h"
-#include "../util/Values.h"
 
 using namespace llvm;
 
@@ -25,12 +24,11 @@ std::string getKernelName(CallInst* callSite)
 void KernelLaunch::handleKernelLaunch(CallInst* callSite)
 {
     auto kernelName = getKernelName(callSite);
-
     auto startEmitter = this->context.createEmitter(callSite);
-    startEmitter.kernelStart();
 
-    GlobalVariable* kernelNameCString = this->context.getValues().createGlobalCString(kernelName);
+    auto context = startEmitter.createKernelContext(this->context.getValues().createGlobalCString(kernelName));
+    startEmitter.kernelStart(context);
 
     auto endEmitter = this->context.createEmitter(callSite->getNextNode());
-    endEmitter.kernelEnd(kernelNameCString);
+    endEmitter.kernelEnd(context);
 }

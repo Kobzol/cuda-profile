@@ -2,14 +2,18 @@
 #include "../../runtime/prefix.h"
 
 #include <llvm/IR/Module.h>
-
+#include <iostream>
 
 using namespace llvm;
+
+static const std::string KERNEL_CONTEXT_TYPE = "KernelContext";
+
 
 std::string RuntimeEmitter::runtimePrefix(const std::string& name)
 {
     return PREFIX_STR + name;
 }
+
 
 void RuntimeEmitter::store(Value* address,
                            Value* size,
@@ -32,14 +36,19 @@ void RuntimeEmitter::load(Value* address,
     });
 }
 
-void RuntimeEmitter::kernelStart()
+void RuntimeEmitter::kernelStart(Value* kernelContext)
 {
-    this->builder.CreateCall(this->getKernelStartFunction());
+    this->builder.CreateCall(this->getKernelStartFunction(), {
+            kernelContext
+    });
 }
-void RuntimeEmitter::kernelEnd(Value* kernelName)
+void RuntimeEmitter::kernelEnd(Value* kernelContext)
 {
     this->builder.CreateCall(this->getKernelEndFunction(), {
-        kernelName
+            kernelContext
+    });
+    this->builder.CreateCall(this->getDestroyKernelContextFunction(), {
+            kernelContext
     });
 }
 
@@ -51,12 +60,23 @@ void RuntimeEmitter::malloc(Value* address, Value* size,
             elementSize, type
     });
 }
-
 void RuntimeEmitter::free(Value* address)
 {
     this->builder.CreateCall(this->getFreeFunction(), {
             address
     });
+}
+
+Value* RuntimeEmitter::createKernelContext(Value* kernelName)
+{
+    auto type = this->context.getTypes().getCompositeType(KERNEL_CONTEXT_TYPE);
+    auto alloc = this->builder.CreateAlloca(type);
+    this->builder.CreateCall(this->getCreateKernelContextFunction(), {
+            alloc,
+            kernelName
+    });
+
+    return alloc;
 }
 
 Function* RuntimeEmitter::getStoreFunction()
@@ -86,6 +106,7 @@ Function* RuntimeEmitter::getKernelStartFunction()
     return cast<Function>(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("kernelStart"),
             this->context.getTypes().voidType(),
+            this->context.getTypes().getCompositeType(KERNEL_CONTEXT_TYPE)->getPointerTo(),
             nullptr));
 }
 Function* RuntimeEmitter::getKernelEndFunction()
@@ -93,7 +114,7 @@ Function* RuntimeEmitter::getKernelEndFunction()
     return cast<Function>(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("kernelEnd"),
             this->context.getTypes().voidType(),
-            this->context.getTypes().int8Ptr(),
+            this->context.getTypes().getCompositeType(KERNEL_CONTEXT_TYPE)->getPointerTo(),
             nullptr));
 }
 Function* RuntimeEmitter::getMallocFunction()
@@ -113,5 +134,24 @@ Function* RuntimeEmitter::getFreeFunction()
             RuntimeEmitter::runtimePrefix("free"),
             this->context.getTypes().voidType(),
             this->context.getTypes().int8Ptr(),
+            nullptr));
+}
+
+Function* RuntimeEmitter::getCreateKernelContextFunction()
+{
+    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+            RuntimeEmitter::runtimePrefix("initKernelContext"),
+            this->context.getTypes().voidType(),
+            this->context.getTypes().getCompositeType(KERNEL_CONTEXT_TYPE)->getPointerTo(),
+            this->context.getTypes().int8Ptr(),
+            nullptr));
+}
+
+Function* RuntimeEmitter::getDestroyKernelContextFunction()
+{
+    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+            RuntimeEmitter::runtimePrefix("disposeKernelContext"),
+            this->context.getTypes().voidType(),
+            this->context.getTypes().getCompositeType(KERNEL_CONTEXT_TYPE)->getPointerTo(),
             nullptr));
 }
