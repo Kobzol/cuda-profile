@@ -15,6 +15,9 @@
 
 using namespace llvm;
 
+namespace llvm {
+    FunctionPass* createNVPTXInferAddressSpacesPass();
+}
 
 char CudaPass::ID = 0;
 
@@ -51,6 +54,8 @@ void CudaPass::instrumentCuda(Module& module)
     {
         if (isKernelFunction(fn))
         {
+            auto pass = createNVPTXInferAddressSpacesPass();
+            pass->runOnFunction(fn);
             Kernel kernel(this->context);
             kernel.handleKernel(&fn);
         }

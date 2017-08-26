@@ -2,28 +2,13 @@
 
 #include <iostream>
 #include <llvm/IR/Module.h>
-#include <llvm/IR/TypeFinder.h>
-#include <llvm/Support/raw_ostream.h>
+#include <IR/ConstantsContext.h>
 
-#include "../util/Types.h"
-#include "../util/Values.h"
 #include "RuntimeEmitter.h"
+#include "../util/AddressSpaceResolver.h"
+#include "../../runtime/AddressSpace.h"
 
 using namespace llvm;
-
-
-std::string threadIdx(const std::string& dim)
-{
-    return "llvm.nvvm.read.ptx.sreg.tid." + dim;
-}
-std::string blockIdx(const std::string& dim)
-{
-    return "llvm.nvvm.read.ptx.sreg.ctaid." + dim;
-}
-std::string warpId()
-{
-    return "llvm.nvvm.read.ptx.sreg.warpid";
-}
 
 
 void MemoryAccess::handleStore(StoreInst* store, int32_t debugIndex)
@@ -34,6 +19,7 @@ void MemoryAccess::handleStore(StoreInst* store, int32_t debugIndex)
     auto emitter = this->context.createEmitter(store);
     emitter.store(emitter.getBuilder().CreatePointerCast(store->getPointerOperand(), this->context.getTypes().voidPtr()),
                   this->context.getValues().int64(store->getValueOperand()->getType()->getPrimitiveSizeInBits() / 8),
+                  this->getAddressSpace(store->getPointerAddressSpace()),
                   typeCString,
                   this->context.getValues().int32(debugIndex)
     );
@@ -46,7 +32,17 @@ void MemoryAccess::handleLoad(LoadInst* load, int32_t debugIndex)
     auto emitter = this->context.createEmitter(load);
     emitter.load(emitter.getBuilder().CreatePointerCast(load->getPointerOperand(), this->context.getTypes().voidPtr()),
                  this->context.getValues().int64(load->getPointerOperand()->getType()->getPrimitiveSizeInBits() / 8),
+                 this->getAddressSpace(load->getPointerAddressSpace()),
                  typeCString,
                  this->context.getValues().int32(debugIndex)
     );
+}
+Value* MemoryAccess::getAddressSpace(uint32_t addressSpace)
+{
+    switch (addressSpace)
+    {
+        case 3: return this->context.getValues().int32(static_cast<uint32_t>(AddressSpace::Shared));
+        case 4: return this->context.getValues().int32(static_cast<uint32_t>(AddressSpace::Constant));
+        default: return this->context.getValues().int32(static_cast<uint32_t>(AddressSpace::Global));
+    }
 }

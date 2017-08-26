@@ -30,6 +30,7 @@ public:
     CudaTimer(const CudaTimer& other) = delete;
     CudaTimer& operator=(const CudaTimer& other) = delete;
     CudaTimer(CudaTimer&& other) = delete;
+    CudaTimer& operator=(const CudaTimer&& other) = delete;
 
     void start() const
     {

@@ -7,7 +7,7 @@ using namespace llvm::legacy;
 
 static llvm::RegisterPass<CudaPass> Cuda("cu", "Cuda Pass", false, false);
 
-static void registerMyPass(const PassManagerBuilder&, PassManagerBase& PM)
+static void registerMyPass(const PassManagerBuilder& builder, PassManagerBase& PM)
 {
     PM.add(new CudaPass());
 }

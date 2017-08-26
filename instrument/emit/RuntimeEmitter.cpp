@@ -17,22 +17,26 @@ std::string RuntimeEmitter::runtimePrefix(const std::string& name)
 
 void RuntimeEmitter::store(Value* address,
                            Value* size,
+                           Value* addressSpace,
                            Value* type,
                            Value* debugIndex
 )
 {
     this->builder.CreateCall(this->getStoreFunction(), {
-            address, size, type, debugIndex
+            address, size, addressSpace,
+            type, debugIndex
     });
 }
 void RuntimeEmitter::load(Value* address,
                           Value* size,
+                          Value* addressSpace,
                           Value* type,
                           Value* debugIndex
 )
 {
     this->builder.CreateCall(this->getLoadFunction(), {
-            address, size, type, debugIndex
+            address, size, addressSpace,
+            type, debugIndex
     });
 }
 
@@ -86,6 +90,7 @@ Function* RuntimeEmitter::getStoreFunction()
             this->context.getTypes().voidType(),
             this->context.getTypes().voidPtr(),
             this->context.getTypes().int64(),
+            this->context.getTypes().int32(),
             this->context.getTypes().int8Ptr(),
             this->context.getTypes().int32(),
             nullptr));
@@ -97,6 +102,7 @@ llvm::Function* RuntimeEmitter::getLoadFunction()
             this->context.getTypes().voidType(),
             this->context.getTypes().voidPtr(),
             this->context.getTypes().int64(),
+            this->context.getTypes().int32(),
             this->context.getTypes().int8Ptr(),
             this->context.getTypes().int32(),
             nullptr));

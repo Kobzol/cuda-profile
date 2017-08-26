@@ -24,11 +24,13 @@ public:
 
     void store(llvm::Value* address,
                llvm::Value* size,
+               llvm::Value* addressSpace,
                llvm::Value* type,
                llvm::Value* debugIndex
     );
     void load(llvm::Value* address,
               llvm::Value* size,
+              llvm::Value* addressSpace,
               llvm::Value* type,
               llvm::Value* debugIndex
     );

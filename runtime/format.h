@@ -9,6 +9,7 @@
 #include "AccessRecord.h"
 #include "picojson.h"
 #include "AllocRecord.h"
+#include "AddressSpace.h"
 
 class Formatter
 {
@@ -32,6 +33,7 @@ public:
                         {"address", picojson::value(this->hexPointer(record.address))},
                         {"kind", picojson::value((record.accessType == AccessType::Read ? "read" : "write"))},
                         {"size", picojson::value((double) record.size)},
+                        {"space", picojson::value(this->getAddressSpace(record.addressSpace))},
                         {"type", picojson::value(record.type)},
                         {"timestamp", picojson::value((double) record.timestamp)}
                 })}
@@ -80,5 +82,15 @@ private:
         std::ostringstream address;
         address << ptr;
         return address.str();
+    }
+
+    std::string getAddressSpace(AddressSpace space)
+    {
+        switch (space)
+        {
+            case AddressSpace::Shared: return "shared";
+            case AddressSpace::Constant: return "constant";
+            default: return "global";
+        }
     }
 };

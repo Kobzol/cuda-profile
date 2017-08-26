@@ -12,14 +12,15 @@
 #include "format.h"
 #include "CudaTimer.h"
 #include "KernelContext.h"
+#include "AddressSpace.h"
 
 #define BUFFER_SIZE 1024
 
 static size_t kernelCounter = 0;
 static std::vector<AllocRecord> allocations;
 
-__device__ AccessRecord* devRecordsPtr;
-__device__ uint32_t devRecordIndex;
+static __device__ AccessRecord* devRecordsPtr;
+static __device__ uint32_t devRecordIndex;
 
 inline static void emitKernelData(const std::string& kernelName,
                                   const std::vector<AccessRecord>& records,
@@ -89,16 +90,20 @@ extern "C" {
         asm volatile ("mov.u32 %0, %%warpid;" : "=r"(ret));
         return ret;
     }
-    extern "C" __device__ void PREFIX(store)(void* address, size_t size, const char* type, int32_t debugIndex)
+    extern "C" __device__ void PREFIX(store)(void* address, size_t size, uint32_t addressSpace,
+                                             const char* type, int32_t debugIndex)
     {
         uint32_t index = atomicInc(&devRecordIndex, BUFFER_SIZE);
-        devRecordsPtr[index] = AccessRecord(AccessType::Write, blockIdx, threadIdx, warpid(), address, size,
+        devRecordsPtr[index] = AccessRecord(AccessType::Write, blockIdx, threadIdx, warpid(),
+                                            address, size, static_cast<AddressSpace>(addressSpace),
                                             static_cast<int64_t>(clock64()), type, debugIndex);
     }
-    extern "C" __device__ void PREFIX(load)(void* address, size_t size, const char* type, int32_t debugIndex)
+    extern "C" __device__ void PREFIX(load)(void* address, size_t size, uint32_t addressSpace,
+                                            const char* type, int32_t debugIndex)
     {
         uint32_t index = atomicInc(&devRecordIndex, BUFFER_SIZE);
-        devRecordsPtr[index] = AccessRecord(AccessType::Read, blockIdx, threadIdx, warpid(), address, size,
+        devRecordsPtr[index] = AccessRecord(AccessType::Read, blockIdx, threadIdx, warpid(),
+                                            address, size, static_cast<AddressSpace>(addressSpace),
                                             static_cast<int64_t>(clock64()), type, debugIndex);
     }
 }

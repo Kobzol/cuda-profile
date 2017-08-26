@@ -1,9 +1,12 @@
 #include "general.h"
 #include "runtime/Runtime.h"
 
-__global__ void kernel(int* p)
+__constant__ int constArr[10] = { 0, 1 };
+
+__global__ void kernel()
 {
-    int a = *p;
+    __shared__ int arr[32];
+    arr[5] = constArr[1];
 }
 
 void cudaTest()
@@ -16,7 +19,7 @@ void cudaTest()
     cudaMalloc((void**) &dPtr, sizeof(data));
     cudaMemcpy(dPtr, data, sizeof(data), cudaMemcpyHostToDevice);
 
-    kernel<<<1, COUNT>>>(dPtr);
+    kernel<<<1, COUNT>>>();
 
     int ptr[COUNT];
     cudaMemcpy(ptr, dPtr, sizeof(data), cudaMemcpyDeviceToHost);
