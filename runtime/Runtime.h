@@ -19,8 +19,10 @@
 static size_t kernelCounter = 0;
 static std::vector<AllocRecord> allocations;
 
-static __device__ AccessRecord* devRecordsPtr;
-static __device__ uint32_t devRecordIndex;
+static __device__ AccessRecord* deviceAccessRecords;
+static __device__ uint32_t deviceAccessRecordIndex;
+static __device__ AllocRecord* deviceSharedBuffers;
+static __device__ uint32_t deviceSharedBufferIndex;
 
 inline static void emitKernelData(const std::string& kernelName,
                                   const std::vector<AccessRecord>& records,
@@ -47,11 +49,14 @@ extern "C" {
     }
     void PREFIX(kernelStart)(KernelContext* context)
     {
-        cudaMalloc((void**) &context->deviceRecords, sizeof(AccessRecord) * BUFFER_SIZE);
+        cudaMalloc((void**) &context->deviceAccessRecords, sizeof(AccessRecord) * BUFFER_SIZE);
+        cudaMalloc((void**) &context->deviceSharedBuffers, sizeof(AllocRecord) * BUFFER_SIZE);
 
         const uint32_t zero = 0;
-        CHECK_CUDA_CALL(cudaMemcpyToSymbol(devRecordsPtr, &context->deviceRecords, sizeof(context->deviceRecords)));
-        CHECK_CUDA_CALL(cudaMemcpyToSymbol(devRecordIndex, &zero, sizeof(zero)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(deviceAccessRecords, &context->deviceAccessRecords, sizeof(context->deviceAccessRecords)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(deviceAccessRecordIndex, &zero, sizeof(zero)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(deviceSharedBuffers, &context->deviceSharedBuffers, sizeof(context->deviceSharedBuffers)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(deviceSharedBufferIndex, &zero, sizeof(zero)));
 
         context->timer->start();
     }
@@ -60,18 +65,34 @@ extern "C" {
         context->timer->stop_wait();
         CHECK_CUDA_CALL(cudaDeviceSynchronize());
 
-        uint32_t count = 0;
-        CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&count, devRecordIndex, sizeof(uint32_t)));
+        uint32_t accessCount = 0, sharedBuffersCount = 0;;
+        CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&accessCount, deviceAccessRecordIndex, sizeof(uint32_t)));
+        CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&sharedBuffersCount, deviceSharedBufferIndex, sizeof(uint32_t)));
 
-        std::vector<AccessRecord> records(count);
-        CHECK_CUDA_CALL(cudaMemcpy(records.data(), context->deviceRecords, sizeof(AccessRecord) * count, cudaMemcpyDeviceToHost));
-        CHECK_CUDA_CALL(cudaFree(context->deviceRecords));
+        std::vector<AccessRecord> records(accessCount);
+        if (accessCount > 0)
+        {
+            CHECK_CUDA_CALL(cudaMemcpy(records.data(), context->deviceAccessRecords, sizeof(AccessRecord) * accessCount, cudaMemcpyDeviceToHost));
+        }
+        CHECK_CUDA_CALL(cudaFree(context->deviceAccessRecords));
 
-        emitKernelData(context->kernelName, records, allocations, context->timer->get_time());
+        std::vector<AllocRecord> sharedBuffers(sharedBuffersCount);
+        if (sharedBuffersCount > 0)
+        {
+            CHECK_CUDA_CALL(cudaMemcpy(sharedBuffers.data(), context->deviceSharedBuffers, sizeof(AllocRecord) * sharedBuffersCount, cudaMemcpyDeviceToHost));
+        }
+        CHECK_CUDA_CALL(cudaFree(context->deviceSharedBuffers));
+
+        for (auto& alloc: allocations)
+        {
+            sharedBuffers.push_back(alloc);
+        }
+
+        emitKernelData(context->kernelName, records, sharedBuffers, context->timer->get_time());
     }
     void PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type)
     {
-        allocations.emplace_back(address, size, elementSize, type);
+        allocations.emplace_back(address, size, elementSize, AddressSpace::Global, type);
     }
     void PREFIX(free)(void* address)
     {
@@ -93,17 +114,33 @@ extern "C" {
     extern "C" __device__ void PREFIX(store)(void* address, size_t size, uint32_t addressSpace,
                                              const char* type, int32_t debugIndex)
     {
-        uint32_t index = atomicInc(&devRecordIndex, BUFFER_SIZE);
-        devRecordsPtr[index] = AccessRecord(AccessType::Write, blockIdx, threadIdx, warpid(),
+        uint32_t index = atomicInc(&deviceAccessRecordIndex, BUFFER_SIZE);
+        deviceAccessRecords[index] = AccessRecord(AccessType::Write, blockIdx, threadIdx, warpid(),
                                             address, size, static_cast<AddressSpace>(addressSpace),
                                             static_cast<int64_t>(clock64()), type, debugIndex);
     }
     extern "C" __device__ void PREFIX(load)(void* address, size_t size, uint32_t addressSpace,
                                             const char* type, int32_t debugIndex)
     {
-        uint32_t index = atomicInc(&devRecordIndex, BUFFER_SIZE);
-        devRecordsPtr[index] = AccessRecord(AccessType::Read, blockIdx, threadIdx, warpid(),
+        uint32_t index = atomicInc(&deviceAccessRecordIndex, BUFFER_SIZE);
+        deviceAccessRecords[index] = AccessRecord(AccessType::Read, blockIdx, threadIdx, warpid(),
                                             address, size, static_cast<AddressSpace>(addressSpace),
                                             static_cast<int64_t>(clock64()), type, debugIndex);
+    }
+    extern "C" __device__ bool PREFIX(isFirstThread)()
+    {
+        return threadIdx.x == 0 &&
+                threadIdx.y == 0 &&
+                threadIdx.z == 0 &&
+                blockIdx.x == 0 &&
+                blockIdx.y == 0 &&
+                blockIdx.z == 0;
+    }
+    extern "C" __device__ void PREFIX(markSharedBuffer)(void* address, size_t size, size_t elementSize,
+                                                        const char* type)
+    {
+        printf("size: %lu, elementSize: %lu\n", size, elementSize);
+        uint32_t index = atomicInc(&deviceSharedBufferIndex, BUFFER_SIZE);
+        deviceSharedBuffers[index] = AllocRecord(address, size, elementSize, AddressSpace::Shared, type);
     }
 }

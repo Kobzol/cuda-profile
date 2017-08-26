@@ -45,6 +45,7 @@ public:
                 {"address", picojson::value(this->hexPointer(record.address))},
                 {"size", picojson::value((double) record.size)},
                 {"elementSize", picojson::value((double) record.elementSize)},
+                {"space", picojson::value(this->getAddressSpace(record.addressSpace))},
                 {"type", picojson::value(record.type)},
                 {"active", picojson::value(record.active)}
         });

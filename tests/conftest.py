@@ -72,8 +72,6 @@ def compile_and_run(code, add_include=True, capture_io=False):
     if add_include:
         code = "#include <Runtime.h>\n" + code
 
-    print(code)
-
     try:
         (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code)
 
@@ -111,8 +109,8 @@ def with_main(code=""):
     """
 
 
-def debug_file(kernel="kernel"):
-    return "debug-{}.json".format(kernel)
+def metadata_file(kernel="kernel"):
+    return "{}-metadata.json".format(kernel)
 
 
 def kernel_file(kernel="kernel", index=0):

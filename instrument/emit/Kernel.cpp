@@ -4,21 +4,30 @@
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Instructions.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/IRBuilder.h>
 
 #include "MemoryAccess.h"
 #include "../util/DebugExtractor.h"
 #include "../util/Demangler.h"
 #include "../../runtime/picojson.h"
+#include "../util/LLVMAddressSpace.h"
+#include "../util/FunctionUtils.h"
 #include "../util/StringUtils.h"
+#include "RuntimeEmitter.h"
 
 using namespace llvm;
 
 
 void Kernel::handleKernel(Function* function)
 {
+    auto sharedBuffers = this->extractSharedBuffers(function->getParent());
+    this->emitSharedBuffers(function, sharedBuffers);
+
     auto instructions = this->collectInstructions(function);
     auto debugRecords = this->instrumentInstructions(instructions);
-    this->emitDebugInfo(function, debugRecords);
+
+    this->emitKernelMetadata(function, debugRecords);
 }
 
 std::vector<Instruction*> Kernel::collectInstructions(Function* function)
@@ -111,13 +120,13 @@ void Kernel::instrumentLoad(LoadInst* load, int32_t debugIndex)
     handler.handleLoad(load, debugIndex);
 }
 
-void Kernel::emitDebugInfo(Function* function, const std::vector<DebugInfo>& debugRecods)
+void Kernel::emitKernelMetadata(Function* function, std::vector<DebugInfo> debugRecods)
 {
     Demangler demangler;
     std::string name = demangler.demangle(function->getName().str());
 
     std::vector<picojson::value> jsonRecords;
-    for (auto& info : debugRecods)
+    for (auto& info: debugRecods)
     {
         jsonRecords.push_back(picojson::value(picojson::object {
                 {"name", picojson::value(info.getName())},
@@ -126,8 +135,36 @@ void Kernel::emitDebugInfo(Function* function, const std::vector<DebugInfo>& deb
         }));
     }
 
-    std::fstream debugFile("debug-" + name.substr(0, name.find('(')) + ".json", std::fstream::out);
-    debugFile << picojson::value(picojson::array {
-        jsonRecords
+    std::fstream debugFile(name.substr(0, name.find('(')) + "-metadata.json", std::fstream::out);
+    debugFile << picojson::value(picojson::object {
+            {"locations", picojson::value(jsonRecords)}
     }).serialize(true);
+}
+
+std::vector<GlobalVariable*> Kernel::extractSharedBuffers(Module* module)
+{
+    std::vector<GlobalVariable*> sharedBuffers;
+
+    for (auto& glob: module->getGlobalList())
+    {
+        if (this->isSharedBuffer(glob))
+        {
+            sharedBuffers.push_back(&glob);
+        }
+    }
+
+    return sharedBuffers;
+}
+
+bool Kernel::isSharedBuffer(GlobalVariable& variable)
+{
+    return static_cast<LLVMAddressSpace>(variable.getType()->getAddressSpace()) == LLVMAddressSpace::Shared;
+}
+
+void Kernel::emitSharedBuffers(Function* function, const std::vector<GlobalVariable*>& sharedBuffers)
+{
+    if (sharedBuffers.empty()) return;
+
+    RuntimeEmitter emitter(this->context, FunctionUtils::getFirstInstruction(function));
+    emitter.markSharedBuffers(sharedBuffers);
 }

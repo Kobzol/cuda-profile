@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 namespace llvm {
+    class GlobalVariable;
     class Module;
     class PointerType;
     class StructType;
@@ -38,11 +39,12 @@ public:
     llvm::PointerType* int64Ptr();
 
     llvm::StructType* getCompositeType(const std::string& name);
+    void getGlobalVariableSize(llvm::GlobalVariable* globalVariable, size_t& size, size_t& elementSize);
 
-    std::string print(llvm::Type* type);
+    std::string stringify(llvm::Type* type);
     
 private:
-    llvm::Module* module;
+    llvm::Module* module = nullptr;
 
     std::unordered_map<std::string, llvm::StructType*> structMap;
 };

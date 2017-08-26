@@ -1,8 +1,6 @@
 #include "MemoryAlloc.h"
 
 #include "RuntimeEmitter.h"
-#include "../util/Types.h"
-#include "../util/Values.h"
 
 using namespace llvm;
 
@@ -22,7 +20,7 @@ void MemoryAlloc::handleCudaMalloc(CallInst* call)
     Value* addressLoad = emitter.getBuilder().CreateLoad(call->getOperand(0));
 
     Type* valueType = getMallocValueType(call);
-    std::string typeStr = this->context.getTypes().print(valueType);
+    std::string typeStr = this->context.getTypes().stringify(valueType);
     GlobalVariable* typeCString = this->context.getValues().createGlobalCString(typeStr);
 
     emitter.malloc(addressLoad, call->getOperand(1),

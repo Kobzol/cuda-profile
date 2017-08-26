@@ -69,8 +69,19 @@ StructType* Types::getCompositeType(const std::string& name)
 
     return this->structMap[name];
 }
+void Types::getGlobalVariableSize(GlobalVariable* globalVariable, size_t& size, size_t& elementSize)
+{
+    Type* type = globalVariable->getInitializer()->getType();
 
-std::string Types::print(Type* type)
+    if (auto arrType = dyn_cast<ArrayType>(type))
+    {
+        elementSize = arrType->getContainedType(0)->getPrimitiveSizeInBits() / 8;
+        size = elementSize * arrType->getNumElements();
+    }
+    else elementSize = size = type->getPrimitiveSizeInBits() / 8;
+}
+
+std::string Types::stringify(Type* type)
 {
     if (isa<StructType>(type))
     {

@@ -5,11 +5,13 @@
 
 #include "AccessRecord.h"
 #include "CudaTimer.h"
+#include "AllocRecord.h"
 
 struct KernelContext
 {
 public:
     const char* kernelName;
-    AccessRecord* deviceRecords;
+    AccessRecord* deviceAccessRecords;
+    AllocRecord* deviceSharedBuffers;
     CudaTimer* timer;
 };

@@ -14,7 +14,7 @@ set(SOURCE_FILES
         util/StringUtils.cpp
         util/DebugInfo.cpp
         util/DebugExtractor.cpp
-        util/AddressSpaceResolver.cpp util/AddressSpaceResolver.h)
+        util/AddressSpaceResolver.cpp util/AddressSpaceResolver.h memory/MemoryAllocation.cpp memory/MemoryAllocation.h util/LLVMAddressSpace.h util/FunctionUtils.cpp util/FunctionUtils.h)
 
 add_library(instrument MODULE RegisterPass.cpp ${SOURCE_FILES})
 target_include_directories(instrument PRIVATE ${LLVM_INCLUDE_DIRS} "/home/kobzol/libraries/llvm-4.0.1.src/lib")

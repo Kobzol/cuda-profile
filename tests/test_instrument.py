@@ -26,7 +26,6 @@ def test_kernel_time(profile):
     int main() {
         int* dptr;
         cudaMalloc(&dptr, sizeof(int));
-        printf("%p\\n", dptr);
         kernel<<<1, 1>>>(dptr);
         cudaFree(dptr);
         return 0;

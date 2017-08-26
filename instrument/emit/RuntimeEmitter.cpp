@@ -83,6 +83,39 @@ Value* RuntimeEmitter::createKernelContext(Value* kernelName)
     return alloc;
 }
 
+void RuntimeEmitter::markSharedBuffers(const std::vector<GlobalVariable*>& sharedBuffers)
+{
+    Function* function = this->getBuilder().GetInsertBlock()->getParent();
+    Module* module = function->getParent();
+
+    auto sync = this->builder.CreateCall(
+            module->getOrInsertFunction("llvm.nvvm.barrier0",
+                                        this->context.getTypes().voidType(),
+                                        nullptr));
+
+    auto bufferBlock = BasicBlock::Create(module->getContext(), "sharedBuffers", function, sync->getParent());
+    auto entryBlock = BasicBlock::Create(module->getContext(), "entry", function, bufferBlock);
+
+    this->builder.SetInsertPoint(bufferBlock);
+    for (auto& buffer: sharedBuffers)
+    {
+        size_t size, elementSize;
+        this->context.getTypes().getGlobalVariableSize(buffer, size, elementSize);
+
+        this->builder.CreateCall(this->getMarkSharedBufferFunction(), {
+                this->builder.CreatePointerCast(buffer, this->context.getTypes().voidPtr()),
+                this->context.getValues().int64(size),
+                this->context.getValues().int64(elementSize),
+                this->context.getValues().createGlobalCString(this->context.getTypes().stringify(buffer->getType()))
+        });
+    }
+    this->builder.CreateBr(sync->getParent());
+
+    this->builder.SetInsertPoint(entryBlock);
+    this->builder.CreateCondBr(this->builder.CreateCall(this->getIsFirstThreadFunction()),
+                               bufferBlock, sync->getParent());
+}
+
 Function* RuntimeEmitter::getStoreFunction()
 {
     return cast<Function>(this->context.getModule()->getOrInsertFunction(
@@ -152,12 +185,30 @@ Function* RuntimeEmitter::getCreateKernelContextFunction()
             this->context.getTypes().int8Ptr(),
             nullptr));
 }
-
 Function* RuntimeEmitter::getDestroyKernelContextFunction()
 {
     return cast<Function>(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("disposeKernelContext"),
             this->context.getTypes().voidType(),
             this->context.getTypes().getCompositeType(KERNEL_CONTEXT_TYPE)->getPointerTo(),
+            nullptr));
+}
+
+Function* RuntimeEmitter::getIsFirstThreadFunction()
+{
+    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+            RuntimeEmitter::runtimePrefix("isFirstThread"),
+            this->context.getTypes().boolType(),
+            nullptr));
+}
+Function* RuntimeEmitter::getMarkSharedBufferFunction()
+{
+    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+            RuntimeEmitter::runtimePrefix("markSharedBuffer"),
+            this->context.getTypes().voidType(),
+            this->context.getTypes().int8Ptr(),
+            this->context.getTypes().int64(),
+            this->context.getTypes().int64(),
+            this->context.getTypes().int8Ptr(),
             nullptr));
 }

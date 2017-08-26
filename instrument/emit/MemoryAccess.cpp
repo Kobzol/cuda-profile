@@ -7,13 +7,14 @@
 #include "RuntimeEmitter.h"
 #include "../util/AddressSpaceResolver.h"
 #include "../../runtime/AddressSpace.h"
+#include "../util/LLVMAddressSpace.h"
 
 using namespace llvm;
 
 
 void MemoryAccess::handleStore(StoreInst* store, int32_t debugIndex)
 {
-    std::string type = this->context.getTypes().print(store->getValueOperand()->getType());
+    std::string type = this->context.getTypes().stringify(store->getValueOperand()->getType());
     auto* typeCString = this->context.getValues().createGlobalCString(type);
 
     auto emitter = this->context.createEmitter(store);
@@ -26,7 +27,7 @@ void MemoryAccess::handleStore(StoreInst* store, int32_t debugIndex)
 }
 void MemoryAccess::handleLoad(LoadInst* load, int32_t debugIndex)
 {
-    std::string type = this->context.getTypes().print(load->getType());
+    std::string type = this->context.getTypes().stringify(load->getType());
     auto* typeCString = this->context.getValues().createGlobalCString(type);
 
     auto emitter = this->context.createEmitter(load);
@@ -39,10 +40,10 @@ void MemoryAccess::handleLoad(LoadInst* load, int32_t debugIndex)
 }
 Value* MemoryAccess::getAddressSpace(uint32_t addressSpace)
 {
-    switch (addressSpace)
+    switch (static_cast<LLVMAddressSpace>(addressSpace))
     {
-        case 3: return this->context.getValues().int32(static_cast<uint32_t>(AddressSpace::Shared));
-        case 4: return this->context.getValues().int32(static_cast<uint32_t>(AddressSpace::Constant));
+        case LLVMAddressSpace::Shared: return this->context.getValues().int32(static_cast<uint32_t>(AddressSpace::Shared));
+        case LLVMAddressSpace::Constant: return this->context.getValues().int32(static_cast<uint32_t>(AddressSpace::Constant));
         default: return this->context.getValues().int32(static_cast<uint32_t>(AddressSpace::Global));
     }
 }
