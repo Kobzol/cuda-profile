@@ -112,7 +112,7 @@ extern "C" {
         return ret;
     }
     extern "C" __device__ void PREFIX(store)(void* address, size_t size, uint32_t addressSpace,
-                                             const char* type, int32_t debugIndex)
+                                             size_t type, int32_t debugIndex)
     {
         uint32_t index = atomicInc(&deviceAccessRecordIndex, BUFFER_SIZE);
         deviceAccessRecords[index] = AccessRecord(AccessType::Write, blockIdx, threadIdx, warpid(),
@@ -120,7 +120,7 @@ extern "C" {
                                             static_cast<int64_t>(clock64()), type, debugIndex);
     }
     extern "C" __device__ void PREFIX(load)(void* address, size_t size, uint32_t addressSpace,
-                                            const char* type, int32_t debugIndex)
+                                            size_t type, int32_t debugIndex)
     {
         uint32_t index = atomicInc(&deviceAccessRecordIndex, BUFFER_SIZE);
         deviceAccessRecords[index] = AccessRecord(AccessType::Read, blockIdx, threadIdx, warpid(),
@@ -137,9 +137,8 @@ extern "C" {
                 blockIdx.z == 0;
     }
     extern "C" __device__ void PREFIX(markSharedBuffer)(void* address, size_t size, size_t elementSize,
-                                                        const char* type)
+                                                        size_t type)
     {
-        printf("size: %lu, elementSize: %lu\n", size, elementSize);
         uint32_t index = atomicInc(&deviceSharedBufferIndex, BUFFER_SIZE);
         deviceSharedBuffers[index] = AllocRecord(address, size, elementSize, AddressSpace::Shared, type);
     }

@@ -58,15 +58,11 @@ private:
     llvm::Function* getKernelEndFunction();
     llvm::Function* getMallocFunction();
     llvm::Function* getFreeFunction();
+    llvm::Function* getCreateKernelContextFunction();
+    llvm::Function* getDestroyKernelContextFunction();
+    llvm::Function* getIsFirstThreadFunction();
+    llvm::Function* getMarkSharedBufferFunction();
 
     Context& context;
     llvm::IRBuilder<> builder;
-
-    llvm::Function* getCreateKernelContextFunction();
-
-    llvm::Function* getDestroyKernelContextFunction();
-
-    llvm::Function* getIsFirstThreadFunction();
-
-    llvm::Function* getMarkSharedBufferFunction();
 };

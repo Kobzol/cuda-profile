@@ -14,27 +14,21 @@ using namespace llvm;
 
 void MemoryAccess::handleStore(StoreInst* store, int32_t debugIndex)
 {
-    std::string type = this->context.getTypes().stringify(store->getValueOperand()->getType());
-    auto* typeCString = this->context.getValues().createGlobalCString(type);
-
     auto emitter = this->context.createEmitter(store);
     emitter.store(emitter.getBuilder().CreatePointerCast(store->getPointerOperand(), this->context.getTypes().voidPtr()),
                   this->context.getValues().int64(store->getValueOperand()->getType()->getPrimitiveSizeInBits() / 8),
                   this->getAddressSpace(store->getPointerAddressSpace()),
-                  typeCString,
+                  this->context.getValues().int64(this->context.getTypeMapper().mapType(store->getValueOperand()->getType())),
                   this->context.getValues().int32(debugIndex)
     );
 }
 void MemoryAccess::handleLoad(LoadInst* load, int32_t debugIndex)
 {
-    std::string type = this->context.getTypes().stringify(load->getType());
-    auto* typeCString = this->context.getValues().createGlobalCString(type);
-
     auto emitter = this->context.createEmitter(load);
     emitter.load(emitter.getBuilder().CreatePointerCast(load->getPointerOperand(), this->context.getTypes().voidPtr()),
                  this->context.getValues().int64(load->getPointerOperand()->getType()->getPrimitiveSizeInBits() / 8),
                  this->getAddressSpace(load->getPointerAddressSpace()),
-                 typeCString,
+                 this->context.getValues().int64(this->context.getTypeMapper().mapType(load->getType())),
                  this->context.getValues().int32(debugIndex)
     );
 }

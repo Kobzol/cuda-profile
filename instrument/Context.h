@@ -2,6 +2,7 @@
 
 #include "util/Types.h"
 #include "util/Values.h"
+#include "util/TypeMapper.h"
 
 namespace llvm {
     class Instruction;
@@ -13,12 +14,12 @@ class RuntimeEmitter;
 class Context
 {
 public:
-    Context(): values(this->types)
+    Context(): values(this->types), typeMapper(*this)
     {
 
     }
 
-    explicit Context(llvm::Module* module): values(this->types)
+    explicit Context(llvm::Module* module): values(this->types), typeMapper(*this)
     {
         this->setModule(module);
     }
@@ -33,6 +34,10 @@ public:
     {
         return this->values;
     }
+    TypeMapper& getTypeMapper()
+    {
+        return this->typeMapper;
+    }
     llvm::Module* getModule()
     {
         return this->module;
@@ -44,4 +49,5 @@ private:
     llvm::Module* module = nullptr;
     Types types;
     Values values;
+    TypeMapper typeMapper;
 };

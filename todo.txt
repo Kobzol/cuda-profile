@@ -3,5 +3,3 @@
 - combine namespace with prefix
 - solve link issues (link switch, nvcc hook, module link/clone, #define for includes)
 - write tests
-- track shared and constant buffers
-- make map of types

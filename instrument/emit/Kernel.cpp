@@ -18,7 +18,6 @@
 
 using namespace llvm;
 
-
 void Kernel::handleKernel(Function* function)
 {
     auto sharedBuffers = this->extractSharedBuffers(function->getParent());
@@ -27,7 +26,7 @@ void Kernel::handleKernel(Function* function)
     auto instructions = this->collectInstructions(function);
     auto debugRecords = this->instrumentInstructions(instructions);
 
-    this->emitKernelMetadata(function, debugRecords);
+    this->emitKernelMetadata(function, debugRecords, this->context.getTypeMapper());
 }
 
 std::vector<Instruction*> Kernel::collectInstructions(Function* function)
@@ -120,7 +119,7 @@ void Kernel::instrumentLoad(LoadInst* load, int32_t debugIndex)
     handler.handleLoad(load, debugIndex);
 }
 
-void Kernel::emitKernelMetadata(Function* function, std::vector<DebugInfo> debugRecods)
+void Kernel::emitKernelMetadata(llvm::Function* function, std::vector<DebugInfo> debugRecods, TypeMapper& mapper)
 {
     Demangler demangler;
     std::string name = demangler.demangle(function->getName().str());
@@ -135,9 +134,16 @@ void Kernel::emitKernelMetadata(Function* function, std::vector<DebugInfo> debug
         }));
     }
 
+    std::vector<picojson::value> jsonTypes;
+    for (auto& type : mapper.getTypes())
+    {
+        jsonTypes.emplace_back(type);
+    }
+
     std::fstream debugFile(name.substr(0, name.find('(')) + "-metadata.json", std::fstream::out);
     debugFile << picojson::value(picojson::object {
-            {"locations", picojson::value(jsonRecords)}
+            {"locations", picojson::value(jsonRecords)},
+            {"typeMap", picojson::value(jsonTypes)}
     }).serialize(true);
 }
 

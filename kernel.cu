@@ -1,10 +1,9 @@
 #include "general.h"
 #include "runtime/Runtime.h"
 
-__global__ void kernel()
+__global__ void kernel(int *p)
 {
-    __shared__ int arr;
-    printf("%p\n", &arr);
+    *p = 5;
 }
 
 void cudaTest()
@@ -17,7 +16,7 @@ void cudaTest()
     cudaMalloc((void**) &dPtr, sizeof(data));
     cudaMemcpy(dPtr, data, sizeof(data), cudaMemcpyHostToDevice);
 
-    kernel<<<1, 1>>>();
+    kernel<<<1, 1>>>(dPtr);
 
     int ptr[COUNT];
     cudaMemcpy(ptr, dPtr, sizeof(data), cudaMemcpyDeviceToHost);

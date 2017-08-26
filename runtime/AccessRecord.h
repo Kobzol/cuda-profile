@@ -17,19 +17,14 @@ public:
     AccessRecord() = default;
     __universal__ AccessRecord(AccessType accessType, uint3 blockIdx, uint3 threadIdx,
                                uint32_t warpId, void* memory, size_t size,
-                               AddressSpace addressSpace, int64_t timestamp, const char* type,
+                               AddressSpace addressSpace, int64_t timestamp, size_t type,
                                int32_t debugIndex):
             accessType(accessType), blockIdx(blockIdx), threadIdx(threadIdx),
             warpId(warpId), address(memory), size(size),
-            addressSpace(addressSpace), timestamp(timestamp), debugIndex(debugIndex)
+            addressSpace(addressSpace), timestamp(timestamp), type(type),
+            debugIndex(debugIndex)
     {
-        int i = 0;
-        for (; i < sizeof(this->type) - 1; i++)
-        {
-            if (*type == '\0') break;
-            this->type[i] = *type++;
-        }
-        this->type[i] = '\0';
+
     }
 
     uint3 blockIdx { 0, 0, 0 };
@@ -43,5 +38,5 @@ public:
     int32_t debugIndex = 0;
     AddressSpace addressSpace = AddressSpace::Global;
 
-    char type[32] = {};
+    size_t type = 0;
 };

@@ -4,7 +4,6 @@
 
 #include "../Context.h"
 #include "../util/DebugInfo.h"
-#include "../memory/MemoryAllocation.h"
 
 namespace llvm {
     class Function;
@@ -30,7 +29,7 @@ private:
 
     std::vector<llvm::Instruction*> collectInstructions(llvm::Function* function);
     std::vector<DebugInfo> instrumentInstructions(const std::vector<llvm::Instruction*>& instructions);
-    void emitKernelMetadata(llvm::Function* function, std::vector<DebugInfo> debugRecods);
+    void emitKernelMetadata(llvm::Function* function, std::vector<DebugInfo> debugRecods, TypeMapper& mapper);
 
     void instrumentStore(llvm::StoreInst* store, int32_t debugIndex);
     void instrumentLoad(llvm::LoadInst* load, int32_t debugIndex);

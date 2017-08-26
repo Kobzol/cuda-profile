@@ -34,19 +34,28 @@ public:
                         {"kind", picojson::value((record.accessType == AccessType::Read ? "read" : "write"))},
                         {"size", picojson::value((double) record.size)},
                         {"space", picojson::value(this->getAddressSpace(record.addressSpace))},
-                        {"type", picojson::value(record.type)},
+                        {"typeIndex", picojson::value((double) record.type)},
                         {"timestamp", picojson::value((double) record.timestamp)}
                 })}
         });
     }
     picojson::value jsonify(const AllocRecord& record)
     {
+        std::string typeKey = "type";
+        picojson::value typeValue;
+        if (record.type == nullptr)
+        {
+            typeKey = "typeIndex";
+            typeValue = picojson::value((double) record.typeIndex);
+        }
+        else typeValue = picojson::value(record.type);
+
         return picojson::value(picojson::object {
                 {"address", picojson::value(this->hexPointer(record.address))},
                 {"size", picojson::value((double) record.size)},
                 {"elementSize", picojson::value((double) record.elementSize)},
                 {"space", picojson::value(this->getAddressSpace(record.addressSpace))},
-                {"type", picojson::value(record.type)},
+                {typeKey, typeValue},
                 {"active", picojson::value(record.active)}
         });
     }

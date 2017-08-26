@@ -47,6 +47,6 @@ def test_shared_allocation(profile):
     assert allocations[0]["active"]
     assert allocations[0]["elementSize"] == 4
     assert allocations[0]["size"] == 40
-    assert allocations[0]["type"] == "i32"
+    assert "typeIndex" in allocations[0]
     assert allocations[0]["space"] == "shared"
     assert allocations[0]["address"] == data["stdout"].strip()

@@ -106,7 +106,7 @@ void RuntimeEmitter::markSharedBuffers(const std::vector<GlobalVariable*>& share
                 this->builder.CreatePointerCast(buffer, this->context.getTypes().voidPtr()),
                 this->context.getValues().int64(size),
                 this->context.getValues().int64(elementSize),
-                this->context.getValues().createGlobalCString(this->context.getTypes().stringify(buffer->getType()))
+                this->context.getValues().int64(this->context.getTypeMapper().mapType(buffer->getType()))
         });
     }
     this->builder.CreateBr(sync->getParent());
@@ -124,7 +124,7 @@ Function* RuntimeEmitter::getStoreFunction()
             this->context.getTypes().voidPtr(),
             this->context.getTypes().int64(),
             this->context.getTypes().int32(),
-            this->context.getTypes().int8Ptr(),
+            this->context.getTypes().int64(),
             this->context.getTypes().int32(),
             nullptr));
 }
@@ -136,7 +136,7 @@ llvm::Function* RuntimeEmitter::getLoadFunction()
             this->context.getTypes().voidPtr(),
             this->context.getTypes().int64(),
             this->context.getTypes().int32(),
-            this->context.getTypes().int8Ptr(),
+            this->context.getTypes().int64(),
             this->context.getTypes().int32(),
             nullptr));
 }
@@ -209,6 +209,6 @@ Function* RuntimeEmitter::getMarkSharedBufferFunction()
             this->context.getTypes().int8Ptr(),
             this->context.getTypes().int64(),
             this->context.getTypes().int64(),
-            this->context.getTypes().int8Ptr(),
+            this->context.getTypes().int64(),
             nullptr));
 }
