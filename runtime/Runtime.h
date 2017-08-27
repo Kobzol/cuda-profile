@@ -23,7 +23,7 @@
     } while (false)
 
 namespace cupr {
-    static uint32_t BUFFER_SIZE_DEFAULT = 1024;
+    static uint32_t BUFFER_SIZE_DEFAULT = 1024 * 1024;
 
     static size_t kernelCounter = 0;
     static std::vector<cupr::AllocRecord> allocations;
@@ -43,8 +43,11 @@ namespace cupr {
 
         std::fstream kernelOutput(std::string(kernelName) + "-" + std::to_string(kernelCounter++) + ".json", std::fstream::out);
 
+        char* prettifyEnv = getenv("CUPROFILE_PRETTIFY");
+        bool prettify = prettifyEnv != nullptr && prettifyEnv[0] == '1';
+
         Formatter formatter;
-        formatter.outputKernelRun(kernelOutput, records, allocations, kernelTime);
+        formatter.outputKernelRun(kernelOutput, records, allocations, kernelTime, prettify);
         kernelOutput.flush();
     }
     inline static uint32_t getBufferSize()

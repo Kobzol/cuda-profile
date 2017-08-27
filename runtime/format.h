@@ -77,7 +77,8 @@ namespace cupr
         void outputKernelRun(std::ostream& os,
                              const std::vector<AccessRecord>& accesses,
                              const std::vector<AllocRecord>& allocations,
-                             float kernelTime)
+                             float kernelTime,
+                             bool prettify)
         {
             auto value = picojson::value(picojson::object {
                     {"memoryMap",  this->jsonify(allocations)},
@@ -85,7 +86,7 @@ namespace cupr
                     {"kernelTime", picojson::value(kernelTime)}
             });
 
-            os << value.serialize(true);
+            os << value.serialize(prettify);
         }
 
     private:
