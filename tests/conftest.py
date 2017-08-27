@@ -50,11 +50,15 @@ def compile(root, lib, dir, code):
     return (os.path.join(dir, outputname), process.returncode, out, err)
 
 
-def run(dir, exe):
+def run(dir, exe, env):
+    runenv = os.environ.copy()
+    runenv.update(env)
+
     process = subprocess.Popen([exe],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
-                               cwd=dir)
+                               cwd=dir,
+                               env=runenv)
     (out, err) = process.communicate()
 
     mappings = {}
@@ -66,8 +70,12 @@ def run(dir, exe):
     return (mappings, process.returncode, out, err)
 
 
-def compile_and_run(code, add_include=True, capture_io=False):
+def compile_and_run(code, add_include=True, capture_io=False, buffer_size=None):
     tmpdir = create_test_dir()
+
+    env = {}
+    if buffer_size is not None:
+        env["CUPROFILE_BUFFER_SIZE"] = str(buffer_size)
 
     if add_include:
         code = "#include <Runtime.h>\n" + code
@@ -78,7 +86,7 @@ def compile_and_run(code, add_include=True, capture_io=False):
         if retcode != 0:
             raise Exception(str(retcode) + "\n" + out + "\n" + err)
 
-        (mappings, retcode, out, err) = run(tmpdir, exe)
+        (mappings, retcode, out, err) = run(tmpdir, exe, env)
         if retcode != 0:
             raise Exception(retcode)
     finally:

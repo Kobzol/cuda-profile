@@ -1,10 +1,9 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdlib>
 #include <vector>
 #include <iostream>
-
-#include <device_launch_parameters.h>
 
 #include "prefix.h"
 #include "AccessRecord.h"
@@ -13,18 +12,28 @@
 #include "CudaTimer.h"
 #include "KernelContext.h"
 #include "AddressSpace.h"
+#include "cudautil.h"
 
-#define BUFFER_SIZE 1024
 
-static size_t kernelCounter = 0;
-static std::vector<cupr::AllocRecord> allocations;
-
-static __device__ cupr::AccessRecord* deviceAccessRecords;
-static __device__ uint32_t deviceAccessRecordIndex;
-static __device__ cupr::AllocRecord* deviceSharedBuffers;
-static __device__ uint32_t deviceSharedBufferIndex;
+#define ATOMIC_INSERT(buffer, index, maxSize, item) \
+    do { \
+        uint32_t oldIndex = atomicInc(index, maxSize); \
+        if (*(index) < oldIndex) printf("DEVICE PROFILING OVERFLOW\n"); \
+        (buffer)[oldIndex] = item; \
+    } while (false)
 
 namespace cupr {
+    static uint32_t BUFFER_SIZE_DEFAULT = 1024;
+
+    static size_t kernelCounter = 0;
+    static std::vector<cupr::AllocRecord> allocations;
+
+    static __device__ uint32_t deviceBufferSize;
+    static __device__ cupr::AccessRecord* deviceAccessRecords;
+    static __device__ uint32_t deviceAccessRecordIndex;
+    static __device__ cupr::AllocRecord* deviceSharedBuffers;
+    static __device__ uint32_t deviceSharedBufferIndex;
+
     inline static void emitKernelData(const std::string& kernelName,
                                       const std::vector<AccessRecord>& records,
                                       const std::vector<AllocRecord>& allocations,
@@ -37,6 +46,12 @@ namespace cupr {
         Formatter formatter;
         formatter.outputKernelRun(kernelOutput, records, allocations, kernelTime);
         kernelOutput.flush();
+    }
+    inline static uint32_t getBufferSize()
+    {
+        char* envBufferSize = getenv("CUPROFILE_BUFFER_SIZE");
+        if (envBufferSize == nullptr) return BUFFER_SIZE_DEFAULT;
+        return static_cast<uint32_t>(std::stoi(envBufferSize));
     }
 }
 extern "C" {
@@ -51,14 +66,17 @@ extern "C" {
     }
     void CU_PREFIX(kernelStart)(cupr::KernelContext* context)
     {
-        cudaMalloc((void**) &context->deviceAccessRecords, sizeof(cupr::AccessRecord) * BUFFER_SIZE);
-        cudaMalloc((void**) &context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * BUFFER_SIZE);
+        uint32_t bufferSize = cupr::getBufferSize();
+
+        cudaMalloc((void**) &context->deviceAccessRecords, sizeof(cupr::AccessRecord) * bufferSize);
+        cudaMalloc((void**) &context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * bufferSize);
 
         const uint32_t zero = 0;
-        CHECK_CUDA_CALL(cudaMemcpyToSymbol(deviceAccessRecords, &context->deviceAccessRecords, sizeof(context->deviceAccessRecords)));
-        CHECK_CUDA_CALL(cudaMemcpyToSymbol(deviceAccessRecordIndex, &zero, sizeof(zero)));
-        CHECK_CUDA_CALL(cudaMemcpyToSymbol(deviceSharedBuffers, &context->deviceSharedBuffers, sizeof(context->deviceSharedBuffers)));
-        CHECK_CUDA_CALL(cudaMemcpyToSymbol(deviceSharedBufferIndex, &zero, sizeof(zero)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceAccessRecords, &context->deviceAccessRecords, sizeof(context->deviceAccessRecords)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceAccessRecordIndex, &zero, sizeof(zero)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceSharedBuffers, &context->deviceSharedBuffers, sizeof(context->deviceSharedBuffers)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceSharedBufferIndex, &zero, sizeof(zero)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceBufferSize, &bufferSize, sizeof(bufferSize)));
 
         context->timer->start();
     }
@@ -68,8 +86,8 @@ extern "C" {
         CHECK_CUDA_CALL(cudaDeviceSynchronize());
 
         uint32_t accessCount = 0, sharedBuffersCount = 0;;
-        CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&accessCount, deviceAccessRecordIndex, sizeof(uint32_t)));
-        CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&sharedBuffersCount, deviceSharedBufferIndex, sizeof(uint32_t)));
+        CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&accessCount, cupr::deviceAccessRecordIndex, sizeof(uint32_t)));
+        CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&sharedBuffersCount, cupr::deviceSharedBufferIndex, sizeof(uint32_t)));
 
         std::vector<cupr::AccessRecord> records(accessCount);
         if (accessCount > 0)
@@ -85,7 +103,7 @@ extern "C" {
         }
         CHECK_CUDA_CALL(cudaFree(context->deviceSharedBuffers));
 
-        for (auto& alloc: allocations)
+        for (auto& alloc: cupr::allocations)
         {
             sharedBuffers.push_back(alloc);
         }
@@ -94,11 +112,11 @@ extern "C" {
     }
     void CU_PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type)
     {
-        allocations.emplace_back(address, size, elementSize, cupr::AddressSpace::Global, type);
+        cupr::allocations.emplace_back(address, size, elementSize, cupr::AddressSpace::Global, type);
     }
     void CU_PREFIX(free)(void* address)
     {
-        for (auto& alloc: allocations)
+        for (auto& alloc: cupr::allocations)
         {
             if (alloc.address == address)
             {
@@ -107,27 +125,31 @@ extern "C" {
         }
     }
 
-    __forceinline__ __device__ uint32_t warpid()
+    static __forceinline__ __device__ uint32_t warpid()
     {
         uint32_t ret;
         asm volatile ("mov.u32 %0, %%warpid;" : "=r"(ret));
         return ret;
     }
     extern "C" __device__ void CU_PREFIX(store)(void* address, size_t size, uint32_t addressSpace,
-                                             size_t type, int32_t debugIndex)
+                                                size_t type, int32_t debugIndex)
     {
-        uint32_t index = atomicInc(&deviceAccessRecordIndex, BUFFER_SIZE);
-        deviceAccessRecords[index] = cupr::AccessRecord(cupr::AccessType::Write, blockIdx, threadIdx, warpid(),
-                                            address, size, static_cast<cupr::AddressSpace>(addressSpace),
-                                            static_cast<int64_t>(clock64()), type, debugIndex);
+        ATOMIC_INSERT(cupr::deviceAccessRecords,
+                      &cupr::deviceAccessRecordIndex,
+                      cupr::deviceBufferSize,
+                      cupr::AccessRecord(cupr::AccessType::Write, blockIdx, threadIdx, warpid(),
+                                         address, size, static_cast<cupr::AddressSpace>(addressSpace),
+                                         static_cast<int64_t>(clock64()), type, debugIndex));
     }
     extern "C" __device__ void CU_PREFIX(load)(void* address, size_t size, uint32_t addressSpace,
-                                            size_t type, int32_t debugIndex)
+                                               size_t type, int32_t debugIndex)
     {
-        uint32_t index = atomicInc(&deviceAccessRecordIndex, BUFFER_SIZE);
-        deviceAccessRecords[index] = cupr::AccessRecord(cupr::AccessType::Read, blockIdx, threadIdx, warpid(),
-                                            address, size, static_cast<cupr::AddressSpace>(addressSpace),
-                                            static_cast<int64_t>(clock64()), type, debugIndex);
+        ATOMIC_INSERT(cupr::deviceAccessRecords,
+                      &cupr::deviceAccessRecordIndex,
+                      cupr::deviceBufferSize,
+                      cupr::AccessRecord(cupr::AccessType::Read, blockIdx, threadIdx, warpid(),
+                              address, size, static_cast<cupr::AddressSpace>(addressSpace),
+                              static_cast<int64_t>(clock64()), type, debugIndex));
     }
     extern "C" __device__ bool CU_PREFIX(isFirstThread)()
     {
@@ -139,9 +161,11 @@ extern "C" {
                 blockIdx.z == 0;
     }
     extern "C" __device__ void CU_PREFIX(markSharedBuffer)(void* address, size_t size, size_t elementSize,
-                                                        size_t type)
+                                                           size_t type)
     {
-        uint32_t index = atomicInc(&deviceSharedBufferIndex, BUFFER_SIZE);
-        deviceSharedBuffers[index] = cupr::AllocRecord(address, size, elementSize, cupr::AddressSpace::Shared, type);
+        ATOMIC_INSERT(cupr::deviceSharedBuffers,
+                      &cupr::deviceSharedBufferIndex,
+                      cupr::deviceBufferSize,
+                      cupr::AllocRecord(address, size, elementSize, cupr::AddressSpace::Shared, type));
     }
 }
