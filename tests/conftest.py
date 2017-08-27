@@ -23,18 +23,22 @@ def compile(root, lib, dir, code):
         f.write(code)
         f.write("\n")
 
-    process = subprocess.Popen(["clang++",
-                                "-g", "-O0",
-                                "-std=c++14",
-                                "--cuda-gpu-arch=sm_30",
-                                "-I/usr/local/cuda/include",
-                                "-L/usr/local/cuda/lib64",
-                                "-I{}".format(os.path.join(root, "runtime")),
-                                "-Xclang", "-load",
-                                "-Xclang", os.path.join(root, lib),
-                                "-lcudart", "-ldl", "-lrt", "-pthread",
-                                "-xcuda", inputname,
-                                "-o", outputname],
+    args = ["clang++",
+            "-g", "-O0",
+            "-std=c++14",
+            "--cuda-gpu-arch=sm_30",
+            "-I/usr/local/cuda/include",
+            "-L/usr/local/cuda/lib64",
+            "-I{}".format(os.path.join(root, "runtime")),
+            "-Xclang", "-load",
+            "-Xclang", os.path.join(root, lib),
+            "-lcudart", "-ldl", "-lrt", "-lprotobuf", "-pthread",
+            "-xcuda", inputname]
+
+    args += glob.glob(os.path.join(root, "runtime/protobuf/generated/*.pb.cc"))
+    args += ["-o", outputname]
+
+    process = subprocess.Popen(args,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
                                cwd=dir)
@@ -42,7 +46,7 @@ def compile(root, lib, dir, code):
     return (os.path.join(dir, outputname), process.returncode, out, err)
 
 
-def run(dir, exe, env):
+def run(dir, exe, env, protobuf):
     runenv = os.environ.copy()
     runenv.update(env)
 
@@ -55,19 +59,29 @@ def run(dir, exe, env):
 
     mappings = {}
 
-    for json_file in glob.glob("{}/*.json".format(dir)):
-        with open(json_file) as f:
-            mappings[os.path.basename(json_file)] = json.load(f)
+    if protobuf:
+        for protobuf_file in glob.glob("{}/*.protobuf".format(dir)):
+            mappings[os.path.basename(protobuf_file)] = protobuf_file
+    else:
+        for json_file in glob.glob("{}/*.json".format(dir)):
+            with open(json_file) as f:
+                mappings[os.path.basename(json_file)] = json.load(f)
 
     return (mappings, process.returncode, out, err)
 
 
-def compile_and_run(code, add_include=True, capture_io=False, buffer_size=None):
+def compile_and_run(code,
+                    add_include=True,
+                    capture_io=False,
+                    buffer_size=None,
+                    protobuf=False):
     tmpdir = create_test_dir()
 
     env = {}
     if buffer_size is not None:
         env["CUPROFILE_BUFFER_SIZE"] = str(buffer_size)
+    if protobuf:
+        env["CUPROFILE_PROTOBUF"] = "1"
 
     if add_include:
         code = "#include <Runtime.h>\n" + code
@@ -78,7 +92,7 @@ def compile_and_run(code, add_include=True, capture_io=False, buffer_size=None):
         if retcode != 0:
             raise Exception(str(retcode) + "\n" + out + "\n" + err)
 
-        (mappings, retcode, out, err) = run(tmpdir, exe, env)
+        (mappings, retcode, out, err) = run(tmpdir, exe, env, protobuf)
         if retcode != 0:
             raise Exception(retcode)
     finally:

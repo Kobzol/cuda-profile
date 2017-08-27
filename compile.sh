@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 CUDA_DIR=/usr/local/cuda
-SRC_FILES="../main.cpp ../kernel.cu"
+SRC_FILES="../main.cpp ../kernel.cu ../runtime/protobuf/generated/*.pb.cc"
 INSTRUMENTED_KERNEL_BC="kernel-instrumented.bc"
 
 pushd cmake-build-debug
@@ -17,7 +17,7 @@ pushd cmake-build-debug
     clang++ -g -O0 -std=c++14 --cuda-gpu-arch=sm_30 \
             -I/usr/local/cuda/include -L/usr/local/cuda/lib64 \
             -Xclang -load -Xclang ./instrument/libinstrument.so \
-            -z muldefs -lcudart -ldl -lrt -pthread -xcuda \
+            -z muldefs -lcudart -ldl -lrt -lprotobuf -pthread -xcuda \
             ${SRC_FILES} -o cuda
 
     # run instrumented program

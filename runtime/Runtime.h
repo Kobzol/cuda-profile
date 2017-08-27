@@ -34,6 +34,33 @@ namespace cupr {
     static __device__ cupr::AllocRecord* deviceSharedBuffers;
     static __device__ uint32_t deviceSharedBufferIndex;
 
+    inline static void emitKernelDataJson(const std::string& fileName,
+                                          const std::vector<AccessRecord>& records,
+                                          const std::vector<AllocRecord>& allocations,
+                                          float kernelTime)
+    {
+        std::fstream kernelOutput(fileName + ".json", std::fstream::out);
+
+        char* prettifyEnv = getenv("CUPROFILE_PRETTIFY");
+        bool prettify = prettifyEnv != nullptr && strlen(prettifyEnv) > 0 && prettifyEnv[0] == '1';
+
+        Formatter formatter;
+        formatter.outputKernelRunJson(kernelOutput, records, allocations, kernelTime, prettify);
+        kernelOutput.flush();
+    }
+#ifdef USE_PROTOBUF
+    inline static void emitKernelDataProtobuf(const std::string& fileName,
+                                              const std::vector<AccessRecord>& records,
+                                              const std::vector<AllocRecord>& allocations,
+                                              float kernelTime)
+    {
+        std::fstream kernelOutput(fileName + ".protobuf", std::fstream::out);
+
+        Formatter formatter;
+        formatter.outputKernelRunProtobuf(kernelOutput, records, allocations, kernelTime);
+        kernelOutput.flush();
+    }
+#endif
     inline static void emitKernelData(const std::string& kernelName,
                                       const std::vector<AccessRecord>& records,
                                       const std::vector<AllocRecord>& allocations,
@@ -41,14 +68,20 @@ namespace cupr {
     {
         std::cerr << "Emmitted " << records.size() << " accesses " << "in kernel " << kernelName << std::endl;
 
-        std::fstream kernelOutput(std::string(kernelName) + "-" + std::to_string(kernelCounter++) + ".json", std::fstream::out);
+        std::string kernelFile = std::string(kernelName) + "-" + std::to_string(kernelCounter++);
+#ifdef USE_PROTOBUF
+        char* outputProtobuf = getenv("CUPROFILE_PROTOBUF");
+        bool protobuf = outputProtobuf != nullptr && strlen(outputProtobuf) > 0 && outputProtobuf[0] == '1';
 
-        char* prettifyEnv = getenv("CUPROFILE_PRETTIFY");
-        bool prettify = prettifyEnv != nullptr && prettifyEnv[0] == '1';
-
-        Formatter formatter;
-        formatter.outputKernelRun(kernelOutput, records, allocations, kernelTime, prettify);
-        kernelOutput.flush();
+        if (protobuf)
+        {
+            emitKernelDataProtobuf(kernelFile, records, allocations, kernelTime);
+        }
+        else
+#endif
+        {
+            emitKernelDataJson(kernelFile, records, allocations, kernelTime);
+        }
     }
     inline static uint32_t getBufferSize()
     {

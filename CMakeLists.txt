@@ -4,10 +4,12 @@ project(cuda)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-find_package(CUDA)
+find_package(CUDA REQUIRED)
 
-find_package(LLVM CONFIG)
+find_package(LLVM CONFIG REQUIRED)
 add_definitions(${LLVM_DEFINITIONS})
+
+find_package(Protobuf REQUIRED)
 
 set(CMAKE_CXX_COMPILER "${LLVM_TOOLS_BINARY_DIR}/clang++")
 set(CUDA_HOST_COMPILER "g++")
@@ -23,6 +25,7 @@ add_custom_target(tests COMMAND py.test ../tests)
 add_dependencies(tests instrument)
 
 # CUDA program
-set(SOURCE_FILES main.cpp kernel.cu general.h)
+FILE(GLOB PROTOBUF_SRC runtime/protobuf/generated/*.pb.cc)
+set(SOURCE_FILES main.cpp kernel.cu general.h ${PROTOBUF_SRC})
 cuda_add_executable(cuda ${SOURCE_FILES} OPTIONS "-arch sm_30 -std=c++11")
-target_link_libraries(cuda runtime)
+target_link_libraries(cuda runtime ${PROTOBUF_LIBRARIES})

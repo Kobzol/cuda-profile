@@ -11,6 +11,11 @@
 #include "AllocRecord.h"
 #include "AddressSpace.h"
 
+#ifdef USE_PROTOBUF
+    #include "protobuf/generated/memory-access.pb.h"
+    #include "protobuf/generated/kernel-invocation.pb.h"
+#endif
+
 namespace cupr
 {
     class Formatter
@@ -74,7 +79,7 @@ namespace cupr
             return picojson::value(jsonified);
         }
 
-        void outputKernelRun(std::ostream& os,
+        void outputKernelRunJson(std::ostream& os,
                              const std::vector<AccessRecord>& accesses,
                              const std::vector<AllocRecord>& allocations,
                              float kernelTime,
@@ -88,6 +93,52 @@ namespace cupr
 
             os << value.serialize(prettify);
         }
+#ifdef USE_PROTOBUF
+        void outputKernelRunProtobuf(std::ostream& os,
+                                     const std::vector<AccessRecord>& accesses,
+                                     const std::vector<AllocRecord>& allocations,
+                                     float kernelTime)
+        {
+            KernelInvocation kernelInvocation;
+            for (auto& access: accesses)
+            {
+                auto buffer = kernelInvocation.add_accesses();
+                buffer->set_address(this->hexPointer(access.address));
+                buffer->set_size(static_cast<google::protobuf::int32>(access.size));
+                buffer->set_warpid(access.warpId);
+                buffer->set_debugid(access.debugIndex);
+                buffer->set_accesstype(access.accessType == AccessType::Read ? proto::AccessType::Read : proto::AccessType::Write);
+                buffer->set_space(static_cast<google::protobuf::int32>(access.addressSpace));
+                buffer->set_typeindex(static_cast<google::protobuf::int32>(access.type));
+                buffer->set_timestamp(access.timestamp);
+                buffer->mutable_threadidx()->set_x(access.threadIdx.x);
+                buffer->mutable_threadidx()->set_y(access.threadIdx.y);
+                buffer->mutable_threadidx()->set_z(access.threadIdx.z);
+                buffer->mutable_blockidx()->set_x(access.blockIdx.x);
+                buffer->mutable_blockidx()->set_y(access.blockIdx.y);
+                buffer->mutable_blockidx()->set_z(access.blockIdx.z);
+            }
+
+            for (auto& allocation: allocations)
+            {
+                auto buffer = kernelInvocation.add_allocations();
+                buffer->set_address(this->hexPointer(allocation.address));
+                buffer->set_size(static_cast<google::protobuf::int32>(allocation.size));
+                buffer->set_elementsize(static_cast<google::protobuf::int32>(allocation.elementSize));
+                buffer->set_space(static_cast<google::protobuf::int32>(allocation.addressSpace));
+                buffer->set_active(allocation.active);
+
+                if (allocation.type == nullptr)
+                {
+                    buffer->set_typeindex(static_cast<google::protobuf::int32>(allocation.typeIndex));
+                }
+                else buffer->set_typestring(allocation.type);
+            }
+
+            kernelInvocation.set_kerneltime(kernelTime);
+            kernelInvocation.SerializeToOstream(&os);
+        }
+#endif
 
     private:
         std::string hexPointer(const void* ptr)

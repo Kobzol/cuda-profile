@@ -3,14 +3,15 @@
 
 __global__ void kernel(int *p)
 {
-    *p = 5;
-    *p = 5;
-    *p = 5;
+    for (int i = 0; i < 10; i++)
+    {
+        p[i] = p[i + 1];
+    }
 }
 
 void cudaTest()
 {
-    const int COUNT = 1;
+    const int COUNT = 64;
 
     int* dPtr;
     int data[COUNT] = { 0 };
@@ -18,7 +19,7 @@ void cudaTest()
     cudaMalloc((void**) &dPtr, sizeof(data));
     cudaMemcpy(dPtr, data, sizeof(data), cudaMemcpyHostToDevice);
 
-    kernel<<<1, COUNT>>>(dPtr);
+    kernel<<<32, COUNT>>>(dPtr);
 
     int ptr[COUNT];
     cudaMemcpy(ptr, dPtr, sizeof(data), cudaMemcpyDeviceToHost);
