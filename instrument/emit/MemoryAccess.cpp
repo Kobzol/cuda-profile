@@ -36,8 +36,8 @@ Value* MemoryAccess::getAddressSpace(uint32_t addressSpace)
 {
     switch (static_cast<LLVMAddressSpace>(addressSpace))
     {
-        case LLVMAddressSpace::Shared: return this->context.getValues().int32(static_cast<uint32_t>(AddressSpace::Shared));
-        case LLVMAddressSpace::Constant: return this->context.getValues().int32(static_cast<uint32_t>(AddressSpace::Constant));
-        default: return this->context.getValues().int32(static_cast<uint32_t>(AddressSpace::Global));
+        case LLVMAddressSpace::Shared: return this->context.getValues().int32(static_cast<uint32_t>(cupr::AddressSpace::Shared));
+        case LLVMAddressSpace::Constant: return this->context.getValues().int32(static_cast<uint32_t>(cupr::AddressSpace::Constant));
+        default: return this->context.getValues().int32(static_cast<uint32_t>(cupr::AddressSpace::Global));
     }
 }

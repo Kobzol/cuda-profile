@@ -6,12 +6,12 @@
 
 using namespace llvm;
 
-static const std::string KERNEL_CONTEXT_TYPE = "KernelContext";
+static const std::string KERNEL_CONTEXT_TYPE = "cupr::KernelContext";
 
 
 std::string RuntimeEmitter::runtimePrefix(const std::string& name)
 {
-    return PREFIX_STR + name;
+    return CU_PREFIX_STR + name;
 }
 
 

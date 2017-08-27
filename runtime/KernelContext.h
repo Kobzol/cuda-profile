@@ -7,11 +7,14 @@
 #include "CudaTimer.h"
 #include "AllocRecord.h"
 
-struct KernelContext
+namespace cupr
 {
-public:
-    const char* kernelName;
-    AccessRecord* deviceAccessRecords;
-    AllocRecord* deviceSharedBuffers;
-    CudaTimer* timer;
-};
+    struct KernelContext
+    {
+    public:
+        const char* kernelName;
+        AccessRecord* deviceAccessRecords;
+        AllocRecord* deviceSharedBuffers;
+        CudaTimer* timer;
+    };
+}

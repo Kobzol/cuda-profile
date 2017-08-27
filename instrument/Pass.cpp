@@ -23,7 +23,7 @@ char CudaPass::ID = 0;
 
 bool isInstrumentationFunction(Function& fn)
 {
-    return fn.getName().find(PREFIX_STR) == 0;
+    return fn.getName().find(CU_PREFIX_STR) == 0;
 }
 
 CudaPass::CudaPass(): ModulePass(CudaPass::ID)

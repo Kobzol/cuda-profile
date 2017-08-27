@@ -2,53 +2,61 @@
 
 #include "cudautil.h"
 
-
-class CudaTimer
+namespace cupr
 {
-public:
-    explicit CudaTimer(bool automatic = false) : automatic(automatic)
+    class CudaTimer
     {
-        CHECK_CUDA_CALL(cudaEventCreate(&this->startEvent));
-        CHECK_CUDA_CALL(cudaEventCreate(&this->stopEvent));
+    public:
+        explicit CudaTimer(bool automatic = false) : automatic(automatic)
+        {
+            CHECK_CUDA_CALL(cudaEventCreate(&this->startEvent));
+            CHECK_CUDA_CALL(cudaEventCreate(&this->stopEvent));
 
-        if (automatic)
-        {
-            this->start();
-        }
-    }
-    ~CudaTimer()
-    {
-        if (this->automatic)
-        {
-            this->stop_wait();
+            if (automatic)
+            {
+                this->start();
+            }
         }
 
-        CHECK_CUDA_CALL(cudaEventDestroy(this->startEvent));
-        CHECK_CUDA_CALL(cudaEventDestroy(this->stopEvent));
-    }
+        ~CudaTimer()
+        {
+            if (this->automatic)
+            {
+                this->stop_wait();
+            }
 
-    CudaTimer(const CudaTimer& other) = delete;
-    CudaTimer& operator=(const CudaTimer& other) = delete;
-    CudaTimer(CudaTimer&& other) = delete;
-    CudaTimer& operator=(const CudaTimer&& other) = delete;
+            CHECK_CUDA_CALL(cudaEventDestroy(this->startEvent));
+            CHECK_CUDA_CALL(cudaEventDestroy(this->stopEvent));
+        }
 
-    void start() const
-    {
-        CHECK_CUDA_CALL(cudaEventRecord(this->startEvent));
-    }
-    void stop_wait() const
-    {
-        CHECK_CUDA_CALL(cudaEventRecord(this->stopEvent));
-        CHECK_CUDA_CALL(cudaEventSynchronize(this->stopEvent));
-    }
-    float get_time() const
-    {
-        float time;
-        CHECK_CUDA_CALL(cudaEventElapsedTime(&time, this->startEvent, this->stopEvent));
-        return time;
-    }
+        CudaTimer(const CudaTimer& other) = delete;
 
-private:
-    cudaEvent_t startEvent, stopEvent;
-    bool automatic;
-};
+        CudaTimer& operator=(const CudaTimer& other) = delete;
+
+        CudaTimer(CudaTimer&& other) = delete;
+
+        CudaTimer& operator=(const CudaTimer&& other) = delete;
+
+        void start() const
+        {
+            CHECK_CUDA_CALL(cudaEventRecord(this->startEvent));
+        }
+
+        void stop_wait() const
+        {
+            CHECK_CUDA_CALL(cudaEventRecord(this->stopEvent));
+            CHECK_CUDA_CALL(cudaEventSynchronize(this->stopEvent));
+        }
+
+        float get_time() const
+        {
+            float time;
+            CHECK_CUDA_CALL(cudaEventElapsedTime(&time, this->startEvent, this->stopEvent));
+            return time;
+        }
+
+    private:
+        cudaEvent_t startEvent, stopEvent;
+        bool automatic;
+    };
+}
