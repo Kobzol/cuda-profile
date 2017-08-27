@@ -32,3 +32,22 @@ def test_kernel_time(profile):
     }
     """)
     assert data[kernel_file("kernel")]["kernelTime"] > 0
+
+
+def test_multiple_invocations(profile):
+    data = profile("""
+    #include <cstdio>
+    __global__ void kernel(int* p) {
+        *p = 5;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }
+    """)
+    for i in xrange(2):
+        assert kernel_file("kernel", i) in data
