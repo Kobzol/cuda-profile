@@ -15,10 +15,10 @@ def test_buffer_size_parameter(profile):
     }
     """
 
-    data = profile(code, capture_io=True, buffer_size=2)
+    data = profile(code, with_metadata=True, buffer_size=2)
     assert data["stdout"].strip() == "DEVICE PROFILING OVERFLOW"
 
-    data = profile(code, capture_io=True, buffer_size=20)
+    data = profile(code, with_metadata=True, buffer_size=20)
     assert data["stdout"].strip() == ""
 
 

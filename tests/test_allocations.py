@@ -15,7 +15,7 @@ def test_global_allocation(profile):
         cudaFree(dptr);
         return 0;
     }
-    """, capture_io=True)
+    """, with_metadata=True)
 
     allocations = data["mappings"][kernel_file("kernel")]["memoryMap"]
 
@@ -39,7 +39,7 @@ def test_shared_allocation(profile):
         kernel<<<1, 1>>>();
         return 0;
     }
-    """, capture_io=True)
+    """, with_metadata=True)
 
     allocations = data["mappings"][kernel_file("kernel")]["memoryMap"]
 

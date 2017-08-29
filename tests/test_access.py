@@ -15,5 +15,5 @@ def test_access_address_match(profile):
         cudaFree(dptr);
         return 0;
     }
-    """, capture_io=True)
+    """, with_metadata=True)
     assert data["stdout"].strip() == data["mappings"][kernel_file("kernel")]["accesses"][0]["event"]["address"]

@@ -74,7 +74,8 @@ def run(dir, exe, env, protobuf):
 
 def compile_and_run(code,
                     add_include=True,
-                    capture_io=False,
+                    with_metadata=False,
+                    with_main=False,
                     buffer_size=None,
                     protobuf=False):
     tmpdir = create_test_dir()
@@ -89,7 +90,11 @@ def compile_and_run(code,
             prelude += "#define CUPR_USE_PROTOBUF\n"
         prelude += "#include <Runtime.h>\n"
 
-    code += prelude
+    if with_main:
+        prelude += "int main() { return 0; }\n"
+
+    code = prelude + code
+    line_offset = len(prelude.splitlines())
 
     try:
         (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code, protobuf)
@@ -103,29 +108,24 @@ def compile_and_run(code,
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
-    if capture_io:
+    if with_metadata:
         return {
             "mappings": mappings,
             "stdout": out,
-            "stderr": err
+            "stderr": err,
+            "line_offset": line_offset
         }
     else:
         return mappings
 
 
-def offset_line(line):
-    return line + 1  # TODO: fix for protobuf
+def offset_line(line, data):
+    return line + data["line_offset"]
 
 
 @pytest.fixture(scope="module")
 def profile():
     return compile_and_run
-
-
-def with_main(code=""):
-    return code + """
-    int main() { return 0; }
-    """
 
 
 def metadata_file(kernel="kernel"):
