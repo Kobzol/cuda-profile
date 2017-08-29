@@ -34,22 +34,48 @@ namespace cupr {
     static __device__ cupr::AllocRecord* deviceSharedBuffers;
     static __device__ uint32_t deviceSharedBufferIndex;
 
-    inline static void emitKernelDataJson(const std::string& fileName,
+    /// parameters
+    static uint32_t getBufferSize()
+    {
+        char* envBufferSize = getenv("CUPROFILE_BUFFER_SIZE");
+        if (envBufferSize == nullptr) return BUFFER_SIZE_DEFAULT;
+        return static_cast<uint32_t>(std::stoi(envBufferSize));
+    }
+    static bool isParameterEnabled(const char* name)
+    {
+        char* parameter = getenv(name);
+        return parameter != nullptr && strlen(parameter) > 0 && parameter[0] == '1';
+    }
+    static bool isPrettifyEnabled()
+    {
+        return isParameterEnabled("CUPROFILE_PRETTIFY");
+    }
+    static bool isProtobufEnabled()
+    {
+#ifdef CUPR_USE_PROTOBUF
+        return true;
+#else
+        return false;
+#endif
+    }
+    static bool isMappedMemoryEnabled()
+    {
+        return isParameterEnabled("CUPROFILE_MAPPED_MEMORY");
+    }
+
+    /// output
+    static void emitKernelDataJson(const std::string& fileName,
                                           const std::vector<AccessRecord>& records,
                                           const std::vector<AllocRecord>& allocations,
                                           float kernelTime)
     {
         std::fstream kernelOutput(fileName + ".json", std::fstream::out);
 
-        char* prettifyEnv = getenv("CUPROFILE_PRETTIFY");
-        bool prettify = prettifyEnv != nullptr && strlen(prettifyEnv) > 0 && prettifyEnv[0] == '1';
-
         Formatter formatter;
-        formatter.outputKernelRunJson(kernelOutput, records, allocations, kernelTime, prettify);
+        formatter.outputKernelRunJson(kernelOutput, records, allocations, kernelTime, isPrettifyEnabled());
         kernelOutput.flush();
     }
-#ifdef USE_PROTOBUF
-    inline static void emitKernelDataProtobuf(const std::string& fileName,
+    static void emitKernelDataProtobuf(const std::string& fileName,
                                               const std::vector<AccessRecord>& records,
                                               const std::vector<AllocRecord>& allocations,
                                               float kernelTime)
@@ -60,8 +86,7 @@ namespace cupr {
         formatter.outputKernelRunProtobuf(kernelOutput, records, allocations, kernelTime);
         kernelOutput.flush();
     }
-#endif
-    inline static void emitKernelData(const std::string& kernelName,
+    static void emitKernelData(const std::string& kernelName,
                                       const std::vector<AccessRecord>& records,
                                       const std::vector<AllocRecord>& allocations,
                                       float kernelTime)
@@ -69,25 +94,11 @@ namespace cupr {
         std::cerr << "Emmitted " << records.size() << " accesses " << "in kernel " << kernelName << std::endl;
 
         std::string kernelFile = std::string(kernelName) + "-" + std::to_string(kernelCounter++);
-#ifdef USE_PROTOBUF
-        char* outputProtobuf = getenv("CUPROFILE_PROTOBUF");
-        bool protobuf = outputProtobuf != nullptr && strlen(outputProtobuf) > 0 && outputProtobuf[0] == '1';
-
-        if (protobuf)
+        if (isProtobufEnabled())
         {
             emitKernelDataProtobuf(kernelFile, records, allocations, kernelTime);
         }
-        else
-#endif
-        {
-            emitKernelDataJson(kernelFile, records, allocations, kernelTime);
-        }
-    }
-    inline static uint32_t getBufferSize()
-    {
-        char* envBufferSize = getenv("CUPROFILE_BUFFER_SIZE");
-        if (envBufferSize == nullptr) return BUFFER_SIZE_DEFAULT;
-        return static_cast<uint32_t>(std::stoi(envBufferSize));
+        else emitKernelDataJson(kernelFile, records, allocations, kernelTime);
     }
 }
 extern "C" {
@@ -104,8 +115,11 @@ extern "C" {
     {
         uint32_t bufferSize = cupr::getBufferSize();
 
-        cudaMalloc((void**) &context->deviceAccessRecords, sizeof(cupr::AccessRecord) * bufferSize);
-        cudaMalloc((void**) &context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * bufferSize);
+        typedef cudaError (*cudaAllocateType)(void**, size_t);
+
+        cudaAllocateType allocFn = cupr::isMappedMemoryEnabled() ? (cudaAllocateType) cudaMallocHost : (cudaAllocateType) cudaMalloc;
+        allocFn((void**) &context->deviceAccessRecords, sizeof(cupr::AccessRecord) * bufferSize);
+        allocFn((void**) &context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * bufferSize);
 
         const uint32_t zero = 0;
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceAccessRecords, &context->deviceAccessRecords, sizeof(context->deviceAccessRecords)));
@@ -130,19 +144,25 @@ extern "C" {
         {
             CHECK_CUDA_CALL(cudaMemcpy(records.data(), context->deviceAccessRecords, sizeof(cupr::AccessRecord) * accessCount, cudaMemcpyDeviceToHost));
         }
-        CHECK_CUDA_CALL(cudaFree(context->deviceAccessRecords));
 
         std::vector<cupr::AllocRecord> sharedBuffers(sharedBuffersCount);
         if (sharedBuffersCount > 0)
         {
             CHECK_CUDA_CALL(cudaMemcpy(sharedBuffers.data(), context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * sharedBuffersCount, cudaMemcpyDeviceToHost));
         }
-        CHECK_CUDA_CALL(cudaFree(context->deviceSharedBuffers));
+
+        typedef cudaError (*cudaFreeType)(void*);
+
+        cudaFreeType freeFn = cupr::isMappedMemoryEnabled() ? (cudaFreeType) cudaFreeHost : (cudaFreeType) cudaFree;
+        CHECK_CUDA_CALL(freeFn(context->deviceAccessRecords));
+        CHECK_CUDA_CALL(freeFn(context->deviceSharedBuffers));
 
         for (auto& alloc: cupr::allocations)
         {
             sharedBuffers.push_back(alloc);
         }
+
+        std::cerr << context->timer->get_time() << std::endl;
 
         emitKernelData(context->kernelName, records, sharedBuffers, context->timer->get_time());
     }

@@ -15,7 +15,7 @@ def create_test_dir():
     return tempfile.mkdtemp("cu")
 
 
-def compile(root, lib, dir, code):
+def compile(root, lib, dir, code, protobuf):
     inputname = INPUT_FILENAME
     outputname = "cuda"
 
@@ -32,10 +32,12 @@ def compile(root, lib, dir, code):
             "-I{}".format(os.path.join(root, "runtime")),
             "-Xclang", "-load",
             "-Xclang", os.path.join(root, lib),
-            "-lcudart", "-ldl", "-lrt", "-lprotobuf", "-pthread",
+            "-lcudart", "-ldl", "-lrt", "-pthread",
             "-xcuda", inputname]
 
-    args += glob.glob(os.path.join(root, "runtime/protobuf/generated/*.pb.cc"))
+    if protobuf:
+        args += ["-lprotobuf"]
+        args += glob.glob(os.path.join(root, "runtime/protobuf/generated/*.pb.cc"))
     args += ["-o", outputname]
 
     process = subprocess.Popen(args,
@@ -80,14 +82,17 @@ def compile_and_run(code,
     env = {}
     if buffer_size is not None:
         env["CUPROFILE_BUFFER_SIZE"] = str(buffer_size)
-    if protobuf:
-        env["CUPROFILE_PROTOBUF"] = "1"
 
+    prelude = ""
     if add_include:
-        code = "#include <Runtime.h>\n" + code
+        if protobuf:
+            prelude += "#define CUPR_USE_PROTOBUF\n"
+        prelude += "#include <Runtime.h>\n"
+
+    code += prelude
 
     try:
-        (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code)
+        (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code, protobuf)
 
         if retcode != 0:
             raise Exception(str(retcode) + "\n" + out + "\n" + err)
@@ -109,7 +114,7 @@ def compile_and_run(code,
 
 
 def offset_line(line):
-    return line + 1
+    return line + 1  # TODO: fix for protobuf
 
 
 @pytest.fixture(scope="module")

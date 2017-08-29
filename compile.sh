@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 CUDA_DIR=/usr/local/cuda
-SRC_FILES="../main.cpp ../kernel.cu ../runtime/protobuf/generated/*.pb.cc"
+SRC_FILES="../main.cpp ../kernel.cu" # ../runtime/protobuf/generated/*.pb.cc"
 INSTRUMENTED_KERNEL_BC="kernel-instrumented.bc"
 
 pushd cmake-build-debug

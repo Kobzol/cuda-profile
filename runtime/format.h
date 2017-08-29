@@ -93,12 +93,13 @@ namespace cupr
 
             os << value.serialize(prettify);
         }
-#ifdef USE_PROTOBUF
+
         void outputKernelRunProtobuf(std::ostream& os,
                                      const std::vector<AccessRecord>& accesses,
                                      const std::vector<AllocRecord>& allocations,
                                      float kernelTime)
         {
+#ifdef USE_PROTOBUF
             KernelInvocation kernelInvocation;
             for (auto& access: accesses)
             {
@@ -137,8 +138,8 @@ namespace cupr
 
             kernelInvocation.set_kerneltime(kernelTime);
             kernelInvocation.SerializeToOstream(&os);
-        }
 #endif
+        }
 
     private:
         std::string hexPointer(const void* ptr)

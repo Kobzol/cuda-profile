@@ -15,8 +15,6 @@ namespace cupr
     }
 }
 
-//#define USE_PROTOBUF
-
 #define CHECK_CUDA_CALL(ans) { cupr::checkCudaCall((ans), __FILE__, __LINE__); }
 #define __universal__ __device__ __host__
 
