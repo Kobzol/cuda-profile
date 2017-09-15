@@ -1,0 +1,41 @@
+{
+  "name": "cuda-vis",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@types/jest": "^20.0.7",
+    "@types/node": "^8.0.22",
+    "@types/react": "^16.0.2",
+    "@types/react-dom": "^15.5.3",
+    "history": "^4.7.2",
+    "protobufjs": "^6.8.0",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "react-fabricjs": "^0.1.6",
+    "react-redux": "^5.0.6",
+    "react-router-dom": "^4.2.2",
+    "react-router-redux": "^5.0.0-alpha.6",
+    "react-scripts-ts": "2.6.0",
+    "redux": "^3.7.2",
+    "redux-observable": "^0.16.0",
+    "rxjs": "^5.4.3",
+    "typescript-fsa": "^2.5.0",
+    "typescript-fsa-reducers": "^0.4.4",
+    "typescript-fsa-redux-observable": "^0.16.0"
+  },
+  "scripts": {
+    "start": "react-scripts-ts start",
+    "build": "react-scripts-ts build",
+    "test": "react-scripts-ts test --env=jsdom",
+    "eject": "react-scripts-ts eject"
+  },
+  "devDependencies": {
+    "@types/history": "^4.6.0",
+    "@types/react-redux": "^5.0.8",
+    "@types/react-router": "^4.0.15",
+    "@types/react-router-dom": "^4.0.7",
+    "@types/react-router-redux": "^5.0.8",
+    "@types/redux-logger": "^3.0.3",
+    "redux-logger": "^3.0.6"
+  }
+}
