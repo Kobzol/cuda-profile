@@ -14,6 +14,6 @@ export class InvalidFileContent extends Error
     {
         super();
 
-        Object.setPrototypeOf(this, InvalidFileFormat.prototype);
+        Object.setPrototypeOf(this, InvalidFileContent.prototype);
     }
 }

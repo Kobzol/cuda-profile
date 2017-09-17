@@ -1,31 +1,33 @@
 import {Observable} from "rxjs/Observable";
-import {readFile, readFileText, readFileBinary} from "../util/fs";
+import {readFileText, readFileBinary} from "../util/fs";
 import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/do';
 import {InvalidFileFormat, InvalidFileContent} from "./errors";
 import {FileLoadData, FileType} from "./trace-file";
 import {Trace} from "../trace/trace";
 import {Metadata} from "../trace/metadata";
-import {KernelInvocation} from "../proto-bundle";
+import {createWorkerJob} from "../util/worker";
 
 
 /**
- * Loads file and parses its content as JSON.
+ * Loads file and parses its content as JSON using a web worker.
  * @param {File} file
  * @returns {Observable<Object>}
  */
 function parseFileJson(file: File): Observable<Trace | Metadata>
 {
-    return readFileText(file).map(data => JSON.parse(data));
+    return readFileText(file)
+        .flatMap(data => createWorkerJob("./json.worker.js", data, true));
 }
 /**
- * Loads file and parses its content as Protobuf.
+ * Loads file and parses its content as Protobuf using a web worker.
  * @param {File} file
  * @returns {Observable<Object>}
  */
 function parseFileProtobuf(file: File): Observable<Trace | Metadata>
 {
-    return readFileBinary(file).map(data => KernelInvocation.decode(new Uint8Array(data)).toJSON() as any);
+    return readFileBinary(file)
+        .flatMap(data => createWorkerJob("./protobuf.worker.js", data, true));
 }
 /**
  * Loads file as JSON or Protobuf, according to the extension (.json or .proto).
@@ -40,7 +42,10 @@ function parseFile(file: File): Observable<Trace | Metadata>
     }
     else if (file.name.match(/\.protobuf$/))
     {
-        return parseFileProtobuf(file);
+        return parseFileProtobuf(file).map(content => ({
+            ...content,
+            type: "trace"
+        }));
     }
     else return Observable.throw(new InvalidFileFormat());
 }
@@ -103,6 +108,10 @@ function getFileType(file: File): FileType
 export function parseAndValidateFile(file: File): Observable<FileLoadData>
 {
     return parseFile(file)
+        .catch(error => {
+            if (!(error instanceof InvalidFileFormat)) return Observable.throw(new InvalidFileContent());
+            else return Observable.throw(error);
+        })
         .do(content => {
             if (!validateContent(file, content))
             {
