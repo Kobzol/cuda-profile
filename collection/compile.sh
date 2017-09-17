@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+LLVM_DIR=/home/kobzol/libraries/llvm-4.0.1-build
+CLANG=clang++ # ${LLVM_DIR}/bin/clang++
 CUDA_DIR=/usr/local/cuda
 SRC_FILES="../main.cpp ../kernel.cu" # ../runtime/protobuf/generated/*.pb.cc"
 INSTRUMENTED_KERNEL_BC="kernel-instrumented.bc"
@@ -11,10 +13,10 @@ pushd cmake-build-debug
     # build pass
     make
 
-    clang++ -g -O0 -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
+    ${CLANG} -g -O0 -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
 
     # run pass and compile
-    clang++ -g -O0 -std=c++14 --cuda-gpu-arch=sm_30 \
+    ${CLANG} -g -O0 -std=c++14 --cuda-gpu-arch=sm_30 \
             -I/usr/local/cuda/include -L/usr/local/cuda/lib64 \
             -Xclang -load -Xclang ./instrument/libinstrument.so \
             -z muldefs -lcudart -ldl -lrt -lprotobuf -pthread -xcuda \

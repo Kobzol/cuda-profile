@@ -1,2 +1,3 @@
+- track more CUDA memory allocations (2D, array, pitched memory)
 - solve link issues (link switch, nvcc hook, module link/clone, #define for includes)
 - write tests

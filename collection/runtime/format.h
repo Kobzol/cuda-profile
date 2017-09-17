@@ -80,12 +80,15 @@ namespace cupr
         }
 
         void outputKernelRunJson(std::ostream& os,
-                             const std::vector<AccessRecord>& accesses,
-                             const std::vector<AllocRecord>& allocations,
-                             float kernelTime,
-                             bool prettify)
+                                 const std::string& kernel,
+                                 const std::vector<AccessRecord>& accesses,
+                                 const std::vector<AllocRecord>& allocations,
+                                 float kernelTime,
+                                 bool prettify)
         {
             auto value = picojson::value(picojson::object {
+                    {"type", picojson::value("trace")},
+                    {"kernel", picojson::value(kernel)},
                     {"memoryMap",  this->jsonify(allocations)},
                     {"accesses",   this->jsonify(accesses)},
                     {"kernelTime", picojson::value(kernelTime)}
@@ -95,6 +98,7 @@ namespace cupr
         }
 
         void outputKernelRunProtobuf(std::ostream& os,
+                                     const std::string& kernel,
                                      const std::vector<AccessRecord>& accesses,
                                      const std::vector<AllocRecord>& allocations,
                                      float kernelTime)
@@ -137,6 +141,7 @@ namespace cupr
             }
 
             kernelInvocation.set_kerneltime(kernelTime);
+            kernelInvocation.set_kernel(kernel);
             kernelInvocation.SerializeToOstream(&os);
 #endif
         }

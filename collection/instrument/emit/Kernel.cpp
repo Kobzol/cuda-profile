@@ -140,8 +140,12 @@ void Kernel::emitKernelMetadata(llvm::Function* function, std::vector<DebugInfo>
         jsonTypes.emplace_back(type);
     }
 
-    std::fstream debugFile(name.substr(0, name.find('(')) + "-metadata.json", std::fstream::out);
-    debugFile << picojson::value(picojson::object {
+    std::string kernelName = name.substr(0, name.find('('));
+
+    std::fstream metadataFile(kernelName + "-metadata.json", std::fstream::out);
+    metadataFile << picojson::value(picojson::object {
+            {"type", picojson::value("metadata")},
+            {"kernel", picojson::value(kernelName)},
             {"locations", picojson::value(jsonRecords)},
             {"typeMap", picojson::value(jsonTypes)}
     }).serialize(true);
