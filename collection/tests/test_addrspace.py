@@ -1,7 +1,8 @@
-from conftest import kernel_file
+from conftest import kernel_file, param_all_formats
 
 
-def test_shared_access(profile):
+@param_all_formats
+def test_shared_access(profile, format):
     data = profile("""
     __global__ void kernel() {
         __shared__ int arr[10];
@@ -11,11 +12,12 @@ def test_shared_access(profile):
         kernel<<<1, 1>>>();
         return 0;
     }
-    """)
-    assert data[kernel_file("kernel")]["accesses"][0]["event"]["space"] == "shared"
+    """, format=format)
+    assert data[kernel_file("kernel", format=format)]["accesses"][0]["space"] == 1
 
 
-def test_constant_access(profile):
+@param_all_formats
+def test_constant_access(profile, format):
     data = profile("""
     __constant__ int arr[10];
     __global__ void kernel() {
@@ -25,11 +27,12 @@ def test_constant_access(profile):
         kernel<<<1, 1>>>();
         return 0;
     }
-    """)
-    assert data[kernel_file("kernel")]["accesses"][0]["event"]["space"] == "constant"
+    """, format=format)
+    assert data[kernel_file("kernel", format=format)]["accesses"][0]["space"] == 2
 
 
-def test_global_access(profile):
+@param_all_formats
+def test_global_access(profile, format):
     data = profile("""
     __global__ void kernel(int* p) {
         *p = 5;
@@ -41,11 +44,12 @@ def test_global_access(profile):
         cudaFree(dptr);
         return 0;
     }
-    """)
-    assert data[kernel_file("kernel")]["accesses"][0]["event"]["space"] == "global"
+    """, format=format)
+    assert data[kernel_file("kernel", format=format)]["accesses"][0]["space"] == 0
 
 
-def test_shared_constant_access(profile):
+@param_all_formats
+def test_shared_constant_access(profile, format):
     data = profile("""
     __constant__ int constArr[10];
     __global__ void kernel() {
@@ -56,7 +60,7 @@ def test_shared_constant_access(profile):
         kernel<<<1, 1>>>();
         return 0;
     }
-    """)
+    """, format=format)
 
-    assert data[kernel_file("kernel")]["accesses"][0]["event"]["space"] == "constant"
-    assert data[kernel_file("kernel")]["accesses"][1]["event"]["space"] == "shared"
+    assert data[kernel_file("kernel", format=format)]["accesses"][0]["space"] == 2
+    assert data[kernel_file("kernel", format=format)]["accesses"][1]["space"] == 1

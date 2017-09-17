@@ -1,7 +1,8 @@
-from conftest import kernel_file
+from conftest import kernel_file, param_all_formats
 
 
-def test_no_include(profile):
+@param_all_formats
+def test_no_include(profile, format):
     data = profile("""
     __global__ void kernel(int* p) {
         *p = 5;
@@ -13,11 +14,12 @@ def test_no_include(profile):
         cudaFree(dptr);
         return 0;
     }
-    """, add_include=False)
+    """, format=format, add_include=False)
     assert len(data) == 0
 
 
-def test_kernel_time(profile):
+@param_all_formats
+def test_kernel_time(profile, format):
     data = profile("""
     #include <cstdio>
     __global__ void kernel(int* p) {
@@ -30,11 +32,12 @@ def test_kernel_time(profile):
         cudaFree(dptr);
         return 0;
     }
-    """)
-    assert data[kernel_file("kernel")]["duration"] > 0
+    """, format=format)
+    assert data[kernel_file("kernel", format=format)]["duration"] > 0
 
 
-def test_multiple_invocations(profile):
+@param_all_formats
+def test_multiple_invocations(profile, format):
     data = profile("""
     #include <cstdio>
     __global__ void kernel(int* p) {
@@ -48,6 +51,6 @@ def test_multiple_invocations(profile):
         cudaFree(dptr);
         return 0;
     }
-    """)
+    """, format=format)
     for i in xrange(2):
-        assert kernel_file("kernel", i) in data
+        assert kernel_file("kernel", i, format) in data

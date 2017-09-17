@@ -1,7 +1,8 @@
-from conftest import kernel_file
+from conftest import kernel_file, param_all_formats
 
 
-def test_access_address_match(profile):
+@param_all_formats
+def test_access_address_match(profile, format):
     data = profile("""
     #include <cstdio>
     __global__ void kernel(int* p) {
@@ -15,11 +16,13 @@ def test_access_address_match(profile):
         cudaFree(dptr);
         return 0;
     }
-    """, with_metadata=True)
-    assert data["stdout"].strip() == data["mappings"][kernel_file("kernel")]["accesses"][0]["event"]["address"]
+    """, format=format, with_metadata=True)
+    assert data["stdout"].strip() == data["mappings"][kernel_file("kernel",
+                                                                  format=format)]["accesses"][0]["address"]
 
 
-def test_access_type_and_name(profile):
+@param_all_formats
+def test_access_type_and_name(profile, format):
     data = profile("""
     __global__ void kernel(int* p) {
         int x = *p;
@@ -31,13 +34,14 @@ def test_access_type_and_name(profile):
         kernel<<<1, 1>>>(dptr);
         cudaFree(dptr);
         return 0;
-    }""")
-    info = data[kernel_file("kernel")]
+    }""", format=format)
+    info = data[kernel_file("kernel", format=format)]
     assert info["type"] == "trace"
     assert info["kernel"] == "kernel"
 
 
-def test_access_time(profile):
+@param_all_formats
+def test_access_time(profile, format):
     data = profile("""
     __global__ void kernel(int* p) {
         int x = *p;
@@ -50,6 +54,6 @@ def test_access_time(profile):
         kernel<<<1, 1>>>(dptr);
         cudaFree(dptr);
         return 0;
-    }""")
-    info = (data[kernel_file("kernel", 0)], data[kernel_file("kernel", 1)])
+    }""", format=format)
+    info = (data[kernel_file("kernel", 0, format)], data[kernel_file("kernel", 1, format)])
     assert info[0]["timestamp"] < info[1]["timestamp"]

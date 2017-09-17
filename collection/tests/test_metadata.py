@@ -69,7 +69,7 @@ def test_access_type_index(profile):
     types = data[metadata_file("kernel")]["typeMap"]
     assert len(types) > 0
 
-    access = data[kernel_file("kernel")]["accesses"][0]["event"]
+    access = data[kernel_file("kernel")]["accesses"][0]
     assert access["typeIndex"] == types.index("i32")
 
 

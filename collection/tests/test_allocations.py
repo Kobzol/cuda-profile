@@ -1,7 +1,8 @@
-from conftest import kernel_file
+from conftest import kernel_file, param_all_formats
 
 
-def test_global_allocation(profile):
+@param_all_formats
+def test_global_allocation(profile, format):
     data = profile("""
     #include <cstdio>
     __global__ void kernel(int* p) {
@@ -15,20 +16,21 @@ def test_global_allocation(profile):
         cudaFree(dptr);
         return 0;
     }
-    """, with_metadata=True)
+    """, format=format, with_metadata=True)
 
-    allocations = data["mappings"][kernel_file("kernel")]["memoryMap"]
+    allocations = data["mappings"][kernel_file("kernel", format=format)]["allocations"]
 
     assert len(allocations) == 1
     assert allocations[0]["active"]
     assert allocations[0]["elementSize"] == 4
     assert allocations[0]["size"] == 40
-    assert allocations[0]["type"] == "i32"
-    assert allocations[0]["space"] == "global"
+    assert allocations[0]["typeString"] == "i32"
+    assert allocations[0]["space"] == 0
     assert allocations[0]["address"] == data["stdout"].strip()
 
 
-def test_shared_allocation(profile):
+@param_all_formats
+def test_shared_allocation(profile, format):
     data = profile("""
     #include <cstdio>
     __global__ void kernel() {
@@ -39,14 +41,14 @@ def test_shared_allocation(profile):
         kernel<<<1, 1>>>();
         return 0;
     }
-    """, with_metadata=True)
+    """, format=format, with_metadata=True)
 
-    allocations = data["mappings"][kernel_file("kernel")]["memoryMap"]
+    allocations = data["mappings"][kernel_file("kernel", format=format)]["allocations"]
 
     assert len(allocations) == 1
     assert allocations[0]["active"]
     assert allocations[0]["elementSize"] == 4
     assert allocations[0]["size"] == 40
     assert "typeIndex" in allocations[0]
-    assert allocations[0]["space"] == "shared"
+    assert allocations[0]["space"] == 1
     assert allocations[0]["address"] == data["stdout"].strip()

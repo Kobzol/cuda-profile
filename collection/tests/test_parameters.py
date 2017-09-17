@@ -34,6 +34,6 @@ def test_output_protobuf(profile):
         cudaFree(dptr);
         return 0;
     }
-    """, protobuf=True)
+    """, format="protobuf")
 
     assert "kernel-0.protobuf" in data

@@ -9,4 +9,5 @@ message KernelInvocation {
     required double duration = 3;
     required string kernel = 4;
     required int64 timestamp = 5;
+    required string type = 6;
 }

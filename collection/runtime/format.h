@@ -36,20 +36,18 @@ namespace cupr
                     })},
                     {"warpId",    picojson::value((double) record.warpId)},
                     {"debugId",   picojson::value((double) record.debugIndex)},
-                    {"event",     picojson::value(picojson::object {
-                            {"address",   picojson::value(this->hexPointer(record.address))},
-                            {"kind",      picojson::value((record.accessType == AccessType::Read ? "read" : "write"))},
-                            {"size",      picojson::value((double) record.size)},
-                            {"space",     picojson::value(this->getAddressSpace(record.addressSpace))},
-                            {"typeIndex", picojson::value((double) record.type)},
-                            {"timestamp", picojson::value((double) record.timestamp)}
-                    })}
+                    {"address",   picojson::value(this->hexPointer(record.address))},
+                    {"kind",      picojson::value((double) (record.accessType == AccessType::Read ? 0 : 1))},
+                    {"size",      picojson::value((double) record.size)},
+                    {"space",     picojson::value((double) record.addressSpace)},
+                    {"typeIndex", picojson::value((double) record.type)},
+                    {"timestamp", picojson::value((double) record.timestamp)}
             });
         }
 
         picojson::value jsonify(const AllocRecord& record)
         {
-            std::string typeKey = "type";
+            std::string typeKey = "typeString";
             picojson::value typeValue;
             if (record.type == nullptr)
             {
@@ -61,7 +59,7 @@ namespace cupr
                     {"address",     picojson::value(this->hexPointer(record.address))},
                     {"size",        picojson::value((double) record.size)},
                     {"elementSize", picojson::value((double) record.elementSize)},
-                    {"space",       picojson::value(this->getAddressSpace(record.addressSpace))},
+                    {"space",       picojson::value((double) record.addressSpace)},
                     {typeKey,       typeValue},
                     {"active",      picojson::value(record.active)}
             });
@@ -90,7 +88,7 @@ namespace cupr
             auto value = picojson::value(picojson::object {
                     {"type", picojson::value("trace")},
                     {"kernel", picojson::value(kernel)},
-                    {"memoryMap",  this->jsonify(allocations)},
+                    {"allocations",  this->jsonify(allocations)},
                     {"accesses",   this->jsonify(accesses)},
                     {"duration", picojson::value(duration)},
                     {"timestamp", picojson::value((double) timestamp)}
@@ -115,7 +113,7 @@ namespace cupr
                 buffer->set_size(static_cast<google::protobuf::int32>(access.size));
                 buffer->set_warpid(access.warpId);
                 buffer->set_debugid(access.debugIndex);
-                buffer->set_accesstype(access.accessType == AccessType::Read ? proto::AccessType::Read : proto::AccessType::Write);
+                buffer->set_accesstype(static_cast<google::protobuf::int32>(access.accessType));
                 buffer->set_space(static_cast<google::protobuf::int32>(access.addressSpace));
                 buffer->set_typeindex(static_cast<google::protobuf::int32>(access.type));
                 buffer->set_timestamp(access.timestamp);
@@ -146,6 +144,7 @@ namespace cupr
             kernelInvocation.set_duration(duration);
             kernelInvocation.set_kernel(kernel);
             kernelInvocation.set_timestamp(timestamp);
+            kernelInvocation.set_type("trace");
             kernelInvocation.SerializeToOstream(&os);
 #endif
         }
@@ -156,19 +155,6 @@ namespace cupr
             std::ostringstream address;
             address << ptr;
             return address.str();
-        }
-
-        std::string getAddressSpace(AddressSpace space)
-        {
-            switch (space)
-            {
-                case AddressSpace::Shared:
-                    return "shared";
-                case AddressSpace::Constant:
-                    return "constant";
-                default:
-                    return "global";
-            }
         }
     };
 }
