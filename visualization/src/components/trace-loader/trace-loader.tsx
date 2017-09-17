@@ -1,10 +1,10 @@
-import React, {ChangeEvent, DragEvent, PureComponent} from "react";
-import {connect} from "react-redux";
-import {TraceFile} from "../../lib/file-load/trace-file";
-import {AppState} from "../../state/reducers";
-import {loadFile} from "../../lib/file-load/actions";
-import {validTraceFiles} from "../../lib/file-load/reducer";
-import {push} from "react-router-redux";
+import React, {ChangeEvent, DragEvent, PureComponent} from 'react';
+import {connect} from 'react-redux';
+import {push} from 'react-router-redux';
+import {loadFile} from '../../lib/file-load/actions';
+import {validTraceFiles} from '../../lib/file-load/reducer';
+import {TraceFile} from '../../lib/file-load/trace-file';
+import {AppState} from '../../state/reducers';
 
 interface StateProps
 {
@@ -14,8 +14,8 @@ interface StateProps
 
 interface DispatchProps
 {
-    loadFile: (file: File) => any;
-    navigateToKernelView: () => any;
+    loadFile: (file: File) => {};
+    navigateToKernelView: () => {};
 }
 
 class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
@@ -24,7 +24,7 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
     {
         return (
             <div>
-                <input type="file" multiple={true} onChange={this.handleTraceChange} onDrop={this.handleTraceDrop} />
+                <input type='file' multiple={true} onChange={this.handleTraceChange} onDrop={this.handleTraceDrop} />
                 <ul>
                     {this.props.files.map(this.renderFile)}
                 </ul>
@@ -40,10 +40,10 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
     {
         return (
             <li key={file.name}>
-                <span>{file.name}, loading: {file.loading ? "true" : "false"}, error: {file.error}</span>
+                <span>{file.name}, loading: {file.loading ? 'true' : 'false'}, error: {file.error}</span>
             </li>
         );
-    };
+    }
 
     handleTraceChange = (event: ChangeEvent<HTMLInputElement>) =>
     {
@@ -51,12 +51,12 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
         {
             this.props.loadFile(event.target.files[i]);
         }
-    };
+    }
     handleTraceDrop = (event: DragEvent<HTMLInputElement>) =>
     {
         const files = event.dataTransfer.files;
         // add files
-    };
+    }
 }
 
 export const TraceLoader = connect<StateProps, DispatchProps, {}>((state: AppState) => ({

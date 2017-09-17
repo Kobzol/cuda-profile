@@ -1,10 +1,10 @@
-import {applyMiddleware, combineReducers, compose, createStore} from 'redux';
 import createHistory from 'history/createBrowserHistory';
 import {routerMiddleware, routerReducer} from 'react-router-redux';
+import {applyMiddleware, combineReducers, compose, createStore} from 'redux';
 import {createLogger} from 'redux-logger';
+import {createEpicMiddleware} from 'redux-observable';
+import {rootEpic} from './epics';
 import {reducers} from './reducers';
-import {rootEpic} from "./epics";
-import {createEpicMiddleware} from "redux-observable";
 
 export const history = createHistory();
 

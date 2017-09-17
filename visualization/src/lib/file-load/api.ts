@@ -1,12 +1,12 @@
-import {Observable} from "rxjs/Observable";
-import {readFileText, readFileBinary} from "../util/fs";
+import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/do';
-import {InvalidFileFormat, InvalidFileContent} from "./errors";
-import {FileLoadData, FileType} from "./trace-file";
-import {Trace} from "../trace/trace";
-import {Metadata} from "../trace/metadata";
-import {createWorkerJob} from "../util/worker";
+import {Metadata} from '../trace/metadata';
+import {Trace} from '../trace/trace';
+import {readFileBinary, readFileText} from '../util/fs';
+import {createWorkerJob} from '../util/worker';
+import {InvalidFileContent, InvalidFileFormat} from './errors';
+import {FileLoadData, FileType} from './trace-file';
 
 
 /**
@@ -17,7 +17,7 @@ import {createWorkerJob} from "../util/worker";
 function parseFileJson(file: File): Observable<Trace | Metadata>
 {
     return readFileText(file)
-        .flatMap(data => createWorkerJob("./json.worker.js", data, true));
+        .flatMap(data => createWorkerJob('./json.worker.js', data, true));
 }
 /**
  * Loads file and parses its content as Protobuf using a web worker.
@@ -27,7 +27,7 @@ function parseFileJson(file: File): Observable<Trace | Metadata>
 function parseFileProtobuf(file: File): Observable<Trace | Metadata>
 {
     return readFileBinary(file)
-        .flatMap(data => createWorkerJob("./protobuf.worker.js", data, true));
+        .flatMap(data => createWorkerJob('./protobuf.worker.js', data, true));
 }
 /**
  * Loads file as JSON or Protobuf, according to the extension (.json or .proto).
@@ -44,7 +44,7 @@ function parseFile(file: File): Observable<Trace | Metadata>
     {
         return parseFileProtobuf(file).map(content => ({
             ...content,
-            type: "trace"
+            type: 'trace'
         }));
     }
     else return Observable.throw(new InvalidFileFormat());
@@ -58,9 +58,9 @@ function parseFile(file: File): Observable<Trace | Metadata>
 function validateTrace(content: object): boolean
 {
     return (
-        content["type"] === "trace" &&
-        "kernel" in content &&
-        "accesses" in content
+        content['type'] === 'trace' &&
+        'kernel' in content &&
+        'accesses' in content
     );
 }
 /**
@@ -71,8 +71,8 @@ function validateTrace(content: object): boolean
 function validateMetadata(content: object): boolean
 {
     return (
-        content["type"] === "metadata" &&
-        "kernel" in content
+        content['type'] === 'metadata' &&
+        'kernel' in content
     );
 }
 /**

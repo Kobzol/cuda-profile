@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {PureComponent} from "react";
-import {MemoryAllocation} from "./memory-allocation";
-import {MemoryRegion} from "./memory-region";
+import {PureComponent} from 'react';
+import {MemoryAllocation} from './memory-allocation';
+import {MemoryRegion} from './memory-region';
 
 interface Props
 {

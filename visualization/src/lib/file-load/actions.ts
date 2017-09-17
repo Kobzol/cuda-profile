@@ -1,5 +1,5 @@
 import {actionCreatorFactory} from 'typescript-fsa';
-import {FileLoadData} from "./trace-file";
+import {FileLoadData} from './trace-file';
 
 const actionCreator = actionCreatorFactory('file-load');
 

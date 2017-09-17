@@ -1,6 +1,6 @@
 import * as React from 'react';
-import {PureComponent} from "react";
-import {MemoryAllocation} from "./memory-allocation";
+import {PureComponent} from 'react';
+import {MemoryAllocation} from './memory-allocation';
 
 interface Props
 {
@@ -12,8 +12,8 @@ export class MemoryRegion extends PureComponent<Props>
     render()
     {
         return (
-            <svg width={100} height={20} viewBox="0,0,100,20">
-                <rect width={100} height={20} fill="#0000FF" />
+            <svg width={100} height={20} viewBox='0,0,100,20'>
+                <rect width={100} height={20} fill='#0000FF' />
             </svg>
         );
     }

@@ -1,5 +1,5 @@
-import {Metadata} from "../trace/metadata";
-import {Trace} from "../data/trace";
+import {Trace} from '../data/trace';
+import {Metadata} from '../trace/metadata';
 
 export enum FileType
 {

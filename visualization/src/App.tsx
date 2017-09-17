@@ -1,11 +1,11 @@
 import React from 'react';
-import {Route} from "react-router";
-import {TraceLoader} from "./components/trace-loader/trace-loader";
-import {ConnectedRouter} from "react-router-redux";
-import {store, history} from './state/store';
-import {Provider} from "react-redux";
-import {KernelLaunchSelector} from "./components/kernel-launch-selector/kernel-launch-selector";
-import {Link} from "react-router-dom";
+import {Provider} from 'react-redux';
+import {Route} from 'react-router';
+import {Link} from 'react-router-dom';
+import {ConnectedRouter} from 'react-router-redux';
+import {KernelLaunchSelector} from './components/kernel-launch-selector/kernel-launch-selector';
+import {TraceLoader} from './components/trace-loader/trace-loader';
+import {history, store} from './state/store';
 
 export class App extends React.Component
 {
@@ -16,11 +16,11 @@ export class App extends React.Component
                 <ConnectedRouter history={history}>
                     <div>
                         <nav>
-                            <Link to={"/"}>Home</Link>
+                            <Link to={'/'}>Home</Link>
                         </nav>
                         <div>
-                            <Route path="/" exact component={TraceLoader} />
-                            <Route path="/kernel-launches" component={KernelLaunchSelector} />
+                            <Route path='/' exact component={TraceLoader} />
+                            <Route path='/kernel-launches' component={KernelLaunchSelector} />
                         </div>
                     </div>
                 </ConnectedRouter>

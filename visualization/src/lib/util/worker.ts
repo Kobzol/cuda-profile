@@ -1,5 +1,5 @@
-import {Subject} from "rxjs/Subject";
-import {Observable} from "rxjs/Observable";
+import {Observable} from 'rxjs/Observable';
+import {Subject} from 'rxjs/Subject';
 
 const workerCache: {[key: string]: Worker} = {};
 
@@ -12,6 +12,13 @@ function getWorker(file: string, cache: boolean): Worker
     return worker;
 }
 
+/**
+ * Creates a worker job with a single input and output.
+ * @param {string} file File with code for the worker.
+ * @param {Input} data Input data.
+ * @param {boolean} cache If true the worker will be started only once and then server from cache.
+ * @returns {Observable<Output>} Output data.
+ */
 export function createWorkerJob<Input, Output>(file: string, data: Input, cache: boolean = false): Observable<Output>
 {
     const subject = new Subject<Output>();
