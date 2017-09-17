@@ -1,30 +1,31 @@
 import {combineEpics, Epic} from 'redux-observable';
-import {loadTraceFile} from './actions';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/catch';
 import 'typescript-fsa-redux-observable';
-import {parseTraceFileJson} from "./api";
+import {parseAndValidateFile} from "./api";
 import {Action, Success} from "typescript-fsa";
 import {Failure} from "typescript-fsa/lib";
 import {Observable} from "rxjs/Observable";
+import {FileLoadData} from "./trace-file";
+import {loadFile} from "./actions";
 
 
-const loadTraceFileEpic: Epic<Action<Success<File, {}> | Failure<File, {}>>, {}> = action$ =>
+const loadTraceFileEpic: Epic<Action<Success<File, FileLoadData> | Failure<File, Error>>, {}> = action$ =>
     action$
-        .ofAction(loadTraceFile.started)
+        .ofAction(loadFile.started)
         .flatMap(action => {
-            return parseTraceFileJson(action.payload)
-                .map(trace =>
-                    loadTraceFile.done({
+            return parseAndValidateFile(action.payload)
+                .map(loadData =>
+                    loadFile.done({
                         params: action.payload,
-                        result: trace
+                        result: loadData
                     })
                 ).catch(error =>
-                    Observable.of(loadTraceFile.failed({
+                    Observable.of(loadFile.failed({
                         params: action.payload,
-                        error: error.message
+                        error
                     }))
                 );
         });

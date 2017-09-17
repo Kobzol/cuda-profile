@@ -1,9 +1,9 @@
 import React, {ChangeEvent, DragEvent, PureComponent} from "react";
 import {connect} from "react-redux";
-import {TraceFile} from "../../lib/trace/trace-file";
+import {TraceFile} from "../../lib/file-load/trace-file";
 import {AppState} from "../../state/reducers";
-import {loadTraceFile} from "../../lib/trace/actions";
-import {validTraceFiles} from "../../lib/trace/reducer";
+import {loadFile} from "../../lib/file-load/actions";
+import {validTraceFiles} from "../../lib/file-load/reducer";
 import {push} from "react-router-redux";
 
 interface StateProps
@@ -39,7 +39,7 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
     renderFile = (file: TraceFile): JSX.Element =>
     {
         return (
-            <li key={file.id}>
+            <li key={file.name}>
                 <span>{file.name}, loading: {file.loading ? "true" : "false"}, error: {file.error}</span>
             </li>
         );
@@ -63,6 +63,6 @@ export const TraceLoader = connect<StateProps, DispatchProps, {}>((state: AppSta
     files: state.trace.files,
     validTraceFiles: validTraceFiles(state)
 }), ({
-    loadFile: loadTraceFile.started,
+    loadFile: loadFile.started,
     navigateToKernelView: () => push('/kernel-launches')
 }))(TraceLoaderComponent);

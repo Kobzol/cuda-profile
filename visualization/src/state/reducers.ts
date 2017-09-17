@@ -1,8 +1,8 @@
-import {parseReducer, TraceState} from "../lib/trace/reducer";
+import {parseReducer, FileLoaderState} from "../lib/file-load/reducer";
 
 export interface AppState
 {
-    trace: TraceState,
+    trace: FileLoaderState,
     router: any;
 }
 

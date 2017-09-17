@@ -11,7 +11,7 @@
 #include "AllocRecord.h"
 #include "AddressSpace.h"
 
-#ifdef USE_PROTOBUF
+#ifdef CUPR_USE_PROTOBUF
     #include "protobuf/generated/memory-access.pb.h"
     #include "protobuf/generated/kernel-invocation.pb.h"
 #endif
@@ -103,7 +103,7 @@ namespace cupr
                                      const std::vector<AllocRecord>& allocations,
                                      float kernelTime)
         {
-#ifdef USE_PROTOBUF
+#ifdef CUPR_USE_PROTOBUF
             KernelInvocation kernelInvocation;
             for (auto& access: accesses)
             {
