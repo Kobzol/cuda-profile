@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+package proto;
+
+message AllocRecord {
+    required string address = 1;
+    required int32 size = 2;
+    required int32 elementSize = 3;
+    required int32 space = 4;
+    oneof type {
+        int32 typeIndex = 5;
+        string typeString = 6;
+    }
+    required bool active = 7;
+}

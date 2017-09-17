@@ -1,0 +1,27 @@
+syntax = "proto2";
+
+package proto;
+
+message Dim3 {
+    required int32 x = 1;
+    required int32 y = 2;
+    required int32 z = 3;
+}
+
+enum AccessType {
+    Read = 0;
+    Write = 1;
+}
+
+message MemoryAccess {
+    required Dim3 threadIdx = 1;
+    required Dim3 blockIdx = 2;
+    required int32 warpId = 3;
+    required int32 debugId = 4;
+    required string address = 5;
+    required int32 size = 6;
+    required AccessType accessType = 7;
+    required int32 space = 8;
+    required int32 typeIndex = 9;
+    required int64 timestamp = 10;
+}

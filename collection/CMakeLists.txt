@@ -27,6 +27,14 @@ add_subdirectory("runtime")
 add_custom_target(tests COMMAND py.test ../tests)
 add_dependencies(tests instrument)
 
+FILE(GLOB PROTOBUF_PROTO_FILES runtime/protobuf/*.proto)
+execute_process(COMMAND
+                ${Protobuf_PROTOC_EXECUTABLE}
+                --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/runtime/protobuf
+                --cpp_out=${CMAKE_CURRENT_SOURCE_DIR}/runtime/protobuf/generated
+                ${PROTOBUF_PROTO_FILES}
+)
+
 # CUDA program
 FILE(GLOB PROTOBUF_SRC runtime/protobuf/generated/*.pb.cc)
 set(SOURCE_FILES main.cpp kernel.cu general.h ${PROTOBUF_SRC})
