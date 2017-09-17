@@ -68,39 +68,42 @@ namespace cupr {
                                    const std::string& kernel,
                                    const std::vector<AccessRecord>& records,
                                    const std::vector<AllocRecord>& allocations,
-                                   float kernelTime)
+                                   float duration,
+                                   int64_t timestamp)
     {
         std::fstream kernelOutput(fileName + ".json", std::fstream::out);
 
         Formatter formatter;
-        formatter.outputKernelRunJson(kernelOutput, kernel, records, allocations, kernelTime, isPrettifyEnabled());
+        formatter.outputKernelRunJson(kernelOutput, kernel, records, allocations, duration, timestamp,
+                                      isPrettifyEnabled());
         kernelOutput.flush();
     }
     static void emitKernelDataProtobuf(const std::string& fileName,
                                        const std::string& kernel,
                                        const std::vector<AccessRecord>& records,
                                        const std::vector<AllocRecord>& allocations,
-                                       float kernelTime)
+                                       float duration,
+                                       int64_t timestamp)
     {
         std::fstream kernelOutput(fileName + ".protobuf", std::fstream::out);
 
         Formatter formatter;
-        formatter.outputKernelRunProtobuf(kernelOutput, kernel, records, allocations, kernelTime);
+        formatter.outputKernelRunProtobuf(kernelOutput, kernel, records, allocations, duration, timestamp);
         kernelOutput.flush();
     }
     static void emitKernelData(const std::string& kernelName,
                                const std::vector<AccessRecord>& records,
                                const std::vector<AllocRecord>& allocations,
-                               float kernelTime)
+                               float duration)
     {
         std::cerr << "Emmitted " << records.size() << " accesses " << "in kernel " << kernelName << std::endl;
 
         std::string kernelFile = std::string(kernelName) + "-" + std::to_string(kernelCounter++);
         if (isProtobufEnabled())
         {
-            emitKernelDataProtobuf(kernelFile, kernelName, records, allocations, kernelTime);
+            emitKernelDataProtobuf(kernelFile, kernelName, records, allocations, duration, getTimestamp());
         }
-        else emitKernelDataJson(kernelFile, kernelName, records, allocations, kernelTime);
+        else emitKernelDataJson(kernelFile, kernelName, records, allocations, duration, getTimestamp());
     }
 }
 extern "C" {

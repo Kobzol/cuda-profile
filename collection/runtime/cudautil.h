@@ -3,6 +3,8 @@
 #include <cuda_runtime_api.h>
 #include <device_launch_parameters.h>
 #include <cstdio>
+#include <cstdint>
+#include <chrono>
 
 namespace cupr
 {
@@ -12,6 +14,10 @@ namespace cupr
         {
             fprintf(stderr, "CUDA error: %s %s %d\n", cudaGetErrorString(code), file, line);
         }
+    }
+    inline int64_t getTimestamp()
+    {
+        return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
     }
 }
 

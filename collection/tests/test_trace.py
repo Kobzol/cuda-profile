@@ -35,3 +35,21 @@ def test_access_type_and_name(profile):
     info = data[kernel_file("kernel")]
     assert info["type"] == "trace"
     assert info["kernel"] == "kernel"
+
+
+def test_access_time(profile):
+    data = profile("""
+    __global__ void kernel(int* p) {
+        int x = *p;
+        *p = 5;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }""")
+    info = (data[kernel_file("kernel", 0)], data[kernel_file("kernel", 1)])
+    assert info[0]["timestamp"] < info[1]["timestamp"]

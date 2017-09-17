@@ -83,7 +83,8 @@ namespace cupr
                                  const std::string& kernel,
                                  const std::vector<AccessRecord>& accesses,
                                  const std::vector<AllocRecord>& allocations,
-                                 float kernelTime,
+                                 float duration,
+                                 int64_t timestamp,
                                  bool prettify)
         {
             auto value = picojson::value(picojson::object {
@@ -91,7 +92,8 @@ namespace cupr
                     {"kernel", picojson::value(kernel)},
                     {"memoryMap",  this->jsonify(allocations)},
                     {"accesses",   this->jsonify(accesses)},
-                    {"kernelTime", picojson::value(kernelTime)}
+                    {"duration", picojson::value(duration)},
+                    {"timestamp", picojson::value((double) timestamp)}
             });
 
             os << value.serialize(prettify);
@@ -101,7 +103,8 @@ namespace cupr
                                      const std::string& kernel,
                                      const std::vector<AccessRecord>& accesses,
                                      const std::vector<AllocRecord>& allocations,
-                                     float kernelTime)
+                                     float duration,
+                                     int64_t timestamp)
         {
 #ifdef CUPR_USE_PROTOBUF
             KernelInvocation kernelInvocation;
@@ -140,8 +143,9 @@ namespace cupr
                 else buffer->set_typestring(allocation.type);
             }
 
-            kernelInvocation.set_kerneltime(kernelTime);
+            kernelInvocation.set_duration(duration);
             kernelInvocation.set_kernel(kernel);
+            kernelInvocation.set_timestamp(timestamp);
             kernelInvocation.SerializeToOstream(&os);
 #endif
         }

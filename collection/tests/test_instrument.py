@@ -31,7 +31,7 @@ def test_kernel_time(profile):
         return 0;
     }
     """)
-    assert data[kernel_file("kernel")]["kernelTime"] > 0
+    assert data[kernel_file("kernel")]["duration"] > 0
 
 
 def test_multiple_invocations(profile):

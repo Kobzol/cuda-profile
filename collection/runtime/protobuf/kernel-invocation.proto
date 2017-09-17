@@ -6,6 +6,7 @@ import "alloc-record.proto";
 message KernelInvocation {
     repeated proto.MemoryAccess accesses = 1;
     repeated proto.AllocRecord allocations = 2;
-    required double kernelTime = 3;
+    required double duration = 3;
     required string kernel = 4;
+    required int64 timestamp = 5;
 }
