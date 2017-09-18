@@ -2,14 +2,15 @@ import React, {ChangeEvent, DragEvent, PureComponent} from 'react';
 import {connect} from 'react-redux';
 import {push} from 'react-router-redux';
 import {loadFile} from '../../lib/file-load/actions';
-import {validTraceFiles} from '../../lib/file-load/reducer';
-import {TraceFile} from '../../lib/file-load/trace-file';
+import {TraceFile} from '../../lib/file-load/file';
+import {loadingFiles, validTraceFiles} from '../../lib/file-load/reducer';
 import {AppState} from '../../state/reducers';
 
 interface StateProps
 {
     files: TraceFile[];
     validTraceFiles: TraceFile[];
+    loadingFiles: TraceFile[];
 }
 
 interface DispatchProps
@@ -29,9 +30,8 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
                     {this.props.files.map(this.renderFile)}
                 </ul>
                 <button
-                    disabled={this.props.validTraceFiles.length < 1}
-                    onClick={this.props.navigateToKernelView}
-                >Load trace</button>
+                    disabled={!this.canSwitchToKernelSelection()}
+                    onClick={this.props.navigateToKernelView}>Load trace</button>
             </div>
         );
     }
@@ -55,13 +55,22 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
     handleTraceDrop = (event: DragEvent<HTMLInputElement>) =>
     {
         const files = event.dataTransfer.files;
-        // add files
+        for (let i = 0; i < files.length; i++)
+        {
+            this.props.loadFile(files[i]);
+        }
+    }
+
+    canSwitchToKernelSelection = (): boolean =>
+    {
+        return this.props.validTraceFiles.length > 0 && this.props.loadingFiles.length < 1;
     }
 }
 
 export const TraceLoader = connect<StateProps, DispatchProps, {}>((state: AppState) => ({
-    files: state.trace.files,
-    validTraceFiles: validTraceFiles(state)
+    files: state.fileLoader.files,
+    validTraceFiles: validTraceFiles(state),
+    loadingFiles: loadingFiles(state)
 }), ({
     loadFile: loadFile.started,
     navigateToKernelView: () => push('/kernel-launches')

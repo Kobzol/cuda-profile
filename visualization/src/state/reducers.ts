@@ -1,12 +1,15 @@
 import {RouterState} from 'react-router-redux';
-import {parseReducer, FileLoaderState} from '../lib/file-load/reducer';
+import {fileLoaderReducer, FileLoaderState} from '../lib/file-load/reducer';
+import {traceReducer, TraceState} from '../lib/trace/reducer';
 
 export interface AppState
 {
-    trace: FileLoaderState;
+    fileLoader: FileLoaderState;
+    trace: TraceState;
     router: RouterState;
 }
 
 export const reducers = {
-    trace: parseReducer
+    fileLoader: fileLoaderReducer,
+    trace: traceReducer
 };

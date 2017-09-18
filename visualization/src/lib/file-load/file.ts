@@ -1,13 +1,35 @@
 import {Observable} from 'rxjs/Observable';
-import 'rxjs/add/observable/throw';
+import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/do';
+import 'rxjs/add/operator/map';
 import {Metadata} from '../trace/metadata';
 import {Trace} from '../trace/trace';
 import {readFileBinary, readFileText} from '../util/fs';
 import {createWorkerJob} from '../util/worker';
 import {InvalidFileContent, InvalidFileFormat} from './errors';
-import {FileLoadData, FileType} from './trace-file';
 
+export enum FileType
+{
+    Trace = 0,
+    Metadata = 1,
+    Unknown = 2,
+    Invalid = 3
+}
+
+export interface TraceFile
+{
+    name: string;
+    loading: boolean;
+    content: Trace | Metadata | null;
+    type: FileType;
+    error: number;
+}
+
+export interface FileLoadData
+{
+    type: FileType;
+    content: Trace | Metadata;
+}
 
 /**
  * Loads file and parses its content as JSON using a web worker.
@@ -113,6 +135,7 @@ export function parseAndValidateFile(file: File): Observable<FileLoadData>
             else return Observable.throw(error);
         })
         .do(content => {
+            console.log(content);
             if (!validateContent(file, content))
             {
                 throw new InvalidFileContent();

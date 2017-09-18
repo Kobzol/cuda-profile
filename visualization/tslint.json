@@ -74,7 +74,7 @@
     ],
     "no-eval": true,
     "no-internal-module": true,
-    "no-trailing-whitespace": true,
+    "no-trailing-whitespace": false,
     "no-var-keyword": true,
     "one-line": false,
     "quotemark": [

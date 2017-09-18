@@ -1,18 +1,16 @@
-import {combineEpics, Epic} from 'redux-observable';
+import {Action} from 'redux';
+import {combineEpics, ActionsObservable} from 'redux-observable';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
-import {Action, Success} from 'typescript-fsa';
 import 'typescript-fsa-redux-observable';
-import {Failure} from 'typescript-fsa/lib';
 import {loadFile} from './actions';
-import {parseAndValidateFile} from './api';
-import {FileLoadData} from './trace-file';
+import {parseAndValidateFile} from './file';
 
 
-const loadTraceFileEpic: Epic<Action<Success<File, FileLoadData> | Failure<File, Error>>, {}> = action$ =>
+const loadTraceFileEpic = (action$: ActionsObservable<Action>) =>
     action$
         .ofAction(loadFile.started)
         .flatMap(action => {
@@ -30,4 +28,4 @@ const loadTraceFileEpic: Epic<Action<Success<File, FileLoadData> | Failure<File,
                 );
         });
 
-export const traceEpics = combineEpics(loadTraceFileEpic);
+export const fileLoadEpics = combineEpics(loadTraceFileEpic);
