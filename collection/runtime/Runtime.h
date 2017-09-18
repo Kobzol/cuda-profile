@@ -71,7 +71,7 @@ namespace cupr {
                                    float duration,
                                    int64_t timestamp)
     {
-        std::fstream kernelOutput(fileName + ".json", std::fstream::out);
+        std::fstream kernelOutput(fileName + ".trace.json", std::fstream::out);
 
         Formatter formatter;
         formatter.outputKernelRunJson(kernelOutput, kernel, records, allocations, duration, timestamp,
@@ -85,7 +85,7 @@ namespace cupr {
                                        float duration,
                                        int64_t timestamp)
     {
-        std::fstream kernelOutput(fileName + ".protobuf", std::fstream::out);
+        std::fstream kernelOutput(fileName + ".trace.protobuf", std::fstream::out);
 
         Formatter formatter;
         formatter.outputKernelRunProtobuf(kernelOutput, kernel, records, allocations, duration, timestamp);

@@ -36,4 +36,4 @@ def test_output_protobuf(profile):
     }
     """, format="protobuf")
 
-    assert "kernel-0.protobuf" in data
+    assert "kernel-0.trace.protobuf" in data

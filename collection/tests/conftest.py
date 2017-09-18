@@ -133,11 +133,11 @@ def profile():
 
 
 def metadata_file(kernel="kernel"):
-    return "{}-metadata.json".format(kernel)
+    return "{}.metadata.json".format(kernel)
 
 
 def kernel_file(kernel="kernel", index=0, format="json"):
-    return "{}-{}.{}".format(kernel, index, format)
+    return "{}-{}.trace.{}".format(kernel, index, format)
 
 
 def param_all_formats(fn):
