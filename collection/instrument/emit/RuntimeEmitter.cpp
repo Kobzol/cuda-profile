@@ -1,5 +1,5 @@
 #include "RuntimeEmitter.h"
-#include "../../runtime/prefix.h"
+#include "../../runtime/Prefix.h"
 
 #include <llvm/IR/Module.h>
 #include <iostream>

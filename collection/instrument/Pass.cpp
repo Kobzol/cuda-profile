@@ -9,7 +9,7 @@
 #include "emit/MemoryAccess.h"
 #include "emit/KernelLaunch.h"
 #include "emit/MemoryAlloc.h"
-#include "../runtime/prefix.h"
+#include "../runtime/Prefix.h"
 #include "emit/Kernel.h"
 #include "emit/RuntimeEmitter.h"
 

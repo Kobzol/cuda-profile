@@ -1,5 +1,5 @@
 #include "general.h"
-#include "runtime/Runtime.h"
+#include "device/Runtime.h"
 
 __global__ void kernel(int *p)
 {

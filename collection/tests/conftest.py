@@ -10,6 +10,7 @@ from google.protobuf import json_format
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(__file__))
 INSTRUMENT_LIB = "cmake-build-debug/instrument/libinstrument.so"
+RUNTIME_LIB_DIR = "cmake-build-debug/runtime"
 INPUT_FILENAME = "input.cu"
 
 
@@ -32,14 +33,14 @@ def compile(root, lib, dir, code, format):
             "-I/usr/local/cuda/include",
             "-L/usr/local/cuda/lib64",
             "-I{}".format(os.path.join(root, "runtime")),
+            "-L{}".format(os.path.join(root, RUNTIME_LIB_DIR)),
+            "-I{}".format(os.path.join(root, "device")),
             "-Xclang", "-load",
             "-Xclang", os.path.join(root, lib),
-            "-lcudart", "-ldl", "-lrt", "-pthread",
+            "-lcudart", "-ldl", "-lrt", "-lruntime",
+            "-pthread",
             "-xcuda", inputname]
 
-    if format == "protobuf":
-        args += ["-lprotobuf"]
-        args += glob.glob(os.path.join(root, "runtime/protobuf/generated/*.pb.cc"))
     args += ["-o", outputname]
 
     process = subprocess.Popen(args,
@@ -50,9 +51,10 @@ def compile(root, lib, dir, code, format):
     return (os.path.join(dir, outputname), process.returncode, out, err)
 
 
-def run(dir, exe, env):
+def run(root, dir, exe, env):
     runenv = os.environ.copy()
     runenv.update(env)
+    runenv["LD_LIBRARY_PATH"] = os.path.join(root, RUNTIME_LIB_DIR)
 
     process = subprocess.Popen([exe],
                                stdout=subprocess.PIPE,
@@ -86,12 +88,12 @@ def compile_and_run(code,
 
     env = {}
     if buffer_size is not None:
-        env["CUPROFILE_BUFFER_SIZE"] = str(buffer_size)
+        env["CUPR_BUFFER_SIZE"] = str(buffer_size)
+    if format == "protobuf":
+        env["CUPR_PROTOBUF"] = "1"
 
     prelude = ""
     if add_include:
-        if format == "protobuf":
-            prelude += "#define CUPR_USE_PROTOBUF\n"
         prelude += "#include <Runtime.h>\n"
 
     if with_main:
@@ -106,7 +108,7 @@ def compile_and_run(code,
         if retcode != 0:
             raise Exception(str(retcode) + "\n" + out + "\n" + err)
 
-        (mappings, retcode, out, err) = run(tmpdir, exe, env)
+        (mappings, retcode, out, err) = run(PROJECT_DIR, tmpdir, exe, env)
         if retcode != 0:
             raise Exception(retcode)
     finally:

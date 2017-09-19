@@ -2,7 +2,7 @@
 
 #include <cstddef>
 #include "AddressSpace.h"
-#include "cudautil.h"
+#include "Utility.h"
 
 namespace cupr
 {

@@ -5,14 +5,16 @@
 #include <vector>
 #include <iostream>
 
-#include "prefix.h"
+#include "Prefix.h"
 #include "AccessRecord.h"
 #include "AllocRecord.h"
-#include "format.h"
+#include "Formatter.h"
 #include "CudaTimer.h"
 #include "KernelContext.h"
 #include "AddressSpace.h"
-#include "cudautil.h"
+#include "Utility.h"
+#include "RuntimeState.h"
+#include "Parameters.h"
 
 
 #define ATOMIC_INSERT(buffer, index, maxSize, item) \
@@ -22,91 +24,16 @@
         (buffer)[oldIndex] = item; \
     } while (false)
 
-namespace cupr {
-    static uint32_t BUFFER_SIZE_DEFAULT = 1024 * 1024;
-
-    static size_t kernelCounter = 0;
-    static std::vector<cupr::AllocRecord> allocations;
-
+namespace cupr
+{
     static __device__ uint32_t deviceBufferSize;
     static __device__ cupr::AccessRecord* deviceAccessRecords;
     static __device__ uint32_t deviceAccessRecordIndex;
     static __device__ cupr::AllocRecord* deviceSharedBuffers;
     static __device__ uint32_t deviceSharedBufferIndex;
-
-    /// parameters
-    static uint32_t getBufferSize()
-    {
-        char* envBufferSize = getenv("CUPROFILE_BUFFER_SIZE");
-        if (envBufferSize == nullptr) return BUFFER_SIZE_DEFAULT;
-        return static_cast<uint32_t>(std::stoi(envBufferSize));
-    }
-    static bool isParameterEnabled(const char* name)
-    {
-        char* parameter = getenv(name);
-        return parameter != nullptr && strlen(parameter) > 0 && parameter[0] == '1';
-    }
-    static bool isPrettifyEnabled()
-    {
-        return isParameterEnabled("CUPROFILE_PRETTIFY");
-    }
-    static bool isProtobufEnabled()
-    {
-#ifdef CUPR_USE_PROTOBUF
-        return true;
-#else
-        return false;
-#endif
-    }
-    static bool isMappedMemoryEnabled()
-    {
-        return isParameterEnabled("CUPROFILE_MAPPED_MEMORY");
-    }
-
-    /// output
-    static void emitKernelDataJson(const std::string& fileName,
-                                   const std::string& kernel,
-                                   const std::vector<AccessRecord>& records,
-                                   const std::vector<AllocRecord>& allocations,
-                                   float duration,
-                                   int64_t timestamp)
-    {
-        std::fstream kernelOutput(fileName + ".trace.json", std::fstream::out);
-
-        Formatter formatter;
-        formatter.outputKernelRunJson(kernelOutput, kernel, records, allocations, duration, timestamp,
-                                      isPrettifyEnabled());
-        kernelOutput.flush();
-    }
-    static void emitKernelDataProtobuf(const std::string& fileName,
-                                       const std::string& kernel,
-                                       const std::vector<AccessRecord>& records,
-                                       const std::vector<AllocRecord>& allocations,
-                                       float duration,
-                                       int64_t timestamp)
-    {
-        std::fstream kernelOutput(fileName + ".trace.protobuf", std::fstream::out);
-
-        Formatter formatter;
-        formatter.outputKernelRunProtobuf(kernelOutput, kernel, records, allocations, duration, timestamp);
-        kernelOutput.flush();
-    }
-    static void emitKernelData(const std::string& kernelName,
-                               const std::vector<AccessRecord>& records,
-                               const std::vector<AllocRecord>& allocations,
-                               float duration)
-    {
-        std::cerr << "Emmitted " << records.size() << " accesses " << "in kernel " << kernelName << std::endl;
-
-        std::string kernelFile = std::string(kernelName) + "-" + std::to_string(kernelCounter++);
-        if (isProtobufEnabled())
-        {
-            emitKernelDataProtobuf(kernelFile, kernelName, records, allocations, duration, getTimestamp());
-        }
-        else emitKernelDataJson(kernelFile, kernelName, records, allocations, duration, getTimestamp());
-    }
 }
-extern "C" {
+extern "C"
+{
     void CU_PREFIX(initKernelContext)(cupr::KernelContext* context, const char* kernelName)
     {
         context->kernelName = kernelName;
@@ -118,11 +45,11 @@ extern "C" {
     }
     void CU_PREFIX(kernelStart)(cupr::KernelContext* context)
     {
-        uint32_t bufferSize = cupr::getBufferSize();
+        uint32_t bufferSize = cupr::Parameters::getBufferSize();
 
         typedef cudaError (*cudaAllocateType)(void**, size_t);
 
-        cudaAllocateType allocFn = cupr::isMappedMemoryEnabled() ? (cudaAllocateType) cudaMallocHost : (cudaAllocateType) cudaMalloc;
+        cudaAllocateType allocFn = cupr::Parameters::isMappedMemoryEnabled() ? (cudaAllocateType) cudaMallocHost : (cudaAllocateType) cudaMalloc;
         allocFn((void**) &context->deviceAccessRecords, sizeof(cupr::AccessRecord) * bufferSize);
         allocFn((void**) &context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * bufferSize);
 
@@ -158,24 +85,24 @@ extern "C" {
 
         typedef cudaError (*cudaFreeType)(void*);
 
-        cudaFreeType freeFn = cupr::isMappedMemoryEnabled() ? (cudaFreeType) cudaFreeHost : (cudaFreeType) cudaFree;
+        cudaFreeType freeFn = cupr::Parameters::isMappedMemoryEnabled() ? (cudaFreeType) cudaFreeHost : (cudaFreeType) cudaFree;
         CHECK_CUDA_CALL(freeFn(context->deviceAccessRecords));
         CHECK_CUDA_CALL(freeFn(context->deviceSharedBuffers));
 
-        for (auto& alloc: cupr::allocations)
+        for (auto& alloc: cupr::state.allocations)
         {
             sharedBuffers.push_back(alloc);
         }
 
-        emitKernelData(context->kernelName, records, sharedBuffers, context->timer->get_time());
+        cupr::state.emitter.emitKernelData(context->kernelName, records, sharedBuffers, context->timer->get_time());
     }
     void CU_PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type)
     {
-        cupr::allocations.emplace_back(address, size, elementSize, cupr::AddressSpace::Global, type);
+        cupr::state.allocations.emplace_back(address, size, elementSize, cupr::AddressSpace::Global, type);
     }
     void CU_PREFIX(free)(void* address)
     {
-        for (auto& alloc: cupr::allocations)
+        for (auto& alloc: cupr::state.allocations)
         {
             if (alloc.address == address)
             {

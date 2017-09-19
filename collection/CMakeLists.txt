@@ -23,6 +23,9 @@ add_subdirectory("instrument")
 # Runtime
 add_subdirectory("runtime")
 
+# Device runtime
+add_subdirectory("device")
+
 # Tests
 add_custom_target(tests COMMAND py.test ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 add_dependencies(tests instrument)
@@ -43,7 +46,8 @@ execute_process(COMMAND
 )
 
 # CUDA program
-FILE(GLOB PROTOBUF_SRC runtime/protobuf/generated/*.pb.cc)
-set(SOURCE_FILES main.cpp kernel.cu general.h ${PROTOBUF_SRC})
-cuda_add_executable(cuda ${SOURCE_FILES} OPTIONS "-arch sm_30 -std=c++11")
-target_link_libraries(cuda runtime ${PROTOBUF_LIBRARIES})
+#FILE(GLOB PROTOBUF_SRC runtime/protobuf/generated/*.pb.cc)
+#set(SOURCE_FILES main.cpp kernel.cu general.h ${PROTOBUF_SRC})
+#link_directories("/usr/local/cuda/lib64")
+#add_executable(cuda ${SOURCE_FILES})
+#target_link_libraries(cuda runtime cudart rt dl ${PROTOBUF_LIBRARIES})
