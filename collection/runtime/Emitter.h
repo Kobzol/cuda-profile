@@ -11,6 +11,15 @@ namespace cupr
     class Emitter
     {
     public:
+        void initialize();
+        void emitProgramRun();
+
+        void emitKernelData(const std::string& kernelName,
+                            const std::vector<AccessRecord>& records,
+                            const std::vector<AllocRecord>& allocations,
+                            float duration);
+
+    private:
         void emitKernelDataJson(const std::string& fileName,
                                 const std::string& kernel,
                                 const std::vector<AccessRecord>& records,
@@ -23,12 +32,14 @@ namespace cupr
                                     const std::vector<AllocRecord>& allocations,
                                     float duration,
                                     int64_t timestamp);
-        void emitKernelData(const std::string& kernelName,
-                            const std::vector<AccessRecord>& records,
-                            const std::vector<AllocRecord>& allocations,
-                            float duration);
 
-    private:
+        std::string generateDirectoryName();
+        std::string getFilePath(const std::string& name);
+
         int kernelCounter = 0;
+        int64_t timestampStart = getTimestamp();
+        std::string directory;
+
+        void copyMetadataFiles();
     };
 }

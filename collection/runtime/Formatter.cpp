@@ -116,6 +116,18 @@ void cupr::Formatter::outputKernelRunProtobuf(std::ostream& os, const std::strin
 #endif
 }
 
+void cupr::Formatter::outputProgramRun(std::fstream& os,
+                                       int64_t timestampStart,
+                                       int64_t timestampEnd)
+{
+    auto value = picojson::value(picojson::object {
+            {"start", picojson::value((double) timestampStart)},
+            {"end", picojson::value((double) timestampEnd)}
+    });
+
+    os << value.serialize(true);
+}
+
 std::string cupr::Formatter::hexPointer(const void* ptr)
 {
     std::ostringstream address;

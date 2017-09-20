@@ -9,6 +9,7 @@ INSTRUMENTED_KERNEL_BC="kernel-instrumented.bc"
 pushd cmake-build-debug
     # remove existing files
     # rm -rf *.bc *.ll *.o
+    rm -rf cupr-*
 
     # build pass
     make

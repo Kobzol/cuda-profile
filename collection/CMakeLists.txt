@@ -44,10 +44,3 @@ execute_process(COMMAND
         --python_out=${CMAKE_CURRENT_SOURCE_DIR}/tests/generated
         ${PROTOBUF_PROTO_FILES}
 )
-
-# CUDA program
-#FILE(GLOB PROTOBUF_SRC runtime/protobuf/generated/*.pb.cc)
-#set(SOURCE_FILES main.cpp kernel.cu general.h ${PROTOBUF_SRC})
-#link_directories("/usr/local/cuda/lib64")
-#add_executable(cuda ${SOURCE_FILES})
-#target_link_libraries(cuda runtime cudart rt dl ${PROTOBUF_LIBRARIES})

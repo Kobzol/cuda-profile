@@ -1,4 +1,4 @@
-from conftest import kernel_file, param_all_formats
+from conftest import kernel_file, param_all_formats, run_file
 
 
 @param_all_formats
@@ -15,7 +15,8 @@ def test_no_include(profile, format):
         return 0;
     }
     """, format=format, add_include=False)
-    assert len(data) == 0
+    assert run_file() in data
+    assert len(data) == 1
 
 
 @param_all_formats

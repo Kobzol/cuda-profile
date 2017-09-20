@@ -1,6 +1,6 @@
 import os
 
-from conftest import offset_line, INPUT_FILENAME, metadata_file, kernel_file
+from conftest import offset_line, INPUT_FILENAME, metadata_file, kernel_file, run_file
 
 
 def check_debug_record(data, record, name, line):
@@ -11,12 +11,13 @@ def check_debug_record(data, record, name, line):
 
 def test_emit_nothing(profile):
     data = profile("", with_main=True)
-    assert len(data) == 0
+    assert run_file() in data
+    assert len(data) == 1
 
 
 def test_emit_empty_debug(profile):
     data = profile("__global__ void kernel() {}", with_main=True)
-    assert len(data) == 1
+    assert len(data) == 2
     assert metadata_file("kernel") in data
     assert data[metadata_file("kernel")]["locations"] == []
 
@@ -89,3 +90,9 @@ def test_metadata_type_and_name(profile):
     metadata = data[metadata_file("kernel")]
     assert metadata["type"] == "metadata"
     assert metadata["kernel"] == "kernel"
+
+
+def test_run_file(profile):
+    data = profile("__global__ void kernel() {}", with_main=True)
+    run = data[run_file()]
+    assert run["end"] >= run["start"]

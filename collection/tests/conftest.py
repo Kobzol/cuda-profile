@@ -5,6 +5,9 @@ import tempfile
 import os
 import shutil
 import pytest
+
+import re
+
 from generated.kernel_invocation_pb2 import KernelInvocation
 from google.protobuf import json_format
 
@@ -18,7 +21,7 @@ def create_test_dir():
     return tempfile.mkdtemp("cu")
 
 
-def compile(root, lib, dir, code, format):
+def compile(root, lib, dir, code):
     inputname = INPUT_FILENAME
     outputname = "cuda"
 
@@ -51,6 +54,13 @@ def compile(root, lib, dir, code, format):
     return (os.path.join(dir, outputname), process.returncode, out, err)
 
 
+def find_cupr_dir(dir):
+    for (dirpath, _, _) in os.walk(dir):
+        if re.search("cupr-\d+$", dirpath):
+            return dirpath
+    raise Exception("CUPR directory not found in {}".format(dir))
+
+
 def run(root, dir, exe, env):
     runenv = os.environ.copy()
     runenv.update(env)
@@ -64,14 +74,15 @@ def run(root, dir, exe, env):
     (out, err) = process.communicate()
 
     mappings = {}
+    cuprdir = find_cupr_dir(dir)
 
-    for protobuf_file in glob.glob("{}/*.protobuf".format(dir)):
+    for protobuf_file in glob.glob("{}/*.protobuf".format(cuprdir)):
         with open(protobuf_file) as f:
             kernel = KernelInvocation()
             kernel.ParseFromString(f.read())
             mappings[os.path.basename(protobuf_file)] = json_format.MessageToDict(kernel,
                                                                                   preserving_proto_field_name=True)
-    for json_file in glob.glob("{}/*.json".format(dir)):
+    for json_file in glob.glob("{}/*.json".format(cuprdir)):
         with open(json_file) as f:
             mappings[os.path.basename(json_file)] = json.load(f)
 
@@ -103,7 +114,7 @@ def compile_and_run(code,
     line_offset = len(prelude.splitlines())
 
     try:
-        (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code, format)
+        (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code)
 
         if retcode != 0:
             raise Exception(str(retcode) + "\n" + out + "\n" + err)
@@ -140,6 +151,10 @@ def metadata_file(kernel="kernel"):
 
 def kernel_file(kernel="kernel", index=0, format="json"):
     return "{}-{}.trace.{}".format(kernel, index, format)
+
+
+def run_file():
+    return "run.json"
 
 
 def param_all_formats(fn):
