@@ -95,4 +95,6 @@ def test_metadata_type_and_name(profile):
 def test_run_file(profile):
     data = profile("__global__ void kernel() {}", with_main=True)
     run = data[run_file()]
+
+    assert run["type"] == "run"
     assert run["end"] >= run["start"]

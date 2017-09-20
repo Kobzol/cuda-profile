@@ -121,6 +121,7 @@ void cupr::Formatter::outputProgramRun(std::fstream& os,
                                        int64_t timestampEnd)
 {
     auto value = picojson::value(picojson::object {
+            {"type", picojson::value("run")},
             {"start", picojson::value((double) timestampStart)},
             {"end", picojson::value((double) timestampEnd)}
     });
