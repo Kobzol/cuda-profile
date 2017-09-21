@@ -5,16 +5,16 @@
 #include <vector>
 #include <iostream>
 
-#include <Prefix.h>
-#include <AccessRecord.h>
-#include <AllocRecord.h>
-#include <Formatter.h>
-#include <CudaTimer.h>
-#include <KernelContext.h>
-#include <AddressSpace.h>
-#include <Utility.h>
-#include <RuntimeState.h>
-#include <Parameters.h>
+#include "../runtime/Prefix.h"
+#include "../runtime/AccessRecord.h"
+#include "../runtime/AllocRecord.h"
+#include "../runtime/Formatter.h"
+#include "../runtime/CudaTimer.h"
+#include "../runtime/KernelContext.h"
+#include "../runtime/AddressSpace.h"
+#include "../runtime/Utility.h"
+#include "../runtime/RuntimeState.h"
+#include "../runtime/Parameters.h"
 
 
 #define ATOMIC_INSERT(buffer, index, maxSize, item) \
@@ -110,14 +110,6 @@ extern "C"
             }
         }
     }
-    /*void CU_PREFIX(startProfiler)()
-    {
-        cupr::state.emitter.initialize();
-    }
-    void CU_PREFIX(endProfiler)()
-    {
-        cupr::state.emitter.
-    }*/
 
     static __forceinline__ __device__ uint32_t warpid()
     {

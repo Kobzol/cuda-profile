@@ -35,7 +35,6 @@ def compile(root, lib, dir, code):
             "--cuda-gpu-arch=sm_30",
             "-I/usr/local/cuda/include",
             "-L/usr/local/cuda/lib64",
-            "-I{}".format(os.path.join(root, "runtime")),
             "-L{}".format(os.path.join(root, RUNTIME_LIB_DIR)),
             "-I{}".format(os.path.join(root, "device")),
             "-Xclang", "-load",

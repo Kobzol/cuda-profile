@@ -22,16 +22,22 @@ bool Parameters::isPrettifyEnabled()
 
 bool Parameters::isProtobufEnabled()
 {
+#ifdef CUPR_USE_PROTOBUF
     return isParameterEnabled("CUPR_PROTOBUF");
+#else
+    return false;
+#endif
 }
 
 bool Parameters::isMappedMemoryEnabled()
 {
-    return isParameterEnabled("CUPR_MAPPED_MEMORY");
+    return isParameterEnabled("CUPR_HOST_MEMORY");
 }
 
 bool Parameters::isParameterEnabled(const char* name)
 {
     char* parameter = getenv(name);
-    return parameter != nullptr && strlen(parameter) > 0 && parameter[0] == '1';
+    return  parameter != nullptr &&
+            strlen(parameter) > 0 &&
+            parameter[0] == '1';
 }

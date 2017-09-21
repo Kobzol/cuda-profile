@@ -19,10 +19,9 @@ pushd cmake-build-debug
     # run pass and compile
     ${CLANG} -g -O0 -std=c++14 --cuda-gpu-arch=sm_30 \
             -I/usr/local/cuda/include -L/usr/local/cuda/lib64 \
-            -I../runtime \
             -L./runtime \
             -Xclang -load -Xclang ./instrument/libinstrument.so \
-            -z muldefs -lcudart -ldl -lrt -lprotobuf -lruntime -pthread -xcuda \
+            -z muldefs -lcudart -ldl -lrt -lruntime -pthread -xcuda \
             ${SRC_FILES} -o cuda
 
     # run instrumented program
