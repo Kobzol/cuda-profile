@@ -18,13 +18,7 @@
     "eofline": true,
     "no-conditional-assignment": true,
     "object-literal-key-quotes": [ false ],
-    "ordered-imports": [
-      true,
-      {
-        "import-sources-order": "lowercase-last",
-        "named-imports-order": "lowercase-first"
-      }
-    ],
+    "ordered-imports": false,
     "interface-name": false,
     "jsdoc-format": true,
     "new-parens": true,

@@ -5,6 +5,7 @@ import {createLogger} from 'redux-logger';
 import {createEpicMiddleware} from 'redux-observable';
 import {rootEpic} from './epics';
 import {reducers} from './reducers';
+import {persistStore, autoRehydrate} from 'redux-persist';
 
 export const history = createHistory();
 
@@ -18,5 +19,8 @@ export const store = createStore(
         ...reducers,
         router: routerReducer
     }),
-    composeEnhancers(applyMiddleware(router, epic, logger))
+    composeEnhancers(applyMiddleware(router, epic, logger), autoRehydrate())
 );
+persistStore(store, {
+    whitelist: ['trace']
+});

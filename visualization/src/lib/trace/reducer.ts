@@ -1,26 +1,23 @@
 import {reducerWithInitialState} from 'typescript-fsa-reducers';
-import {buildKernels} from './actions';
-import {Kernel} from './kernel';
+import {buildProfile, selectTrace} from './actions';
+import {Profile} from './profile';
+import {TraceSelection} from './trace-selection';
 
 export interface TraceState
 {
-    kernels: Kernel[];
-    selectedKernel?: number;
-    buildingKernels: boolean;
+    profile?: Profile;
+    selectedTrace?: TraceSelection;
 }
 
 const reducer = reducerWithInitialState<TraceState>({
-    kernels: [],
-    selectedKernel: null,
-    buildingKernels: false
-}).case(buildKernels.started, state => ({
+    profile: null,
+    selectedTrace: null
+}).case(buildProfile.done, (state, payload) => ({
     ...state,
-    buildingKernels: true
-}))
-    .case(buildKernels.done, (state, payload) => ({
+    profile: payload.result
+})).case(selectTrace, (state, payload) => ({
     ...state,
-    kernels: payload.result,
-    buildingKernels: false
+    selectedTrace: payload
 }));
 
 export const traceReducer = reducer;

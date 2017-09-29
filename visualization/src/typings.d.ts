@@ -1,4 +1,4 @@
-declare module 'react-fabricjs';
+declare module 'react-visjs-timeline';
 
 interface FileReaderEventTarget extends EventTarget
 {

@@ -1,5 +1,7 @@
 export interface Trace
 {
+    type: string;
     kernel: string;
-    time: number;
+    timestamp: number;
+    duration: number;
 }

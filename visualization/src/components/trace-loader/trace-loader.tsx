@@ -5,6 +5,7 @@ import {loadFile} from '../../lib/file-load/actions';
 import {TraceFile} from '../../lib/file-load/file';
 import {loadingFiles, validTraceFiles} from '../../lib/file-load/reducer';
 import {AppState} from '../../state/reducers';
+import {Button, Glyphicon} from 'react-bootstrap';
 
 interface StateProps
 {
@@ -29,9 +30,12 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
                 <ul>
                     {this.props.files.map(this.renderFile)}
                 </ul>
-                <button
+                <Button
                     disabled={!this.canSwitchToKernelSelection()}
-                    onClick={this.props.navigateToKernelView}>Load trace</button>
+                    onClick={this.props.navigateToKernelView}
+                    bsStyle='primary'>
+                    <Glyphicon glyph='flash' /> Load trace
+                </Button>
             </div>
         );
     }
@@ -73,5 +77,5 @@ export const TraceLoader = connect<StateProps, DispatchProps, {}>((state: AppSta
     loadingFiles: loadingFiles(state)
 }), ({
     loadFile: loadFile.started,
-    navigateToKernelView: () => push('/kernel-launches')
+    navigateToKernelView: () => push('/kernel-timeline')
 }))(TraceLoaderComponent);

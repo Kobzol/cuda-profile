@@ -1,48 +1,48 @@
 import React, {PureComponent} from 'react';
 import {connect} from 'react-redux';
 import {TraceFile} from '../../lib/file-load/file';
-import {buildKernels} from '../../lib/trace/actions';
-import {Kernel} from '../../lib/trace/kernel';
+import {buildProfile, selectTrace} from '../../lib/trace/actions';
 import {AppState} from '../../state/reducers';
-import {KernelComponent} from '../kernel/kernel';
+import {KernelTimeline} from '../kernel-timeline/kernel-timeline';
+import {Profile} from '../../lib/trace/profile';
+import {TraceSelection} from '../../lib/trace/trace-selection';
 
 interface StateProps
 {
     files: TraceFile[];
-    kernels: Kernel[];
+    profile: Profile;
 }
 interface DispatchProps
 {
-    buildKernels: (files: TraceFile[]) => {};
+    buildProfile: (files: TraceFile[]) => {};
+    selectTrace: (selection: TraceSelection) => {};
 }
 
 class KernelLaunchSelectorComponent extends PureComponent<StateProps & DispatchProps>
 {
     componentWillMount()
     {
-        this.props.buildKernels(this.props.files);
+        this.props.buildProfile(this.props.files);
     }
 
     render()
     {
-        return (
-            <div>{this.props.kernels.map(this.renderKernel)}</div>
-        );
-    }
-
-    renderKernel = (kernel: Kernel): JSX.Element =>
-    {
-        return (
-            <KernelComponent
-                key={kernel.metadata.kernel}
-                kernel={kernel} />
+        if (this.props.profile === null)
+        {
+            return (<div>Loading profile...</div>);
+        }
+        else return (
+            <KernelTimeline
+                profile={this.props.profile}
+                selectTrace={this.props.selectTrace} />
         );
     }
 }
 
 export const KernelLaunchSelector = connect<StateProps, DispatchProps, {}>((state: AppState) => ({
     files: state.fileLoader.files,
-    kernels: state.trace.kernels
+    profile: state.trace.profile
 }), {
-    buildKernels: buildKernels.started
+    buildProfile: buildProfile.started,
+    selectTrace: selectTrace
 })(KernelLaunchSelectorComponent);

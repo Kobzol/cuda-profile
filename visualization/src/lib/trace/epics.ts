@@ -5,16 +5,16 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 import 'typescript-fsa-redux-observable';
-import {buildKernels as buildKernelsAction} from './actions';
-import {buildKernels} from './kernel';
+import {buildProfile as buildProfileAction} from './actions';
+import {buildProfile} from './kernel';
 
 
 const loadTraceFileEpic = (action$: ActionsObservable<Action>) =>
     action$
-        .ofAction(buildKernelsAction.started)
-        .map(action => buildKernelsAction.done({
+        .ofAction(buildProfileAction.started)
+        .map(action => buildProfileAction.done({
             params: action.payload,
-            result: buildKernels(action.payload)
+            result: buildProfile(action.payload)
         }));
 
 export const traceEpics = combineEpics(loadTraceFileEpic);

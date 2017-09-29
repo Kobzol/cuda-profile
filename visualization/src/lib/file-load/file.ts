@@ -7,20 +7,22 @@ import {Trace} from '../trace/trace';
 import {readFileBinary, readFileText} from '../util/fs';
 import {createWorkerJob} from '../util/worker';
 import {InvalidFileContent, InvalidFileFormat} from './errors';
+import {Run} from '../trace/run';
 
 export enum FileType
 {
     Trace = 0,
     Metadata = 1,
-    Unknown = 2,
-    Invalid = 3
+    Run = 2,
+    Unknown = 3,
+    Invalid = 4
 }
 
 export interface TraceFile
 {
     name: string;
     loading: boolean;
-    content: Trace | Metadata | null;
+    content: Trace | Metadata | Run | null;
     type: FileType;
     error: number;
 }
@@ -39,7 +41,7 @@ export interface FileLoadData
 function parseFileJson(file: File): Observable<Trace | Metadata>
 {
     return readFileText(file)
-        .flatMap(data => createWorkerJob('./json.worker.js', data, true));
+        .flatMap(data => createWorkerJob(process.env.PUBLIC_URL + './json.worker.js', data));
 }
 /**
  * Loads file and parses its content as Protobuf using a web worker.
@@ -49,7 +51,7 @@ function parseFileJson(file: File): Observable<Trace | Metadata>
 function parseFileProtobuf(file: File): Observable<Trace | Metadata>
 {
     return readFileBinary(file)
-        .flatMap(data => createWorkerJob('./protobuf.worker.js', data, true));
+        .flatMap(data => createWorkerJob(process.env.PUBLIC_URL + './protobuf.worker.js', data));
 }
 /**
  * Loads file as JSON or Protobuf, according to the extension (.json or .proto).
@@ -98,6 +100,19 @@ function validateMetadata(content: object): boolean
     );
 }
 /**
+ * Checks validity of run object.
+ * @param {Object} content
+ * @returns {boolean}
+ */
+function validateRun(content: object): boolean
+{
+    return (
+        content['type'] === 'run' &&
+        'start' in content &&
+        'end' in content
+    );
+}
+/**
  * Checks validity of file content depending on its type.
  * @param {File} file
  * @param {Object} content
@@ -105,11 +120,15 @@ function validateMetadata(content: object): boolean
  */
 function validateContent(file: File, content: object): boolean
 {
-    if (getFileType(file) === FileType.Metadata)
+    const type = getFileType(file);
+
+    switch (type)
     {
-        return validateMetadata(content);
+        case FileType.Metadata: return validateMetadata(content);
+        case FileType.Run: return validateRun(content);
+        case FileType.Trace: return validateTrace(content);
+        default: return false;
     }
-    else return validateTrace(content);
 }
 
 /**
@@ -119,7 +138,13 @@ function validateContent(file: File, content: object): boolean
  */
 function getFileType(file: File): FileType
 {
-    return file.name.match(/.*-metadata\..*/) ? FileType.Metadata : FileType.Trace;
+    if (file.name === 'run.json')
+    {
+        return FileType.Run;
+    }
+
+    const metadata = file.name.match(/.*\.metadata\..*/);
+    return metadata ? FileType.Metadata : FileType.Trace;
 }
 
 /**
@@ -135,7 +160,6 @@ export function parseAndValidateFile(file: File): Observable<FileLoadData>
             else return Observable.throw(error);
         })
         .do(content => {
-            console.log(content);
             if (!validateContent(file, content))
             {
                 throw new InvalidFileContent();

@@ -1,39 +1,59 @@
 import {FileType, TraceFile} from '../file-load/file';
 import {Metadata} from './metadata';
 import {Trace} from './trace';
+import {Profile} from './profile';
+import {Run} from './run';
 
 export interface Kernel
 {
+    name: string;
     metadata?: Metadata;
     traces: Trace[];
 }
 
-export function buildKernels(files: TraceFile[]): Kernel[]
+function prepareKey(dict: {[key: string]: Kernel}, key: Metadata | Trace)
 {
+    if (!dict.hasOwnProperty(key.kernel))
+    {
+        dict[key.kernel] = {
+            name: '',
+            traces: [],
+            metadata: null
+        };
+    }
+}
+
+export function buildProfile(files: TraceFile[]): Profile
+{
+    if (files.length === 0) return null;
+
+    let run: Run;
     let kernelMap: {[key: string]: Kernel} = {};
 
     for (const file of files)
     {
-        if (!kernelMap.hasOwnProperty(file.content.kernel))
-        {
-            kernelMap[file.content.kernel] = {
-                traces: [],
-                metadata: null
-            };
-        }
-
         if (file.type === FileType.Metadata)
         {
-            kernelMap[file.content.kernel].metadata = (file.content as Metadata);
+            const metadata = file.content as Metadata;
+            prepareKey(kernelMap, metadata);
+            kernelMap[metadata.kernel].metadata = metadata;
+            kernelMap[metadata.kernel].name = metadata.kernel;
         }
-        else kernelMap[file.content.kernel].traces.push((file.content as Trace));
+        else if (file.type === FileType.Trace)
+        {
+            const trace = file.content as Trace;
+            prepareKey(kernelMap, trace);
+            kernelMap[trace.kernel].traces.push(trace);
+            kernelMap[trace.kernel].name = trace.kernel;
+        }
+        else if (file.type === FileType.Run)
+        {
+            run = file.content as Run;
+        }
     }
 
-    let kernels: Kernel[] = [];
-    for (const key of Object.keys(kernelMap))
-    {
-        kernels.push(kernelMap[key]);
-    }
-
-    return kernels;
+    return {
+        run: run,
+        kernels: Object.keys(kernelMap).map(key => kernelMap[key])
+    };
 }
