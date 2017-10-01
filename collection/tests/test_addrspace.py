@@ -2,7 +2,7 @@ from conftest import kernel_file, param_all_formats
 
 
 @param_all_formats
-def test_shared_access(profile, format):
+def test_addrspace_shared_access(profile, format):
     data = profile("""
     __global__ void kernel() {
         __shared__ int arr[10];
@@ -17,7 +17,7 @@ def test_shared_access(profile, format):
 
 
 @param_all_formats
-def test_constant_access(profile, format):
+def test_addrspace_constant_access(profile, format):
     data = profile("""
     __constant__ int arr[10];
     __global__ void kernel() {
@@ -32,7 +32,7 @@ def test_constant_access(profile, format):
 
 
 @param_all_formats
-def test_global_access(profile, format):
+def test_addrspace_global_access(profile, format):
     data = profile("""
     __global__ void kernel(int* p) {
         *p = 5;
@@ -49,7 +49,7 @@ def test_global_access(profile, format):
 
 
 @param_all_formats
-def test_shared_constant_access(profile, format):
+def test_addrspace_shared_constant_access(profile, format):
     data = profile("""
     __constant__ int constArr[10];
     __global__ void kernel() {

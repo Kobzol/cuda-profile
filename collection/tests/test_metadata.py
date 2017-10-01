@@ -9,20 +9,14 @@ def check_debug_record(data, record, name, line):
     assert record["line"] == offset_line(line, data)
 
 
-def test_emit_nothing(profile):
-    data = profile("", with_main=True)
-    assert run_file() in data
-    assert len(data) == 1
-
-
-def test_emit_empty_debug(profile):
+def test_metadata_emit_empty_debug(profile):
     data = profile("__global__ void kernel() {}", with_main=True)
     assert len(data) == 2
     assert metadata_file("kernel") in data
     assert data[metadata_file("kernel")]["locations"] == []
 
 
-def test_emit_debug_info(profile):
+def test_metadata_debug_info(profile):
     data = profile("""
     __global__ void kernel(int* p) {
             int x = *p;
@@ -36,7 +30,7 @@ def test_emit_debug_info(profile):
     check_debug_record(data, records[1], "store", 4)
 
 
-def test_debug_index(profile):
+def test_metadata_debug_index(profile):
     data = profile("""
     __global__ void kernel(int* p) {
         int x = *p;
@@ -54,7 +48,7 @@ def test_debug_index(profile):
     assert accesses[1]["debugId"] == 2
 
 
-def test_access_type_index(profile):
+def test_metadata_access_type_index(profile):
     data = profile("""
     __global__ void kernel(int* p) {
         int x = *p;
@@ -92,7 +86,7 @@ def test_metadata_type_and_name(profile):
     assert metadata["kernel"] == "kernel"
 
 
-def test_run_file(profile):
+def test_metadata_run_file(profile):
     data = profile("__global__ void kernel() {}", with_main=True)
     run = data[run_file()]
 

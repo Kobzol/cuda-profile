@@ -1,4 +1,4 @@
-def test_buffer_size_parameter(profile):
+def test_parameters_buffer_size(profile):
     code = """
     #include <cstdio>
     __global__ void kernel(int* p) {
@@ -22,7 +22,7 @@ def test_buffer_size_parameter(profile):
     assert data["stdout"].strip() == ""
 
 
-def test_output_protobuf(profile):
+def test_parameters_protobuf(profile):
     data = profile("""
     __global__ void kernel(int* p) {
         *p = 5;

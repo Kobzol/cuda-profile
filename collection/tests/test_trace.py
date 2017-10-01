@@ -2,27 +2,7 @@ from conftest import kernel_file, param_all_formats
 
 
 @param_all_formats
-def test_access_address_match(profile, format):
-    data = profile("""
-    #include <cstdio>
-    __global__ void kernel(int* p) {
-        *p = 5;
-    }
-    int main() {
-        int* dptr;
-        cudaMalloc(&dptr, sizeof(int));
-        printf("%p\\n", dptr);
-        kernel<<<1, 1>>>(dptr);
-        cudaFree(dptr);
-        return 0;
-    }
-    """, format=format, with_metadata=True)
-    assert data["stdout"].strip() == data["mappings"][kernel_file("kernel",
-                                                                  format=format)]["accesses"][0]["address"]
-
-
-@param_all_formats
-def test_access_type_and_name(profile, format):
+def test_trace_type_and_name(profile, format):
     data = profile("""
     __global__ void kernel(int* p) {
         int x = *p;
@@ -41,7 +21,45 @@ def test_access_type_and_name(profile, format):
 
 
 @param_all_formats
-def test_access_time(profile, format):
+def test_trace_time(profile, format):
+    data = profile("""
+    #include <cstdio>
+    __global__ void kernel(int* p) {
+        *p = 5;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }
+    """, format=format)
+    assert data[kernel_file("kernel", format=format)]["end"] > data[kernel_file("kernel", format=format)]["start"]
+
+
+@param_all_formats
+def test_trace_multiple_invocations(profile, format):
+    data = profile("""
+    #include <cstdio>
+    __global__ void kernel(int* p) {
+        *p = 5;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }
+    """, format=format)
+    for i in xrange(2):
+        assert kernel_file("kernel", i, format) in data
+
+
+@param_all_formats
+def test_trace_multiple_time(profile, format):
     data = profile("""
     __global__ void kernel(int* p) {
         int x = *p;
