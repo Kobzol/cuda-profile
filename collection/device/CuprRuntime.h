@@ -6,12 +6,12 @@
 #include <iostream>
 
 #include "../runtime/Prefix.h"
-#include "../runtime/AccessRecord.h"
-#include "../runtime/AllocRecord.h"
-#include "../runtime/Formatter.h"
+#include "../runtime/tracedata/AccessRecord.h"
+#include "../runtime/tracedata/AllocRecord.h"
+#include "../runtime/format/Formatter.h"
 #include "../runtime/CudaTimer.h"
 #include "../runtime/KernelContext.h"
-#include "../runtime/AddressSpace.h"
+#include "../runtime/tracedata/AddressSpace.h"
 #include "../runtime/Utility.h"
 #include "../runtime/RuntimeState.h"
 #include "../runtime/Parameters.h"
@@ -94,7 +94,7 @@ extern "C"
             sharedBuffers.push_back(alloc);
         }
 
-        cupr::state.emitter.emitKernelData(context->kernelName, records, sharedBuffers, context->timer->get_time());
+        cupr::state.emitter.emitKernelTrace(context->kernelName, records, sharedBuffers, context->timer->get_time());
     }
     void CU_PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type)
     {

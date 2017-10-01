@@ -10,7 +10,7 @@
 #include "MemoryAccess.h"
 #include "../util/DebugExtractor.h"
 #include "../util/Demangler.h"
-#include "../../runtime/picojson.h"
+#include "../../runtime/format/picojson.h"
 #include "../util/LLVMAddressSpace.h"
 #include "../util/FunctionUtils.h"
 #include "../util/StringUtils.h"

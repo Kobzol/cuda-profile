@@ -3,9 +3,9 @@
 #include <string>
 #include <utility>
 
-#include "AccessRecord.h"
+#include "tracedata/AccessRecord.h"
 #include "CudaTimer.h"
-#include "AllocRecord.h"
+#include "tracedata/AllocRecord.h"
 
 namespace cupr
 {

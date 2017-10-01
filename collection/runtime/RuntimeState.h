@@ -1,7 +1,7 @@
 #pragma once
 
-#include "AllocRecord.h"
-#include "Emitter.h"
+#include "tracedata/AllocRecord.h"
+#include "format/Emitter.h"
 
 namespace cupr
 {

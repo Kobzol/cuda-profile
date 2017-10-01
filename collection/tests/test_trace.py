@@ -56,4 +56,4 @@ def test_access_time(profile, format):
         return 0;
     }""", format=format)
     info = (data[kernel_file("kernel", 0, format)], data[kernel_file("kernel", 1, format)])
-    assert info[0]["timestamp"] < info[1]["timestamp"]
+    assert info[0]["start"] < info[1]["start"]

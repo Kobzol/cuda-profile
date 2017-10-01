@@ -31,16 +31,16 @@ add_custom_target(tests COMMAND py.test ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 add_dependencies(tests instrument)
 
 # Compile protobuf definitions
-FILE(GLOB PROTOBUF_PROTO_FILES runtime/protobuf/*.proto)
+FILE(GLOB PROTOBUF_PROTO_FILES runtime/format/protobuf/*.proto)
 execute_process(COMMAND
         ${Protobuf_PROTOC_EXECUTABLE}
-        --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/runtime/protobuf
-        --cpp_out=${CMAKE_CURRENT_SOURCE_DIR}/runtime/protobuf/generated
+        --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/runtime/format/protobuf
+        --cpp_out=${CMAKE_CURRENT_SOURCE_DIR}/runtime/format/protobuf/generated
         ${PROTOBUF_PROTO_FILES}
 )
 execute_process(COMMAND
         ${Protobuf_PROTOC_EXECUTABLE}
-        --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/runtime/protobuf
+        --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/runtime/format/protobuf
         --python_out=${CMAKE_CURRENT_SOURCE_DIR}/tests/generated
         ${PROTOBUF_PROTO_FILES}
 )

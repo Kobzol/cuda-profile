@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package proto;
+package cupr.proto;
 
 message AllocRecord {
     required string address = 1;

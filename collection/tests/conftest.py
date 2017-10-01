@@ -1,15 +1,14 @@
 import glob
 import json
+import os
+import pytest
+import re
+import shutil
 import subprocess
 import tempfile
-import os
-import shutil
-import pytest
 
-import re
-
-from generated.kernel_invocation_pb2 import KernelInvocation
 from google.protobuf import json_format
+from generated.kernel_trace_pb2 import KernelTrace
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(__file__))
 INSTRUMENT_LIB = "cmake-build-debug/instrument/libinstrument.so"
@@ -77,7 +76,7 @@ def run(root, dir, exe, env):
 
     for protobuf_file in glob.glob("{}/*.protobuf".format(cuprdir)):
         with open(protobuf_file) as f:
-            kernel = KernelInvocation()
+            kernel = KernelTrace()
             kernel.ParseFromString(f.read())
             mappings[os.path.basename(protobuf_file)] = json_format.MessageToDict(kernel,
                                                                                   preserving_proto_field_name=True)
@@ -104,7 +103,7 @@ def compile_and_run(code,
 
     prelude = ""
     if add_include:
-        prelude += "#include <Runtime.h>\n"
+        prelude += "#include <CuprRuntime.h>\n"
 
     if with_main:
         prelude += "int main() { return 0; }\n"

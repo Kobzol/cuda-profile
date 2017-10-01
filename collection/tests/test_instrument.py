@@ -34,7 +34,7 @@ def test_kernel_time(profile, format):
         return 0;
     }
     """, format=format)
-    assert data[kernel_file("kernel", format=format)]["duration"] > 0
+    assert data[kernel_file("kernel", format=format)]["end"] > data[kernel_file("kernel", format=format)]["start"]
 
 
 @param_all_formats

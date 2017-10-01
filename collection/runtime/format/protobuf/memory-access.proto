@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package proto;
+package cupr.proto;
 
 message Dim3 {
     required int32 x = 1;

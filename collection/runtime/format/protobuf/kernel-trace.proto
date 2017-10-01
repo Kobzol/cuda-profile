@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+import "memory-access.proto";
+import "alloc-record.proto";
+
+package cupr.proto;
+
+message KernelTrace {
+    repeated cupr.proto.MemoryAccess accesses = 1;
+    repeated cupr.proto.AllocRecord allocations = 2;
+    required string kernel = 3;
+    required double start = 4;
+    required double end = 5;
+    required string type = 6;
+}

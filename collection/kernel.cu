@@ -1,5 +1,5 @@
 #include "general.h"
-#include "device/Runtime.h"
+#include "device/CuprRuntime.h"
 
 __global__ void kernel(int *p)
 {
@@ -8,7 +8,7 @@ __global__ void kernel(int *p)
 
 void cudaTest()
 {
-    const int COUNT = 256;
+    const int COUNT = 32;
 
     int* dPtr;
     int data[COUNT] = { 0 };
@@ -16,7 +16,7 @@ void cudaTest()
     cudaMalloc((void**) &dPtr, sizeof(data));
     cudaMemcpy(dPtr, data, sizeof(data), cudaMemcpyHostToDevice);
 
-    kernel<<<256, COUNT>>>(dPtr);
+    kernel<<<32, COUNT>>>(dPtr);
 
     int ptr[COUNT];
     cudaMemcpy(ptr, dPtr, sizeof(data), cudaMemcpyDeviceToHost);

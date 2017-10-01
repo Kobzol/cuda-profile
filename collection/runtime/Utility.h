@@ -21,6 +21,9 @@ namespace cupr
             fprintf(stderr, "CUDA error: %s %s %d\n", cudaGetErrorString(code), file, line);
         }
     }
+    /**
+     * Returns current UNIX timestamp in milliseconds.
+     */
     inline int64_t getTimestamp()
     {
         return std::chrono::duration_cast<std::chrono::milliseconds>(

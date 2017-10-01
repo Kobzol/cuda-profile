@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.8)
 
 set(CMAKE_CXX_STANDARD 14)
 
-FILE(GLOB PROTOBUF_CXX_FILES ./protobuf/generated/*.cc)
+FILE(GLOB PROTOBUF_CXX_FILES format/protobuf/generated/*.cc)
 set(SOURCE_FILES
         CudaTimer.cpp
-        Emitter.cpp
-        Formatter.cpp
+        format/Emitter.cpp
+        format/Formatter.cpp
         RuntimeState.cpp
         Init.cpp
         Parameters.cpp)

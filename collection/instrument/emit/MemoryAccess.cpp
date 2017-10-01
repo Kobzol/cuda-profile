@@ -6,7 +6,7 @@
 
 #include "RuntimeEmitter.h"
 #include "../util/AddressSpaceResolver.h"
-#include "../../runtime/AddressSpace.h"
+#include "../../runtime/tracedata/AddressSpace.h"
 #include "../util/LLVMAddressSpace.h"
 
 using namespace llvm;
