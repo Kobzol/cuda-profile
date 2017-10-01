@@ -22,7 +22,7 @@ namespace cupr
                                    uint32_t warpId, void* memory, size_t size,
                                    AddressSpace addressSpace, int64_t timestamp, size_t type,
                                    int32_t debugIndex) :
-                accessType(accessType), blockIdx(blockIdx), threadIdx(threadIdx),
+                kind(accessType), blockIdx(blockIdx), threadIdx(threadIdx),
                 warpId(warpId), address(memory), size(size),
                 addressSpace(addressSpace), timestamp(timestamp), type(type),
                 debugIndex(debugIndex)
@@ -37,7 +37,7 @@ namespace cupr
         size_t size = 0;
         int64_t timestamp = 0;
         uint32_t warpId = 0;
-        AccessType accessType = AccessType::Read;
+        AccessType kind = AccessType::Read;
         int32_t debugIndex = 0;
         AddressSpace addressSpace = AddressSpace::Global;
 

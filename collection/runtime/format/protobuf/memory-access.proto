@@ -15,7 +15,7 @@ message MemoryAccess {
     required int32 debugId = 4;
     required string address = 5;
     required int32 size = 6;
-    required int32 accessType = 7;
+    required int32 kind = 7;
     required int32 space = 8;
     required int32 typeIndex = 9;
     required int64 timestamp = 10;

@@ -23,7 +23,7 @@ picojson::value cupr::Formatter::jsonify(const cupr::AccessRecord& record)
             {"warpId",    picojson::value((double) record.warpId)},
             {"debugId",   picojson::value((double) record.debugIndex)},
             {"address",   picojson::value(this->hexPointer(record.address))},
-            {"kind",      picojson::value((double) (record.accessType == AccessType::Read ? 0 : 1))},
+            {"kind",      picojson::value((double) (record.kind == AccessType::Read ? 0 : 1))},
             {"size",      picojson::value((double) record.size)},
             {"space",     picojson::value((double) record.addressSpace)},
             {"typeIndex", picojson::value((double) record.type)},
@@ -87,7 +87,7 @@ void cupr::Formatter::outputKernelTraceProtobuf(std::ostream& os,
         buffer->set_size(static_cast<google::protobuf::int32>(access.size));
         buffer->set_warpid(access.warpId);
         buffer->set_debugid(access.debugIndex);
-        buffer->set_accesstype(static_cast<google::protobuf::int32>(access.accessType));
+        buffer->set_kind(static_cast<google::protobuf::int32>(access.kind));
         buffer->set_space(static_cast<google::protobuf::int32>(access.addressSpace));
         buffer->set_typeindex(static_cast<google::protobuf::int32>(access.type));
         buffer->set_timestamp(access.timestamp);
