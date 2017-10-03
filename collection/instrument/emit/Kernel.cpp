@@ -54,13 +54,16 @@ std::vector<DebugInfo> Kernel::instrumentInstructions(const std::vector<Instruct
     for (auto* inst : instructions)
     {
         DebugInfo info = extractor.getInstructionLocation(inst);
+        int32_t index = -1;
+
         if (info.isValid())
         {
             debugInfo.push_back(info);
+            index = debugIndex;
             debugIndex++;
         }
 
-        this->instrumentInstruction(inst, debugIndex);
+        this->instrumentInstruction(inst, index);
     }
 
     return debugInfo;

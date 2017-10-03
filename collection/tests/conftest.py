@@ -20,7 +20,7 @@ def create_test_dir():
     return tempfile.mkdtemp("cu")
 
 
-def compile(root, lib, dir, code):
+def compile(root, lib, dir, code, debug):
     inputname = INPUT_FILENAME
     outputname = "cuda"
 
@@ -28,19 +28,22 @@ def compile(root, lib, dir, code):
         f.write(code)
         f.write("\n")
 
-    args = ["clang++",
-            "-g", "-O0",
-            "-std=c++14",
-            "--cuda-gpu-arch=sm_30",
-            "-I/usr/local/cuda/include",
-            "-L/usr/local/cuda/lib64",
-            "-L{}".format(os.path.join(root, RUNTIME_LIB_DIR)),
-            "-I{}".format(os.path.join(root, "device")),
-            "-Xclang", "-load",
-            "-Xclang", os.path.join(root, lib),
-            "-lcudart", "-ldl", "-lrt", "-lruntime",
-            "-pthread",
-            "-xcuda", inputname]
+    args = ["clang++"]
+
+    if debug:
+        args += ["-g", "-O0"]
+
+    args += ["-std=c++14",
+             "--cuda-gpu-arch=sm_30",
+             "-I/usr/local/cuda/include",
+             "-L/usr/local/cuda/lib64",
+             "-L{}".format(os.path.join(root, RUNTIME_LIB_DIR)),
+             "-I{}".format(os.path.join(root, "device")),
+             "-Xclang", "-load",
+             "-Xclang", os.path.join(root, lib),
+             "-lcudart", "-ldl", "-lrt", "-lruntime",
+             "-pthread",
+             "-xcuda", inputname]
 
     args += ["-o", outputname]
 
@@ -92,6 +95,7 @@ def compile_and_run(code,
                     with_metadata=False,
                     with_main=False,
                     buffer_size=None,
+                    debug=True,
                     format="json"):
     tmpdir = create_test_dir()
 
@@ -112,7 +116,7 @@ def compile_and_run(code,
     line_offset = len(prelude.splitlines())
 
     try:
-        (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code)
+        (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code, debug)
 
         if retcode != 0:
             raise Exception(str(retcode) + "\n" + out + "\n" + err)

@@ -21,7 +21,7 @@ public:
 
     explicit operator bool() const;
 
-    void print(std::ostream& o = std::cerr) const;
+    void print(std::ostream& os = std::cerr) const;
 
 private:
     std::string name;

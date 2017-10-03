@@ -39,13 +39,13 @@ DebugInfo::operator bool() const
     return this->isValid();
 }
 
-void DebugInfo::print(std::ostream& o) const
+void DebugInfo::print(std::ostream& os) const
 {
     if (this->valid)
     {
-        o << this->name << " at " << this->filename << ":" << this->line << std::endl;
+        os << this->name << " at " << this->filename << ":" << this->line << std::endl;
     }
-    else o << "Invalid location" << std::endl;
+    else os << "Invalid location" << std::endl;
 }
 
 std::ostream& operator<<(std::ostream& o, const DebugInfo& info)

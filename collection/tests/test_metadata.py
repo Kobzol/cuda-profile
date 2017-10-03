@@ -9,14 +9,14 @@ def check_debug_record(data, record, name, line):
     assert record["line"] == offset_line(line, data)
 
 
-def test_metadata_emit_empty_debug(profile):
+def test_metadata_empty_debug(profile):
     data = profile("__global__ void kernel() {}", with_main=True)
     assert len(data) == 2
     assert metadata_file("kernel") in data
     assert data[metadata_file("kernel")]["locations"] == []
 
 
-def test_metadata_debug_info(profile):
+def test_metadata_debug_location(profile):
     data = profile("""
     __global__ void kernel(int* p) {
             int x = *p;
@@ -44,11 +44,29 @@ def test_metadata_debug_index(profile):
         return 0;
     }""")
     accesses = data[kernel_file("kernel")]["accesses"]
-    assert accesses[0]["debugId"] == 1
-    assert accesses[1]["debugId"] == 2
+    assert accesses[0]["debugId"] == 0
+    assert accesses[1]["debugId"] == 1
 
 
-def test_metadata_access_type_index(profile):
+def test_metadata_debug_index_missing(profile):
+    data = profile("""
+    __global__ void kernel(int* p) {
+        int x = *p;
+        *p = 5;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }""", debug=False)
+    accesses = data[kernel_file("kernel")]["accesses"]
+    assert accesses[0]["debugId"] == -1
+    assert accesses[1]["debugId"] == -1
+
+
+def test_metadata_type_index(profile):
     data = profile("""
     __global__ void kernel(int* p) {
         int x = *p;
