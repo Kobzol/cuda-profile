@@ -1,7 +1,7 @@
 import {createSelector} from 'reselect';
 import {reducerWithInitialState} from 'typescript-fsa-reducers';
-import {getErrorId, Errors} from '../../state/errors';
-import {AppState} from '../../state/reducers';
+import {getErrorId, Errors} from '../state/errors';
+import {AppState} from '../state/reducers';
 import {pushOrReplaceArray, replaceArray} from '../util/immutable';
 import {loadFile} from './actions';
 import {FileType, TraceFile} from './file';

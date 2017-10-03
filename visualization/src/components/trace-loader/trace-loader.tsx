@@ -4,8 +4,9 @@ import {push} from 'react-router-redux';
 import {loadFile} from '../../lib/file-load/actions';
 import {TraceFile} from '../../lib/file-load/file';
 import {loadingFiles, validTraceFiles} from '../../lib/file-load/reducer';
-import {AppState} from '../../state/reducers';
+import {AppState} from '../../lib/state/reducers';
 import {Button, Glyphicon} from 'react-bootstrap';
+import {Routes} from '../../lib/nav/routes';
 
 interface StateProps
 {
@@ -17,7 +18,7 @@ interface StateProps
 interface DispatchProps
 {
     loadFile: (file: File) => {};
-    navigateToKernelView: () => {};
+    goToNextPage: () => {};
 }
 
 class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
@@ -31,8 +32,8 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
                     {this.props.files.map(this.renderFile)}
                 </ul>
                 <Button
-                    disabled={!this.canSwitchToKernelSelection()}
-                    onClick={this.props.navigateToKernelView}
+                    disabled={!this.canGoToNextPage()}
+                    onClick={this.props.goToNextPage}
                     bsStyle='primary'>
                     <Glyphicon glyph='flash' /> Load trace
                 </Button>
@@ -65,7 +66,7 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
         }
     }
 
-    canSwitchToKernelSelection = (): boolean =>
+    canGoToNextPage = (): boolean =>
     {
         return this.props.validTraceFiles.length > 0 && this.props.loadingFiles.length < 1;
     }
@@ -77,5 +78,5 @@ export const TraceLoader = connect<StateProps, DispatchProps, {}>((state: AppSta
     loadingFiles: loadingFiles(state)
 }), ({
     loadFile: loadFile.started,
-    navigateToKernelView: () => push('/kernel-timeline')
+    goToNextPage: () => push(Routes.TraceVisualisation)
 }))(TraceLoaderComponent);

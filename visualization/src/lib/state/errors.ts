@@ -1,4 +1,4 @@
-import {InvalidFileContent, InvalidFileFormat} from '../lib/file-load/errors';
+import {InvalidFileContent, InvalidFileFormat} from '../file-load/errors';
 
 export const Errors = {
     None: 0,

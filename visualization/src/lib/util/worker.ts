@@ -9,7 +9,6 @@ import {Subject} from 'rxjs/Subject';
  */
 export function createWorkerJob<Input, Output>(file: string, data: Input): Observable<Output>
 {
-    console.log('Create worker for ' + data);
     const subject = new Subject<Output>();
     const worker = new Worker(file);
 

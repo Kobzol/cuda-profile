@@ -23,7 +23,6 @@ export class KernelTimeline extends PureComponent<Props>
 
         const options = {
             width: '100%',
-            height: '120px',
             zoomMin: 100,
             zoomMax: 60000,
             format: {
@@ -35,10 +34,11 @@ export class KernelTimeline extends PureComponent<Props>
             start: start,
             end: end,
             min: start,
-            max: end
+            max: end,
+            dataAttributes: ['id']
         };
         return (
-            <Panel className='kernel' header={`Timeline`}>
+            <Panel className='kernel' header={`Timeline (select a trace)`}>
                 <Timeline
                     options={options}
                     items={this.createTimelineItems(this.props.profile)}
@@ -52,8 +52,8 @@ export class KernelTimeline extends PureComponent<Props>
     {
         return flatMap(profile.kernels, (kernel, kernelIndex) => {
             return kernel.traces.map((trace, index) => {
-                const start = new Date((trace.timestamp - (trace.duration * 1000)));
-                const end = new Date(trace.timestamp);
+                const start = new Date(trace.start);
+                const end = new Date(trace.end);
                 const label = `${kernel.name} #${index}`;
 
                 return {
