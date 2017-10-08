@@ -24,7 +24,9 @@ function parseTrace(trace: TraceFormat): Trace
         start: trace.start,
         end: trace.end,
         accessGroups: groupAccessesByTime(trace.accesses),
-        allocations: trace.allocations
+        allocations: trace.allocations,
+        gridDimension: trace.gridDim,
+        blockDimension: trace.blockDim
     };
 }
 

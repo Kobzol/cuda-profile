@@ -1,5 +1,6 @@
 import {MemoryAccessGroup} from './memory-access';
 import {MemoryAllocation} from './memory-allocation';
+import {Dim3} from './dim3';
 
 export interface Trace
 {
@@ -7,4 +8,6 @@ export interface Trace
     end: number;
     accessGroups: MemoryAccessGroup[];
     allocations: MemoryAllocation[];
+    gridDimension: Dim3;
+    blockDimension: Dim3;
 }

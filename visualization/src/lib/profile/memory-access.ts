@@ -1,14 +1,9 @@
+import {Dim3} from './dim3';
+
 export enum AccessType
 {
     Read = 0,
     Write = 1
-}
-
-export interface Dim3
-{
-    x: number;
-    y: number;
-    z: number;
 }
 
 export enum AddressSpace
