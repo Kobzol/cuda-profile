@@ -15,15 +15,63 @@ export interface TraceState
 }
 
 const reducer = reducerWithInitialState<TraceState>({
-    profile: null,
+    profile: {
+        run: {
+            start: 1,
+            end: 200
+        },
+        kernels: [{
+            metadata: {
+                typeMap: ["", "", ""],
+                locations: []
+            },
+            name: "",
+            traces: [{
+                start: 1,
+                end: 200,
+                allocations: [{
+                    address: "",
+                    size: 1,
+                    elementSize: 1,
+                    space: 1,
+                    typeString: "",
+                    typeIndex: 1,
+                    active: true
+                }],
+                accessGroups: [{
+                    size: 0,
+                    kind: 1,
+                    space: 1,
+                    typeIndex: 1,
+                    timestamp: 10,
+                    debugId: 1,
+                    accesses: [{
+                        id: 0,
+                        address: "0x0111",
+                        threadIdx: {
+                            x: 1,
+                            y: 1,
+                            z: 1
+                        },
+                        blockIdx: {
+                            x: 1,
+                            y: 1,
+                            z: 1
+                        },
+                        warpId: 1
+                    }]
+                }]
+            }]
+        }]
+    },
     selectedTrace: null,
     selectedAccessGroup: null
-}).case(buildProfile.done, (state, payload) => ({
+})/*.case(buildProfile.done, (state, payload) => ({
     ...state,
     profile: payload.result,
     selectedTrace: null,
     selectedAccessGroup: null
-})).case(selectTrace, (state, payload) => ({
+}))*/.case(selectTrace, (state, payload) => ({
     ...state,
     selectedTrace: payload,
     selectedAccessGroup: null

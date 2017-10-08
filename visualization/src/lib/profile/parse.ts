@@ -36,7 +36,16 @@ function parseRun(run: RunFormat): Run
     };
 }
 
-export function groupAccessesByTime(accesses: MemoryAccessFormat[]): MemoryAccessGroup[]
+function normalizeIndex({x, y, z}: {x: number, y: number, z: number}): {x: number, y: number, z: number}
+{
+    return {
+        x: x - 1,
+        y: y - 1,
+        z: z - 1
+    };
+}
+
+function groupAccessesByTime(accesses: MemoryAccessFormat[]): MemoryAccessGroup[]
 {
     // imperative implementation to exploit already sorted input
 
@@ -48,7 +57,11 @@ export function groupAccessesByTime(accesses: MemoryAccessFormat[]): MemoryAcces
         size, timestamp, kind, space,
         debugId, typeIndex,
         accesses: [{
-            address, threadIdx, blockIdx, warpId
+            id: 0,
+            address,
+            threadIdx: normalizeIndex(threadIdx),
+            blockIdx: normalizeIndex(blockIdx),
+            warpId
         }]
     });
 
@@ -62,8 +75,11 @@ export function groupAccessesByTime(accesses: MemoryAccessFormat[]): MemoryAcces
             groups.push(createGroup(accesses[i]));
         }
         else groups[groups.length - 1].accesses.push({
-            address, threadIdx,
-            blockIdx, warpId
+            id: groups[groups.length - 1].accesses.length,
+            address,
+            threadIdx: normalizeIndex(threadIdx),
+            blockIdx: normalizeIndex(blockIdx),
+            warpId
         });
     }
 

@@ -31,6 +31,7 @@ export interface MemoryAccessGroup
 
 export interface MemoryAccess
 {
+    id: number;
     threadIdx: Dim3;
     blockIdx: Dim3;
     warpId: number;
