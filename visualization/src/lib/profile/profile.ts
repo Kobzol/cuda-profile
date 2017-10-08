@@ -1,14 +1,21 @@
 import {FileType, TraceFile} from '../file-load/file';
-import {Metadata} from './metadata';
-import {Trace} from './trace';
-import {Profile} from './profile';
-import {Run} from './run';
+import {Run} from '../format/run';
+import * as _ from 'lodash';
+import {Trace} from '../format/trace';
+import {MemoryAccess} from '../format/memory-access';
+import {Metadata} from '../format/metadata';
 
 export interface Kernel
 {
     name: string;
     metadata?: Metadata;
     traces: Trace[];
+}
+
+export interface Profile
+{
+    run: Run;
+    kernels: Kernel[];
 }
 
 function prepareKey(dict: {[key: string]: Kernel}, key: Metadata | Trace)
@@ -56,4 +63,12 @@ export function buildProfile(files: TraceFile[]): Profile
         run: run,
         kernels: Object.keys(kernelMap).map(key => kernelMap[key])
     };
+}
+
+export function groupAccessesByTime(accesses: MemoryAccess[]): MemoryAccess[][]
+{
+    const grouped = _.groupBy(accesses, access => access.timestamp);
+    const sortedKeys = _.keys(grouped).sort();
+
+    return sortedKeys.map(key => grouped[key]);
 }

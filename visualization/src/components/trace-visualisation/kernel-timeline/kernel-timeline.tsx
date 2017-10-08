@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 import './kernel-timeline.css';
 import {Panel} from 'react-bootstrap';
 import Timeline from 'react-visjs-timeline';
-import {Profile} from '../../lib/trace/profile';
+import {Profile} from '../../lib/profile/profile';
 import * as moment from 'moment';
 import {flatMap} from 'lodash';
 import {TraceSelection} from '../../lib/trace/trace-selection';
@@ -23,7 +23,8 @@ export class KernelTimeline extends PureComponent<Props>
 
         const options = {
             width: '100%',
-            zoomMin: 100,
+            minHeight: '120px',
+            zoomMin: 10,
             zoomMax: 60000,
             format: {
                 minorLabels: {
@@ -31,8 +32,7 @@ export class KernelTimeline extends PureComponent<Props>
                 }
             },
             showTooltips: true,
-            start: start,
-            end: end,
+            start, end,
             min: start,
             max: end,
             dataAttributes: ['id']
