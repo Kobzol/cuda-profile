@@ -2,12 +2,12 @@ import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
-import {Metadata} from '../trace/metadata';
-import {Trace} from '../trace/trace';
+import {Metadata} from '../format/metadata';
 import {readFileBinary, readFileText} from '../util/fs';
 import {createWorkerJob} from '../util/worker';
 import {InvalidFileContent, InvalidFileFormat} from './errors';
-import {Run} from '../trace/run';
+import {Run} from '../format/run';
+import {Trace} from '../format/trace';
 
 export enum FileType
 {

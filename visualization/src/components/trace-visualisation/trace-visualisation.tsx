@@ -1,18 +1,21 @@
 import React, {PureComponent} from 'react';
 import {connect} from 'react-redux';
 import {TraceFile} from '../../lib/file-load/file';
-import {buildProfile, selectTrace} from '../../lib/trace/actions';
+import {buildProfile, selectAccessGroup, selectTrace} from '../../lib/trace/actions';
 import {AppState} from '../../lib/state/reducers';
-import {KernelTimeline} from '../kernel-timeline/kernel-timeline';
-import {Profile} from '../../lib/trace/profile';
+import {KernelTimeline} from './kernel-timeline/kernel-timeline';
+import {Profile} from '../../lib/profile/profile';
 import {TraceSelection} from '../../lib/trace/trace-selection';
-import {Kernel} from '../../lib/trace/kernel';
-import {Trace} from '../../lib/trace/trace';
-import {selectedKernel, selectedTrace} from '../../lib/trace/reducer';
-import {AccessTimeline} from '../access-timeline/access-timeline';
+import {Kernel} from '../../lib/profile/kernel';
+import {Trace} from '../../lib/profile/trace';
+import {selectedAccessGroup, selectedKernel, selectedTrace} from '../../lib/trace/reducer';
+import {AccessTimeline} from './access-timeline/access-timeline';
 import {ToggleWrapper} from '../toggle-wrapper/toggle-wrapper';
+import {MemoryMap} from './memory-map/memory-map';
+import {MemoryAccessGroup} from '../../lib/profile/memory-access';
 
 import './trace-visualisation.css';
+import {TraceAccess} from './trace-access/trace-access';
 
 interface StateProps
 {
@@ -20,11 +23,13 @@ interface StateProps
     profile: Profile;
     selectedKernel: Kernel;
     selectedTrace: Trace;
+    selectedAccessGroup: MemoryAccessGroup;
 }
 interface DispatchProps
 {
     buildProfile: (files: TraceFile[]) => {};
     selectTrace: (selection: TraceSelection) => {};
+    selectAccessGroup: (index: number) => {};
 }
 
 type Props = StateProps & DispatchProps;
@@ -73,20 +78,22 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
 
     renderContent = (): JSX.Element =>
     {
+        let content: JSX.Element = null;
+        if (this.props.selectedTrace !== null)
+        {
+            content = this.renderTraceContent(
+                this.props.selectedKernel,
+                this.props.selectedTrace,
+                this.props.selectedAccessGroup
+            );
+        }
         return (
             <div className='trace-visualisation'>
                 {this.renderKernelTimeline()}
-                {this.props.selectedTrace !== null &&
-                    <div className='access-timeline'>
-                        <AccessTimeline
-                            kernel={this.props.selectedKernel}
-                            trace={this.props.selectedTrace} />
-                    </div>
-                }
+                {content}
             </div>
         );
     }
-
     renderKernelTimeline = (): JSX.Element =>
     {
         return (
@@ -101,17 +108,48 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         );
     }
 
+    renderTraceContent = (kernel: Kernel, trace: Trace, accessGroup: MemoryAccessGroup): JSX.Element =>
+    {
+        return (
+            <div>
+                {this.renderMemoryMap(trace)}
+                {accessGroup !== null &&
+                    <TraceAccess
+                        trace={trace}
+                        accessGroup={accessGroup} />}
+                {this.renderAccessTimeline(kernel, trace)}
+            </div>
+        );
+    }
+    renderMemoryMap = (trace: Trace): JSX.Element =>
+    {
+        return (
+            <MemoryMap allocations={trace.allocations} />
+        );
+    }
+    renderAccessTimeline = (kernel: Kernel, trace: Trace): JSX.Element =>
+    {
+        return (
+            <div className='access-timeline'>
+                <AccessTimeline
+                    kernel={kernel}
+                    trace={trace}
+                    selectAccessGroup={this.props.selectAccessGroup} />
+            </div>
+        );
+    }
+
     showKernelTimeline = () =>
     {
-        this.setState({
+        this.setState(() => ({
             showKernelTimeline: true
-        });
+        }));
     }
     hideKernelTimeline = () =>
     {
-        this.setState({
+        this.setState(() => ({
             showKernelTimeline: false
-        });
+        }));
     }
 }
 
@@ -119,8 +157,10 @@ export const TraceVisualisation = connect<StateProps, DispatchProps, {}>((state:
     files: state.fileLoader.files,
     profile: state.trace.profile,
     selectedKernel: selectedKernel(state),
-    selectedTrace: selectedTrace(state)
+    selectedTrace: selectedTrace(state),
+    selectedAccessGroup: selectedAccessGroup(state)
 }), {
     buildProfile: buildProfile.started,
-    selectTrace: selectTrace
+    selectTrace: selectTrace,
+    selectAccessGroup: selectAccessGroup
 })(TraceVisualisationComponent);

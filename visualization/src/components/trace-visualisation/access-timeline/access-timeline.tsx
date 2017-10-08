@@ -1,9 +1,9 @@
 import React, {PureComponent} from 'react';
 import {Panel} from 'react-bootstrap';
 import Timeline from 'react-visjs-timeline';
-import {Kernel} from '../../lib/profile/kernel';
-import {Trace} from '../../lib/profile/trace';
-import {AccessType} from '../../lib/profile/memory-access';
+import {Kernel} from '../../../lib/profile/kernel';
+import {Trace} from '../../../lib/profile/trace';
+import {AccessType} from '../../../lib/profile/memory-access';
 
 interface Props
 {

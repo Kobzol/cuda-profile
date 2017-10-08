@@ -4,3 +4,8 @@ html, body {
 .app, .content, #root {
     height: 100%;
 }
+
+/* Global overrides */
+.vis-timeline {
+    overflow: visible;
+}
