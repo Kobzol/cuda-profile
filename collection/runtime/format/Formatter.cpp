@@ -53,6 +53,7 @@ picojson::value cupr::Formatter::jsonify(const cupr::AllocRecord& record)
 
 void cupr::Formatter::outputKernelTraceJson(std::ostream& os,
                                             const std::string& kernel,
+                                            dim3 dimensions[2],
                                             const std::vector<cupr::AccessRecord>& accesses,
                                             const std::vector<cupr::AllocRecord>& allocations,
                                             double start,
@@ -65,7 +66,17 @@ void cupr::Formatter::outputKernelTraceJson(std::ostream& os,
             {"allocations",  this->jsonify(allocations)},
             {"accesses",   this->jsonify(accesses)},
             {"start", picojson::value(start)},
-            {"end", picojson::value(end)}
+            {"end", picojson::value(end)},
+            {"gridDim",  picojson::value(picojson::object {
+                    {"x", picojson::value((double) dimensions[0].x)},
+                    {"y", picojson::value((double) dimensions[0].y)},
+                    {"z", picojson::value((double) dimensions[0].z)}
+            })},
+            {"blockDim",  picojson::value(picojson::object {
+                    {"x", picojson::value((double) dimensions[1].x)},
+                    {"y", picojson::value((double) dimensions[1].y)},
+                    {"z", picojson::value((double) dimensions[1].z)}
+            })}
     });
 
     os << value.serialize(prettify);
@@ -73,6 +84,7 @@ void cupr::Formatter::outputKernelTraceJson(std::ostream& os,
 
 void cupr::Formatter::outputKernelTraceProtobuf(std::ostream& os,
                                                 const std::string& kernel,
+                                                dim3 dimensions[2],
                                                 const std::vector<cupr::AccessRecord>& accesses,
                                                 const std::vector<cupr::AllocRecord>& allocations,
                                                 double start,
@@ -119,6 +131,12 @@ void cupr::Formatter::outputKernelTraceProtobuf(std::ostream& os,
     trace.set_start(start);
     trace.set_end(end);
     trace.set_type("trace");
+    trace.mutable_griddim()->set_x(dimensions[0].x);
+    trace.mutable_griddim()->set_y(dimensions[0].y);
+    trace.mutable_griddim()->set_z(dimensions[0].z);
+    trace.mutable_blockdim()->set_x(dimensions[1].x);
+    trace.mutable_blockdim()->set_y(dimensions[1].y);
+    trace.mutable_blockdim()->set_z(dimensions[1].z);
     trace.SerializeToOstream(&os);
 #endif
 }

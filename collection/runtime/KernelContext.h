@@ -15,6 +15,7 @@ namespace cupr
         const char* kernelName;
         AccessRecord* deviceAccessRecords;
         AllocRecord* deviceSharedBuffers;
+        dim3* deviceDimensions;
         CudaTimer* timer;
     };
 }

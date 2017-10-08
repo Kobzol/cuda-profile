@@ -21,7 +21,8 @@ void Emitter::emitProgramRun()
     runFile.flush();
 }
 
-void Emitter::emitKernelTrace(const std::string& kernelName, const std::vector<AccessRecord>& records,
+void Emitter::emitKernelTrace(const std::string& kernelName, dim3 dimensions[2],
+                              const std::vector<AccessRecord>& records,
                               const std::vector<AllocRecord>& allocations, float duration)
 {
     std::string kernelFile = this->getFilePath(std::string(kernelName) + "-" + std::to_string(this->kernelCounter++));
@@ -31,13 +32,14 @@ void Emitter::emitKernelTrace(const std::string& kernelName, const std::vector<A
 
     if (Parameters::isProtobufEnabled())
     {
-        this->emitKernelTraceProtobuf(kernelFile, kernelName, records, allocations, start, end);
+        this->emitKernelTraceProtobuf(kernelFile, kernelName, dimensions, records, allocations, start, end);
     }
-    else this->emitKernelTraceJson(kernelFile, kernelName, records, allocations, start, end);
+    else this->emitKernelTraceJson(kernelFile, kernelName, dimensions, records, allocations, start, end);
 }
 
 void Emitter::emitKernelTraceJson(const std::string& fileName,
                                   const std::string& kernel,
+                                  dim3 dimensions[2],
                                   const std::vector<AccessRecord>& records,
                                   const std::vector<AllocRecord>& allocations,
                                   double start, double end)
@@ -45,13 +47,14 @@ void Emitter::emitKernelTraceJson(const std::string& fileName,
     std::fstream kernelOutput(fileName + ".trace.json", std::fstream::out);
 
     Formatter formatter;
-    formatter.outputKernelTraceJson(kernelOutput, kernel, records, allocations, start, end,
+    formatter.outputKernelTraceJson(kernelOutput, kernel, dimensions, records, allocations, start, end,
                                     Parameters::isPrettifyEnabled());
     kernelOutput.flush();
 }
 
 void Emitter::emitKernelTraceProtobuf(const std::string& fileName,
                                       const std::string& kernel,
+                                      dim3 dimensions[2],
                                       const std::vector<AccessRecord>& records,
                                       const std::vector<AllocRecord>& allocations,
                                       double start, double end)
@@ -59,7 +62,7 @@ void Emitter::emitKernelTraceProtobuf(const std::string& fileName,
     std::fstream kernelOutput(fileName + ".trace.protobuf", std::fstream::out);
 
     Formatter formatter;
-    formatter.outputKernelTraceProtobuf(kernelOutput, kernel, records, allocations, start, end);
+    formatter.outputKernelTraceProtobuf(kernelOutput, kernel, dimensions, records, allocations, start, end);
     kernelOutput.flush();
 }
 

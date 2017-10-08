@@ -15,6 +15,7 @@ namespace cupr
         void emitProgramRun();
 
         void emitKernelTrace(const std::string& kernelName,
+                             dim3 dimensions[2],
                              const std::vector<AccessRecord>& records,
                              const std::vector<AllocRecord>& allocations,
                              float duration);
@@ -22,12 +23,14 @@ namespace cupr
     private:
         void emitKernelTraceJson(const std::string& fileName,
                                  const std::string& kernel,
+                                 dim3 dimensions[2],
                                  const std::vector<AccessRecord>& records,
                                  const std::vector<AllocRecord>& allocations,
                                  double start,
                                  double end);
         void emitKernelTraceProtobuf(const std::string& fileName,
                                      const std::string& kernel,
+                                     dim3 dimensions[2],
                                      const std::vector<AccessRecord>& records,
                                      const std::vector<AllocRecord>& allocations,
                                      double start,

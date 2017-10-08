@@ -75,3 +75,29 @@ def test_trace_multiple_time(profile, format):
     }""", format=format)
     info = (data[kernel_file("kernel", 0, format)], data[kernel_file("kernel", 1, format)])
     assert info[0]["start"] < info[1]["start"]
+
+
+@param_all_formats
+def test_trace_dimensions(profile, format):
+    data = profile("""
+    #include <cstdio>
+    __global__ void kernel() {
+        int x = threadIdx.x;
+    }
+    int main() {
+        dim3 gridDim(3, 4, 5);
+        dim3 blockDim(6, 7, 8);
+        
+        kernel<<<gridDim, blockDim>>>();
+        return 0;
+    }
+    """, format=format)
+    grid = data[kernel_file("kernel", format=format)]["gridDim"]
+    assert grid["x"] == 3
+    assert grid["y"] == 4
+    assert grid["z"] == 5
+
+    block = data[kernel_file("kernel", format=format)]["blockDim"]
+    assert block["x"] == 6
+    assert block["y"] == 7
+    assert block["z"] == 8

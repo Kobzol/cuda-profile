@@ -31,6 +31,7 @@ namespace cupr
     static __device__ uint32_t deviceAccessRecordIndex;
     static __device__ cupr::AllocRecord* deviceSharedBuffers;
     static __device__ uint32_t deviceSharedBufferIndex;
+    static __device__ dim3* deviceDimensions;
 }
 extern "C"
 {
@@ -50,8 +51,9 @@ extern "C"
         typedef cudaError (*cudaAllocateType)(void**, size_t);
 
         cudaAllocateType allocFn = cupr::Parameters::isMappedMemoryEnabled() ? (cudaAllocateType) cudaMallocHost : (cudaAllocateType) cudaMalloc;
-        allocFn((void**) &context->deviceAccessRecords, sizeof(cupr::AccessRecord) * bufferSize);
-        allocFn((void**) &context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * bufferSize);
+        CHECK_CUDA_CALL(allocFn((void**) &context->deviceAccessRecords, sizeof(cupr::AccessRecord) * bufferSize));
+        CHECK_CUDA_CALL(allocFn((void**) &context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * bufferSize));
+        CHECK_CUDA_CALL(allocFn((void**) &context->deviceDimensions, sizeof(dim3) * 2));
 
         const uint32_t zero = 0;
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceAccessRecords, &context->deviceAccessRecords, sizeof(context->deviceAccessRecords)));
@@ -59,6 +61,7 @@ extern "C"
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceSharedBuffers, &context->deviceSharedBuffers, sizeof(context->deviceSharedBuffers)));
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceSharedBufferIndex, &zero, sizeof(zero)));
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceBufferSize, &bufferSize, sizeof(bufferSize)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceDimensions, &context->deviceDimensions, sizeof(context->deviceDimensions)));
 
         context->timer->start();
     }
@@ -68,8 +71,8 @@ extern "C"
         CHECK_CUDA_CALL(cudaDeviceSynchronize());
 
         uint32_t accessCount = 0, sharedBuffersCount = 0;;
-        CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&accessCount, cupr::deviceAccessRecordIndex, sizeof(uint32_t)));
-        CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&sharedBuffersCount, cupr::deviceSharedBufferIndex, sizeof(uint32_t)));
+        CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&accessCount, cupr::deviceAccessRecordIndex, sizeof(cupr::deviceAccessRecordIndex)));
+        CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&sharedBuffersCount, cupr::deviceSharedBufferIndex, sizeof(cupr::deviceSharedBufferIndex)));
 
         std::vector<cupr::AccessRecord> records(accessCount);
         if (accessCount > 0)
@@ -83,18 +86,23 @@ extern "C"
             CHECK_CUDA_CALL(cudaMemcpy(sharedBuffers.data(), context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * sharedBuffersCount, cudaMemcpyDeviceToHost));
         }
 
+        dim3 dimensions[2];
+        CHECK_CUDA_CALL(cudaMemcpy(dimensions, context->deviceDimensions, sizeof(dim3) * 2, cudaMemcpyDeviceToHost));
+
         typedef cudaError (*cudaFreeType)(void*);
 
         cudaFreeType freeFn = cupr::Parameters::isMappedMemoryEnabled() ? (cudaFreeType) cudaFreeHost : (cudaFreeType) cudaFree;
         CHECK_CUDA_CALL(freeFn(context->deviceAccessRecords));
         CHECK_CUDA_CALL(freeFn(context->deviceSharedBuffers));
+        CHECK_CUDA_CALL(freeFn(context->deviceDimensions));
 
         for (auto& alloc: cupr::state.allocations)
         {
             sharedBuffers.push_back(alloc);
         }
 
-        cupr::state.emitter.emitKernelTrace(context->kernelName, records, sharedBuffers, context->timer->get_time());
+        cupr::state.emitter.emitKernelTrace(context->kernelName, dimensions,
+                                            records, sharedBuffers, context->timer->get_time());
     }
     void CU_PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type)
     {
@@ -145,6 +153,11 @@ extern "C"
                 blockIdx.x == 0 &&
                 blockIdx.y == 0 &&
                 blockIdx.z == 0;
+    }
+    extern "C" __device__ void CU_PREFIX(storeDimensions)()
+    {
+        cupr::deviceDimensions[0] = gridDim;
+        cupr::deviceDimensions[1] = blockDim;
     }
     extern "C" __device__ void CU_PREFIX(markSharedBuffer)(void* address, size_t size, size_t elementSize,
                                                            size_t type)

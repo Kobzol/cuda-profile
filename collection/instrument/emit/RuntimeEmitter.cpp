@@ -83,7 +83,7 @@ Value* RuntimeEmitter::createKernelContext(Value* kernelName)
     return alloc;
 }
 
-void RuntimeEmitter::markSharedBuffers(const std::vector<GlobalVariable*>& sharedBuffers)
+void RuntimeEmitter::emitFirstThreadActions(const std::vector<GlobalVariable*>& sharedBuffers)
 {
     Function* function = this->getBuilder().GetInsertBlock()->getParent();
     Module* module = function->getParent();
@@ -109,6 +109,7 @@ void RuntimeEmitter::markSharedBuffers(const std::vector<GlobalVariable*>& share
                 this->context.getValues().int64(this->context.getTypeMapper().mapType(buffer->getType()))
         });
     }
+    this->builder.CreateCall(this->getStoreDimensionsFunction());
     this->builder.CreateBr(sync->getParent());
 
     this->builder.SetInsertPoint(entryBlock);
@@ -210,5 +211,12 @@ Function* RuntimeEmitter::getMarkSharedBufferFunction()
             this->context.getTypes().int64(),
             this->context.getTypes().int64(),
             this->context.getTypes().int64(),
+            nullptr));
+}
+Function* RuntimeEmitter::getStoreDimensionsFunction()
+{
+    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+            RuntimeEmitter::runtimePrefix("storeDimensions"),
+            this->context.getTypes().voidType(),
             nullptr));
 }

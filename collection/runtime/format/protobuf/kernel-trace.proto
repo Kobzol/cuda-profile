@@ -1,5 +1,6 @@
 syntax = "proto2";
 
+import "dim3.proto";
 import "memory-access.proto";
 import "alloc-record.proto";
 
@@ -12,4 +13,6 @@ message KernelTrace {
     required double start = 4;
     required double end = 5;
     required string type = 6;
+    required cupr.proto.Dim3 gridDim = 7;
+    required cupr.proto.Dim3 blockDim = 8;
 }

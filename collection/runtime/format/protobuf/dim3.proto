@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+package cupr.proto;
+
+message Dim3 {
+    required int32 x = 1;
+    required int32 y = 2;
+    required int32 z = 3;
+}

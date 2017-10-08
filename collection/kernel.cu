@@ -3,12 +3,12 @@
 
 __global__ void kernel(int *p)
 {
-    *p = 5;
+    p[threadIdx.x] = 5;
 }
 
 void cudaTest()
 {
-    const int COUNT = 32;
+    const int COUNT = 16;
 
     int* dPtr;
     int data[COUNT] = { 0 };
@@ -16,7 +16,7 @@ void cudaTest()
     cudaMalloc((void**) &dPtr, sizeof(data));
     cudaMemcpy(dPtr, data, sizeof(data), cudaMemcpyHostToDevice);
 
-    kernel<<<32, COUNT>>>(dPtr);
+    kernel<<<2, COUNT>>>(dPtr);
 
     int ptr[COUNT];
     cudaMemcpy(ptr, dPtr, sizeof(data), cudaMemcpyDeviceToHost);

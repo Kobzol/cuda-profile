@@ -1,16 +1,12 @@
 syntax = "proto2";
 
+import "dim3.proto";
+
 package cupr.proto;
 
-message Dim3 {
-    required int32 x = 1;
-    required int32 y = 2;
-    required int32 z = 3;
-}
-
 message MemoryAccess {
-    required Dim3 threadIdx = 1;
-    required Dim3 blockIdx = 2;
+    required cupr.proto.Dim3 threadIdx = 1;
+    required cupr.proto.Dim3 blockIdx = 2;
     required int32 warpId = 3;
     required int32 debugId = 4;
     required string address = 5;

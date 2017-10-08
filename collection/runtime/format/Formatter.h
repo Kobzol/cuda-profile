@@ -18,6 +18,7 @@ namespace cupr
     public:
         void outputKernelTraceJson(std::ostream& os,
                                    const std::string& kernel,
+                                   dim3 dimensions[2],
                                    const std::vector<AccessRecord>& accesses,
                                    const std::vector<AllocRecord>& allocations,
                                    double start,
@@ -26,6 +27,7 @@ namespace cupr
 
         void outputKernelTraceProtobuf(std::ostream& os,
                                        const std::string& kernel,
+                                       dim3 dimensions[2],
                                        const std::vector<AccessRecord>& accesses,
                                        const std::vector<AllocRecord>& allocations,
                                        double start,

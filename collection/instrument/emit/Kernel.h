@@ -43,5 +43,5 @@ private:
     std::vector<llvm::GlobalVariable*> extractSharedBuffers(llvm::Module* module);
     bool isSharedBuffer(llvm::GlobalVariable& variable);
 
-    void emitSharedBuffers(llvm::Function* function, const std::vector<llvm::GlobalVariable*>& sharedBuffers);
+    void emitFirstThreadActions(llvm::Function* function, const std::vector<llvm::GlobalVariable*>& sharedBuffers);
 };

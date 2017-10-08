@@ -49,7 +49,7 @@ public:
 
     llvm::Value* createKernelContext(llvm::Value* kernelName);
 
-    void markSharedBuffers(const std::vector<llvm::GlobalVariable*>& sharedBuffers);
+    void emitFirstThreadActions(const std::vector<llvm::GlobalVariable*>& sharedBuffers);
 
 private:
     llvm::Function* getStoreFunction();
@@ -62,6 +62,7 @@ private:
     llvm::Function* getDestroyKernelContextFunction();
     llvm::Function* getIsFirstThreadFunction();
     llvm::Function* getMarkSharedBufferFunction();
+    llvm::Function* getStoreDimensionsFunction();
 
     Context& context;
     llvm::IRBuilder<> builder;

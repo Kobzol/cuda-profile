@@ -35,7 +35,7 @@ namespace cupr
     }
     inline std::vector<std::string> glob(const std::string& pat)
     {
-        glob_t glob_result;
+        glob_t glob_result{};
         glob(pat.c_str(), GLOB_TILDE, nullptr, &glob_result);
         std::vector<std::string> ret;
         for (int i = 0; i < glob_result.gl_pathc; i++)

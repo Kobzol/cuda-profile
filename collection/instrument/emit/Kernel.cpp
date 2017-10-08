@@ -21,7 +21,7 @@ using namespace llvm;
 void Kernel::handleKernel(Function* function)
 {
     auto sharedBuffers = this->extractSharedBuffers(function->getParent());
-    this->emitSharedBuffers(function, sharedBuffers);
+    this->emitFirstThreadActions(function, sharedBuffers);
 
     auto instructions = this->collectInstructions(function);
     auto debugRecords = this->instrumentInstructions(instructions);
@@ -174,10 +174,8 @@ bool Kernel::isSharedBuffer(GlobalVariable& variable)
     return static_cast<LLVMAddressSpace>(variable.getType()->getAddressSpace()) == LLVMAddressSpace::Shared;
 }
 
-void Kernel::emitSharedBuffers(Function* function, const std::vector<GlobalVariable*>& sharedBuffers)
+void Kernel::emitFirstThreadActions(Function* function, const std::vector<GlobalVariable*>& sharedBuffers)
 {
-    if (sharedBuffers.empty()) return;
-
     RuntimeEmitter emitter(this->context, FunctionUtils::getFirstInstruction(function));
-    emitter.markSharedBuffers(sharedBuffers);
+    emitter.emitFirstThreadActions(sharedBuffers);
 }
