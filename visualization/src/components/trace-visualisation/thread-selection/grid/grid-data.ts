@@ -17,9 +17,9 @@ export interface GridData<T>
 
 export interface GridBounds
 {
-    x: number[];
-    y: number[];
-    z: number[];
+    x: number;
+    y: number;
+    z: number;
 }
 
 export interface DataSelection<T>
@@ -45,13 +45,6 @@ export function createBlockSelector()
         (accessGroup: MemoryAccessGroup) => createBlockData(accessGroup)
     );
 }
-export function createBoundsSelector<T>()
-{
-    return createSelector(
-        (data: DataSelection<T>) => data,
-        (data: DataSelection<T>) => createBounds(data.data, data.selection)
-    );
-}
 
 export function createBlockData(accessGroup: MemoryAccessGroup): GridData<MemoryAccess>
 {
@@ -65,20 +58,4 @@ export function createBlockData(accessGroup: MemoryAccessGroup): GridData<Memory
     }
 
     return data;
-}
-
-export function createBounds<T>(data: GridData<T>, selection: GridSelection): GridBounds
-{
-    const bounds = {
-        z: Object.keys(data).map(k => parseInt(k, 10)),
-        y: Object.keys(data[selection.z]).map(k => parseInt(k, 10)),
-        x: Object.keys(data[selection.z][selection.y]).map(k => parseInt(k, 10))
-    };
-
-    for (const key of Object.keys(bounds))
-    {
-        bounds[key].sort();
-    }
-
-    return bounds;
 }

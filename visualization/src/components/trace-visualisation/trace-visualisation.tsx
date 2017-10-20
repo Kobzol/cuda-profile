@@ -112,19 +112,12 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
     {
         return (
             <div>
-                {this.renderMemoryMap(trace)}
                 {accessGroup !== null &&
                     <TraceAccess
                         trace={trace}
                         accessGroup={accessGroup} />}
                 {this.renderAccessTimeline(kernel, trace)}
             </div>
-        );
-    }
-    renderMemoryMap = (trace: Trace): JSX.Element =>
-    {
-        return (
-            <MemoryMap allocations={trace.allocations} />
         );
     }
     renderAccessTimeline = (kernel: Kernel, trace: Trace): JSX.Element =>

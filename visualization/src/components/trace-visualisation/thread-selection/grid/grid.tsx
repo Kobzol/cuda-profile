@@ -9,7 +9,6 @@ import {GridData, GridSelection} from './grid-data';
 
 interface Props
 {
-    id: string;
     data: GridData<any>;
     selection: GridSelection;
     canvasDimensions: {width: number, height: number};
@@ -88,19 +87,24 @@ export class Grid extends PureComponent<Props>
         });
     }
 
+    componentDidMount()
+    {
+        this.d3(range(64 * 64));
+    }
+
     d3 = (data: number[], selected: number = 0) =>
     {
-        const container = select('#thread-grid');
-        select('body')
-            .on('keydown', x => {
-                this.d3(data, selected + 1);
-                console.log('keydown');
-            });
+        const container = select('#d3-test');
+        //select('body')
+        //    .on('keydown', x => {
+        //        this.d3(data, selected + 1);
+        //        console.log('keydown');
+        //    });
 
-        const width = (container.node() as any).getBoundingClientRect().width;
-        const height = (container.node() as any).getBoundingClientRect().height;
+        const width = 1200;//(container.node() as any).getBoundingClientRect().width;
+        const height = 600;//(container.node() as any).getBoundingClientRect().height;
 
-        const svg = container.select('svg')
+        const svg = container.append('svg')
             .attr('width', width)
             .attr('height', height);
 
@@ -114,10 +118,10 @@ export class Grid extends PureComponent<Props>
 
         const nodeSize = grid.nodeSize();
 
-        const g = svg.select('g');
+        const g = svg.append('g');
 
         const z = zoom()
-            .scaleExtent([8, 10])
+            .scaleExtent([1 / 2, 4])
             .translateExtent([
                 [-nodeSize[0], -nodeSize[1]],
                 [width + nodeSize[0], height + nodeSize[1]]]
@@ -126,7 +130,7 @@ export class Grid extends PureComponent<Props>
                 g.attr('transform', d3.event.transform);
             });
 
-        const selection = svg.select('rect')
+        const selection = svg.append('rect')
             .attr('width', width)
             .attr('height', height)
             .style('fill', 'none')
@@ -146,13 +150,18 @@ export class Grid extends PureComponent<Props>
                 .attr('width', nodeSize[0])
                 .attr('height', nodeSize[1])
                 .attr('fill', (d, i: number) => i === selected ? 'red' : 'rgb(0,0,255)');
+    }
+
+    render()
+    {
+        return <div id='d3-test'></div>;
     }*/
 
     render()
     {
         const layout = this.calculateLayout(
             { rows: this.props.selection.height + 1, cols: this.props.selection.width + 1 },
-            { width: 1600, height: 900 }
+            { width: this.props.canvasDimensions.width, height: this.props.canvasDimensions.height }
         );
         const nodeSize = {
             width: layout.nodeSize()[0],
@@ -163,7 +172,8 @@ export class Grid extends PureComponent<Props>
         const grid = this.renderGrid(layout.nodes(), nodeSize, this.props.selection);
 
         return (
-            <svg width='100%' height='100%' viewBox='0 0 1600 900'>
+            <svg width='100%' height='100%'
+                 viewBox={`0 0 ${this.props.canvasDimensions.width} ${this.props.canvasDimensions.height}`}>
                 <g>{axes}</g>
                 <g>{grid}</g>
             </svg>

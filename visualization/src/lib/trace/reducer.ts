@@ -27,11 +27,21 @@ const reducer = reducerWithInitialState<TraceState>({
             },
             name: "",
             traces: [{
+                gridDimension: {x: 1, y: 1, z: 1},
+                blockDimension: {x: 1, y: 1, z: 1},
                 start: 1,
                 end: 200,
                 allocations: [{
-                    address: "",
-                    size: 1,
+                    address: "0x1000",
+                    size: 30 * 1024 * 1024,
+                    elementSize: 1,
+                    space: 1,
+                    typeString: "",
+                    typeIndex: 1,
+                    active: true
+                },{
+                    address: "0x2000",
+                    size: 100 * 1024 * 1024,
                     elementSize: 1,
                     space: 1,
                     typeString: "",

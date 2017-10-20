@@ -2,24 +2,21 @@ import React, {PureComponent} from 'react';
 import {MemoryAccess, MemoryAccessGroup} from '../../../lib/profile/memory-access';
 import {Grid} from './grid/grid';
 import {
-    GridData, GridSelection, DataSelection, GridBounds,
-    createBlockSelector, createBoundsSelector
+    GridData, GridSelection, GridBounds, createBlockSelector
 } from './grid/grid-data';
 import {GridNavigator} from './grid/grid-navigator';
 import {Selector} from 'reselect';
-import * as _ from 'lodash';
 
 interface Props
 {
-    id: string;
     accessGroup: MemoryAccessGroup;
+    bounds: GridBounds;
 }
 
 interface State
 {
     selection: GridSelection;
     calculateData: Selector<MemoryAccessGroup, GridData<MemoryAccess>>;
-    calculateBounds: Selector<DataSelection<MemoryAccess>, GridBounds>;
 }
 
 const dimensions = [8, 16, 32, 64];
@@ -38,8 +35,7 @@ export class ThreadSelection extends PureComponent<Props, State>
                 width: 32,
                 height: 32
             },
-            calculateData: createBlockSelector(),
-            calculateBounds: createBoundsSelector()
+            calculateData: createBlockSelector()
         };
     }
 
@@ -47,7 +43,6 @@ export class ThreadSelection extends PureComponent<Props, State>
     {
         const data = this.state.calculateData(this.props.accessGroup);
         const selection = this.state.selection;
-        const bounds = this.state.calculateBounds({data, selection});
 
         return (
             <div>
@@ -55,9 +50,8 @@ export class ThreadSelection extends PureComponent<Props, State>
                     selection={selection}
                     onSelectionChanged={this.handleSelectionChange}
                     dimensions={dimensions}
-                    bounds={bounds} />
+                    bounds={this.props.bounds} />
                 <Grid
-                    id={this.props.id}
                     data={data}
                     selection={selection}
                     canvasDimensions={{ width: 1600, height: 900 }} />
@@ -67,22 +61,6 @@ export class ThreadSelection extends PureComponent<Props, State>
 
     handleSelectionChange = (selection: GridSelection) =>
     {
-        selection = this.normalizeSelection(
-            this.state.calculateBounds({
-                data: this.state.calculateData(this.props.accessGroup),
-                selection: this.state.selection
-            }),
-            selection
-        );
-        this.setState(() => ({ selection }));
-    }
-
-    normalizeSelection = (bounds: GridBounds, selection: GridSelection): GridSelection =>
-    {
-        let {z, y, x} = selection;
-        if (_.sortedIndexOf(bounds.z, z) === -1) z = 0;
-        if (_.sortedIndexOf(bounds.z, z) === -1) z = 0;
-        
-        return selection;
+        this.setState(() => ({selection}));
     }
 }

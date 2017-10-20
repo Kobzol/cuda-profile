@@ -1,5 +1,6 @@
 import React, {ChangeEvent, PureComponent} from 'react';
 import {GridBounds, GridSelection} from './grid-data';
+import * as _ from 'lodash';
 
 interface Props
 {
@@ -17,9 +18,7 @@ export class GridNavigator extends PureComponent<Props>
             <div>
                 {this.renderNumberSelect(this.props.dimensions, this.props.selection.width, 'width')}
                 {this.renderNumberSelect(this.props.dimensions, this.props.selection.height, 'height')}
-                {this.renderNumberSelect(this.props.bounds.z, this.props.selection.z, 'z')}
-                {this.renderNumberSelect(this.props.bounds.y, this.props.selection.y, 'y')}
-                {this.renderNumberSelect(this.props.bounds.x, this.props.selection.x, 'x')}
+                {this.renderNumberSelect(_.range(0, this.props.bounds.z), this.props.selection.z, 'z')}
             </div>
         );
     }
