@@ -12,4 +12,5 @@ export interface Trace
     allocations: MemoryAllocation[];
     gridDim: Dim3;
     blockDim: Dim3;
+    warpSize: number;
 }

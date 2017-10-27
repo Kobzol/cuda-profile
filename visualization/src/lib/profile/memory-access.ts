@@ -14,7 +14,7 @@ export enum AddressSpace
     Constant = 2
 }
 
-export interface MemoryAccessGroup
+export interface Warp
 {
     key: string;
     size: number;
@@ -32,7 +32,5 @@ export interface MemoryAccess
 {
     id: number;
     threadIdx: Dim3;
-    blockIdx: Dim3;
-    warpId: number;
     address: string;
 }

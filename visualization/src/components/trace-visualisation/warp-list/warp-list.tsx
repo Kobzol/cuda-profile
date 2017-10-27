@@ -1,12 +1,12 @@
 import React, {PureComponent} from 'react';
 import {Trace} from '../../../lib/profile/trace';
-import {MemoryAccessGroup} from '../../../lib/profile/memory-access';
-import {ThreadSelection} from '../thread-selection/thread-selection';
+import {Warp} from '../../../lib/profile/memory-access';
+import {ThreadGrid} from '../thread-grid/thread-grid';
 
 interface Props
 {
     trace: Trace;
-    warps: MemoryAccessGroup[];
+    warps: Warp[];
 }
 
 export class WarpList extends PureComponent<Props>
@@ -16,10 +16,11 @@ export class WarpList extends PureComponent<Props>
         return (
             <div>
             {this.props.warps.map(warp =>
-                <ThreadSelection
+                <ThreadGrid
                     key={warp.key}
-                    bounds={this.props.trace.blockDimension}
-                    accessGroup={warp} />
+                    trace={this.props.trace}
+                    warp={warp}
+                    canvasDimensions={{width: 120, height: 30}}/>
                 )}
             </div>
         );

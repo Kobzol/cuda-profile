@@ -9,12 +9,12 @@ import {TraceSelection} from '../../lib/trace/trace-selection';
 import {Kernel} from '../../lib/profile/kernel';
 import {Trace} from '../../lib/profile/trace';
 import {selectedAccessGroup, selectedKernel, selectedTrace} from '../../lib/trace/reducer';
-import {AccessTimeline} from './access-timeline/access-timeline';
+import {WarpTimeline} from './warp-timeline/warp-timeline';
 import {ToggleWrapper} from '../toggle-wrapper/toggle-wrapper';
-import {MemoryAccessGroup} from '../../lib/profile/memory-access';
+import {Warp} from '../../lib/profile/memory-access';
 
 import './trace-visualisation.css';
-import {WarpList} from './warp-list/trace-access';
+import {WarpList} from './warp-list/warp-list';
 
 interface StateProps
 {
@@ -22,7 +22,7 @@ interface StateProps
     profile: Profile;
     selectedKernel: Kernel;
     selectedTrace: Trace;
-    selectedAccessGroup: MemoryAccessGroup;
+    selectedAccessGroup: Warp;
 }
 interface DispatchProps
 {
@@ -107,14 +107,14 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         );
     }
 
-    renderTraceContent = (kernel: Kernel, trace: Trace, accessGroup: MemoryAccessGroup): JSX.Element =>
+    renderTraceContent = (kernel: Kernel, trace: Trace, accessGroup: Warp): JSX.Element =>
     {
         return (
             <div>
                 {accessGroup !== null &&
                     <WarpList
                         trace={trace}
-                        accessGroup={accessGroup} />}
+                        warps={[accessGroup]} />}
                 {this.renderAccessTimeline(kernel, trace)}
             </div>
         );
@@ -123,7 +123,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
     {
         return (
             <div className='access-timeline'>
-                <AccessTimeline
+                <WarpTimeline
                     kernel={kernel}
                     trace={trace}
                     selectAccessGroup={this.props.selectAccessGroup} />

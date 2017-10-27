@@ -1,7 +1,7 @@
 import {FileType, TraceFile} from '../file-load/file';
 import {Run} from './run';
 import {Trace} from './trace';
-import {MemoryAccessGroup} from './memory-access';
+import {Warp} from './memory-access';
 import {Metadata} from './metadata';
 import {Kernel} from './kernel';
 import {Profile} from './profile';
@@ -41,10 +41,11 @@ function parseTrace(trace: TraceFormat, metadata: Metadata): Trace
     return {
         start: trace.start,
         end: trace.end,
-        accessGroups: groupAccessesByWarp(trace.accesses, metadata),
+        warps: groupAccessesByWarp(trace.accesses, metadata),
         allocations: parseAllocations(trace.allocations, metadata),
         gridDimension: trace.gridDim,
-        blockDimension: trace.blockDim
+        blockDimension: trace.blockDim,
+        warpSize: trace.warpSize
     };
 }
 
@@ -56,23 +57,14 @@ function parseRun(run: RunFormat): Run
     };
 }
 
-function normalizeIndex({x, y, z}: {x: number, y: number, z: number}): {x: number, y: number, z: number}
-{
-    return {
-        x: x - 1,
-        y: y - 1,
-        z: z - 1
-    };
-}
-
-function groupAccessesByWarp(accesses: MemoryAccessFormat[], metadata: Metadata): MemoryAccessGroup[]
+function groupAccessesByWarp(accesses: MemoryAccessFormat[], metadata: Metadata): Warp[]
 {
     // imperative implementation to exploit already sorted input
     if (accesses.length === 0) return [];
 
     const createGroup = ({
-        size, timestamp, kind, space, debugId, typeIndex, address, threadIdx, blockIdx, warpId
-     }: MemoryAccessFormat, key: string): MemoryAccessGroup => ({
+        size, timestamp, kind, space, debugId, typeIndex, address, threadIdx, blockIdx, warpId }: MemoryAccessFormat,
+                         key: string): Warp => ({
         size, timestamp, kind, space,
         location: debugId === -1 ? null : metadata.locations[debugId],
         type: metadata.typeMap[typeIndex],
@@ -80,11 +72,11 @@ function groupAccessesByWarp(accesses: MemoryAccessFormat[], metadata: Metadata)
         key, accesses: []
     });
 
-    const dict: Dictionary<MemoryAccessGroup> = {};
+    const dict: Dictionary<Warp> = {};
     for (let i = 0; i < accesses.length; i++)
     {
-        const {address, threadIdx, blockIdx, warpId} = accesses[i];
-        const key = `${blockIdx.z}.${blockIdx.y}.${blockIdx.x}.${warpId}`;
+        const {timestamp, address, threadIdx, blockIdx, warpId} = accesses[i];
+        const key = `${blockIdx.z}.${blockIdx.y}.${blockIdx.x}.${warpId}:${timestamp}`;
 
         if (!hasOwnProperty(dict, key))
         {
@@ -93,15 +85,11 @@ function groupAccessesByWarp(accesses: MemoryAccessFormat[], metadata: Metadata)
         dict[key].accesses.push({
             id: dict[key].accesses.length,
             address,
-            threadIdx: normalizeIndex(threadIdx),
-            blockIdx: normalizeIndex(blockIdx),
-            warpId
+            threadIdx: threadIdx
         });
     }
 
-    const keys = Object.keys(dict);
-    keys.sort();
-    return keys.map(key => dict[key]);
+    return Object.keys(dict).map(key => dict[key]).slice(0, 100);
 }
 
 export function parseProfile(files: TraceFile[]): Profile

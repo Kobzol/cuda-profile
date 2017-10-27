@@ -47,9 +47,9 @@ export const selectedAccessGroup = createSelector(
     (state: TraceState, trace: Trace) => {
         if (state.selectedAccessGroup !== null &&
             state.selectedAccessGroup >= 0 &&
-            state.selectedAccessGroup < trace.accessGroups.length)
+            state.selectedAccessGroup < trace.warps.length)
         {
-            return trace.accessGroups[state.selectedAccessGroup];
+            return trace.warps[state.selectedAccessGroup];
         }
 
         return null;

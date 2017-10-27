@@ -1,15 +1,10 @@
 import React, {PureComponent} from 'react';
-import {select} from 'd3';
-import {zoom} from 'd3-zoom';
-import * as d3 from 'd3';
 import GridLayout from 'd3-v4-grid';
 import {range} from 'd3-array';
-import * as Konva from 'konva';
-import {GridData, GridSelection} from './grid-data';
+import {GridSelection} from './grid-data';
 
 interface Props
 {
-    data: GridData<any>;
     selection: GridSelection;
     canvasDimensions: {width: number, height: number};
 }
@@ -264,13 +259,6 @@ export class Grid extends PureComponent<Props>
 
     getElement = (z: number, x: number, y: number): {} | null =>
     {
-        const zDim = this.props.data[z];
-        if (zDim === undefined) return null;
-        const xDim = zDim[x];
-        if (xDim === undefined) return null;
-        const yDim = xDim[y];
-        if (yDim === undefined) return null;
-
-        return yDim;
+        return null;
     }
 }

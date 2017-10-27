@@ -12,7 +12,7 @@ interface Props
     selectAccessGroup: (index: number) => void;
 }
 
-export class AccessTimeline extends PureComponent<Props>
+export class WarpTimeline extends PureComponent<Props>
 {
 
     render()
@@ -49,7 +49,8 @@ export class AccessTimeline extends PureComponent<Props>
 
     createTimelineItems = (kernel: Kernel, trace: Trace) =>
     {
-        return trace.accessGroups.map((group, index) => {
+        console.log(trace.warps);
+        return trace.warps.map((group, index) => {
             const start = this.recalculateTime(trace, group.timestamp);
             const end = this.recalculateTime(trace, group.timestamp) + 2;
             const content = `#${index}`;
@@ -77,8 +78,8 @@ export class AccessTimeline extends PureComponent<Props>
 
     private recalculateTime(trace: Trace, timestamp: number): number
     {
-        const lastAccess = trace.accessGroups[trace.accessGroups.length - 1].timestamp;
-        const firstAccess = trace.accessGroups[0].timestamp;
+        const lastAccess = trace.warps[trace.warps.length - 1].timestamp;
+        const firstAccess = trace.warps[0].timestamp;
         if (firstAccess === lastAccess) return (trace.start + trace.end) / 2;
 
         const accessLength = lastAccess - firstAccess;
