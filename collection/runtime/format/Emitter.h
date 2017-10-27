@@ -3,46 +3,36 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <memory>
 #include "../tracedata/AccessRecord.h"
 #include "../tracedata/AllocRecord.h"
+#include "TraceFormatter.h"
 
 namespace cupr
 {
     class Emitter
     {
     public:
-        void initialize();
+        void initialize(std::unique_ptr<TraceFormatter> formatter, bool prettify);
         void emitProgramRun();
 
         void emitKernelTrace(const std::string& kernelName,
-                             dim3 dimensions[2],
+                             const DeviceDimensions& dimensions,
                              const std::vector<AccessRecord>& records,
                              const std::vector<AllocRecord>& allocations,
                              float duration);
 
     private:
-        void emitKernelTraceJson(const std::string& fileName,
-                                 const std::string& kernel,
-                                 dim3 dimensions[2],
-                                 const std::vector<AccessRecord>& records,
-                                 const std::vector<AllocRecord>& allocations,
-                                 double start,
-                                 double end);
-        void emitKernelTraceProtobuf(const std::string& fileName,
-                                     const std::string& kernel,
-                                     dim3 dimensions[2],
-                                     const std::vector<AccessRecord>& records,
-                                     const std::vector<AllocRecord>& allocations,
-                                     double start,
-                                     double end);
-
         std::string generateDirectoryName();
         std::string getFilePath(const std::string& name);
+
+        void copyMetadataFiles();
+
+        std::unique_ptr<TraceFormatter> formatter;
+        bool prettify;
 
         int kernelCounter = 0;
         int64_t timestampStart = getTimestamp();
         std::string directory;
-
-        void copyMetadataFiles();
     };
 }

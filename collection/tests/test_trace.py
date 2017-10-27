@@ -101,3 +101,44 @@ def test_trace_dimensions(profile, format):
     assert block["x"] == 6
     assert block["y"] == 7
     assert block["z"] == 8
+
+
+@param_all_formats
+def test_warp_size(profile, format):
+    data = profile("""
+    #include <cstdio>
+    __global__ void kernel() {
+        int x = threadIdx.x;
+    }
+    int main() {
+        kernel<<<1, 1>>>();
+        return 0;
+    }
+    """, format=format)
+    assert data[kernel_file("kernel", format=format)]["warpSize"] == 32
+
+
+@param_all_formats
+def test_warp_id(profile, format):
+    data = profile("""
+    #include <cstdio>
+    __global__ void kernel(int* p) {
+        *p = threadIdx.x;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int) * 64);
+        kernel<<<1, 64>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }
+    """, format=format)
+    accesses = data[kernel_file("kernel", format=format)]["accesses"]
+    warps = {0: 0, 1: 0}
+    for access in accesses:
+        warpid = access["warpId"]
+        assert warpid in warps
+        warps[warpid] = warps[warpid] + 1
+
+    assert warps[0] == 32
+    assert warps[1] == 32

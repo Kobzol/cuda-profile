@@ -6,10 +6,10 @@ FILE(GLOB PROTOBUF_CXX_FILES format/protobuf/generated/*.cc)
 set(SOURCE_FILES
         CudaTimer.cpp
         format/Emitter.cpp
-        format/Formatter.cpp
+        format/TraceFormatter.cpp
         RuntimeState.cpp
         Init.cpp
-        Parameters.cpp)
+        Parameters.cpp format/JsonTraceFormatter.cpp format/JsonTraceFormatter.h format/ProtobufTraceFormatter.cpp format/ProtobufTraceFormatter.h)
 
 add_library(runtime SHARED ${SOURCE_FILES} ${PROTOBUF_CXX_FILES})
 target_link_libraries(runtime ${CUDA_LIBRARIES} ${PROTOBUF_LIBRARIES})

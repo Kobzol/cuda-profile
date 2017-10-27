@@ -8,5 +8,5 @@ namespace cupr
 __attribute__((destructor))
 static void closeEmitter()
 {
-    cupr::state.emitter.emitProgramRun();
+    cupr::state.getEmitter().emitProgramRun();
 }

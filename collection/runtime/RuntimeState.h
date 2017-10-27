@@ -8,11 +8,12 @@ namespace cupr
     class RuntimeState
     {
     public:
-        RuntimeState()
-        {
-            this->emitter.initialize();
-        }
+        RuntimeState();
 
+        std::vector<AllocRecord>& getAllocations();
+        Emitter& getEmitter();
+
+    private:
         std::vector<cupr::AllocRecord> allocations;
         Emitter emitter;
     };

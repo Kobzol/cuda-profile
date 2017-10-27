@@ -1,27 +1,32 @@
 #include "Emitter.h"
 
-#include "Formatter.h"
-#include "../Parameters.h"
+#include "picojson.h"
 
 using namespace cupr;
 
-void Emitter::initialize()
+void Emitter::initialize(std::unique_ptr<TraceFormatter> formatter, bool prettify)
 {
+    this->formatter = std::move(formatter);
+    this->prettify = prettify;
+
     this->directory = this->generateDirectoryName();
     createDirectory(this->directory);
     this->copyMetadataFiles();
 }
 void Emitter::emitProgramRun()
 {
-    int64_t end = getTimestamp();
+    std::ofstream runFile(this->getFilePath("run.json"));
+    auto value = picojson::value(picojson::object {
+            {"type", picojson::value("run")},
+            {"start", picojson::value((double) this->timestampStart)},
+            {"end", picojson::value((double) getTimestamp())}
+    });
 
-    std::fstream runFile(this->getFilePath("run.json"), std::fstream::out);
-    Formatter formatter;
-    formatter.outputProgramRun(runFile, this->timestampStart, end);
+    runFile << value.serialize(true);
     runFile.flush();
 }
 
-void Emitter::emitKernelTrace(const std::string& kernelName, dim3 dimensions[2],
+void Emitter::emitKernelTrace(const std::string& kernelName, const DeviceDimensions& dimensions,
                               const std::vector<AccessRecord>& records,
                               const std::vector<AllocRecord>& allocations, float duration)
 {
@@ -30,40 +35,9 @@ void Emitter::emitKernelTrace(const std::string& kernelName, dim3 dimensions[2],
     double start = timestamp - static_cast<double>(duration);
     double end = timestamp;
 
-    if (Parameters::isProtobufEnabled())
-    {
-        this->emitKernelTraceProtobuf(kernelFile, kernelName, dimensions, records, allocations, start, end);
-    }
-    else this->emitKernelTraceJson(kernelFile, kernelName, dimensions, records, allocations, start, end);
-}
-
-void Emitter::emitKernelTraceJson(const std::string& fileName,
-                                  const std::string& kernel,
-                                  dim3 dimensions[2],
-                                  const std::vector<AccessRecord>& records,
-                                  const std::vector<AllocRecord>& allocations,
-                                  double start, double end)
-{
-    std::fstream kernelOutput(fileName + ".trace.json", std::fstream::out);
-
-    Formatter formatter;
-    formatter.outputKernelTraceJson(kernelOutput, kernel, dimensions, records, allocations, start, end,
-                                    Parameters::isPrettifyEnabled());
-    kernelOutput.flush();
-}
-
-void Emitter::emitKernelTraceProtobuf(const std::string& fileName,
-                                      const std::string& kernel,
-                                      dim3 dimensions[2],
-                                      const std::vector<AccessRecord>& records,
-                                      const std::vector<AllocRecord>& allocations,
-                                      double start, double end)
-{
-    std::fstream kernelOutput(fileName + ".trace.protobuf", std::fstream::out);
-
-    Formatter formatter;
-    formatter.outputKernelTraceProtobuf(kernelOutput, kernel, dimensions, records, allocations, start, end);
-    kernelOutput.flush();
+    std::ofstream kernelOutput(kernelFile + ".trace." + this->formatter->getSuffix());
+    this->formatter->formatTrace(kernelOutput, kernelName, dimensions, records, allocations,
+                                 start, end, this->prettify);
 }
 
 std::string Emitter::generateDirectoryName()

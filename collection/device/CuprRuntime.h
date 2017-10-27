@@ -8,13 +8,14 @@
 #include "../runtime/Prefix.h"
 #include "../runtime/tracedata/AccessRecord.h"
 #include "../runtime/tracedata/AllocRecord.h"
-#include "../runtime/format/Formatter.h"
+#include "../runtime/format/TraceFormatter.h"
 #include "../runtime/CudaTimer.h"
 #include "../runtime/KernelContext.h"
 #include "../runtime/tracedata/AddressSpace.h"
 #include "../runtime/Utility.h"
 #include "../runtime/RuntimeState.h"
 #include "../runtime/Parameters.h"
+#include "../runtime/DeviceDimensions.h"
 
 
 #define ATOMIC_INSERT(buffer, index, maxSize, item) \
@@ -31,7 +32,11 @@ namespace cupr
     static __device__ uint32_t deviceAccessRecordIndex;
     static __device__ cupr::AllocRecord* deviceSharedBuffers;
     static __device__ uint32_t deviceSharedBufferIndex;
-    static __device__ dim3* deviceDimensions;
+
+    /**
+     * Grid dimension, block dimension, warpSize.
+     */
+    static __device__ DeviceDimensions* deviceDimensions;
 }
 extern "C"
 {
@@ -53,7 +58,7 @@ extern "C"
         cudaAllocateType allocFn = cupr::Parameters::isMappedMemoryEnabled() ? (cudaAllocateType) cudaMallocHost : (cudaAllocateType) cudaMalloc;
         CHECK_CUDA_CALL(allocFn((void**) &context->deviceAccessRecords, sizeof(cupr::AccessRecord) * bufferSize));
         CHECK_CUDA_CALL(allocFn((void**) &context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * bufferSize));
-        CHECK_CUDA_CALL(allocFn((void**) &context->deviceDimensions, sizeof(dim3) * 2));
+        CHECK_CUDA_CALL(allocFn((void**) &context->deviceDimensions, sizeof(DeviceDimensions)));
 
         const uint32_t zero = 0;
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceAccessRecords, &context->deviceAccessRecords, sizeof(context->deviceAccessRecords)));
@@ -86,8 +91,8 @@ extern "C"
             CHECK_CUDA_CALL(cudaMemcpy(sharedBuffers.data(), context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * sharedBuffersCount, cudaMemcpyDeviceToHost));
         }
 
-        dim3 dimensions[2];
-        CHECK_CUDA_CALL(cudaMemcpy(dimensions, context->deviceDimensions, sizeof(dim3) * 2, cudaMemcpyDeviceToHost));
+        DeviceDimensions dimensions;
+        CHECK_CUDA_CALL(cudaMemcpy(&dimensions, context->deviceDimensions, sizeof(DeviceDimensions), cudaMemcpyDeviceToHost));
 
         typedef cudaError (*cudaFreeType)(void*);
 
@@ -96,21 +101,21 @@ extern "C"
         CHECK_CUDA_CALL(freeFn(context->deviceSharedBuffers));
         CHECK_CUDA_CALL(freeFn(context->deviceDimensions));
 
-        for (auto& alloc: cupr::state.allocations)
+        for (auto& alloc: cupr::state.getAllocations())
         {
             sharedBuffers.push_back(alloc);
         }
 
-        cupr::state.emitter.emitKernelTrace(context->kernelName, dimensions,
+        cupr::state.getEmitter().emitKernelTrace(context->kernelName, dimensions,
                                             records, sharedBuffers, context->timer->get_time());
     }
     void CU_PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type)
     {
-        cupr::state.allocations.emplace_back(address, size, elementSize, cupr::AddressSpace::Global, type);
+        cupr::state.getAllocations().emplace_back(address, size, elementSize, cupr::AddressSpace::Global, type);
     }
     void CU_PREFIX(free)(void* address)
     {
-        for (auto& alloc: cupr::state.allocations)
+        for (auto& alloc: cupr::state.getAllocations())
         {
             if (alloc.address == address)
             {
@@ -156,8 +161,9 @@ extern "C"
     }
     extern "C" __device__ void CU_PREFIX(storeDimensions)()
     {
-        cupr::deviceDimensions[0] = gridDim;
-        cupr::deviceDimensions[1] = blockDim;
+        cupr::deviceDimensions->grid = gridDim;
+        cupr::deviceDimensions->block = blockDim;
+        cupr::deviceDimensions->warpSize = warpSize;
     }
     extern "C" __device__ void CU_PREFIX(markSharedBuffer)(void* address, size_t size, size_t elementSize,
                                                            size_t type)

@@ -15,4 +15,5 @@ message KernelTrace {
     required string type = 6;
     required cupr.proto.Dim3 gridDim = 7;
     required cupr.proto.Dim3 blockDim = 8;
+    required int32 warpSize = 9;
 }
