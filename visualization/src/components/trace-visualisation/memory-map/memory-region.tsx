@@ -1,7 +1,8 @@
 import * as React from 'react';
 import {PureComponent} from 'react';
-import {MemoryAllocation} from '../../../lib/format/memory-allocation';
+import {MemoryAllocation} from '../../../lib/profile/memory-allocation';
 import {formatMiB} from '../../../lib/util/format';
+import {AddressSpace} from '../../../lib/profile/memory-access';
 
 interface Props
 {
@@ -17,13 +18,13 @@ export class MemoryRegion extends PureComponent<Props>
 {
     render()
     {
-        const fill = '#0000FF';
-        const {address, size, elementSize, typeString} = this.props.allocation;
+        const fill = this.getColor(this.props.allocation);
+        const {address, size, elementSize, type} = this.props.allocation;
         const count = size / elementSize;
 
         return (
             <g>
-                <title>{address}: {formatMiB(size)} MiB ({count}x {typeString})</title>
+                <title>{address}: {formatMiB(size)} MiB ({count}x {type})</title>
                 <g y={this.props.y} transform='translate(-50, 0)'>
                     <text
                         y={this.props.y + this.props.rowHeight}
@@ -44,5 +45,16 @@ export class MemoryRegion extends PureComponent<Props>
                 }
             </g>
         );
+    }
+
+    getColor = (allocation: MemoryAllocation): string =>
+    {
+        switch (allocation.space)
+        {
+            case AddressSpace.Constant: return '#0000FF';
+            case AddressSpace.Shared: return '#00FF00';
+            case AddressSpace.Global: return '#FF0000';
+            default: return '#000000';
+        }
     }
 }

@@ -6,7 +6,5 @@ export interface MemoryAllocation
     size: number;
     elementSize: number;
     space: AddressSpace;
-    typeIndex: number;
-    typeString: string;
-    active: boolean;
+    type: string;
 }

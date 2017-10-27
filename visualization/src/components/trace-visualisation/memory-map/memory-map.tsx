@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {PureComponent} from 'react';
-import {MemoryAllocation} from '../../../lib/format/memory-allocation';
+import {MemoryAllocation} from '../../../lib/profile/memory-allocation';
 import {MemoryRegion} from './memory-region';
 
 interface Props
@@ -31,7 +31,7 @@ export class MemoryMap extends PureComponent<Props>
 
     renderAllocations = (allocations: MemoryAllocation[]): JSX.Element[] =>
     {
-        const byteWidth = 8 * 1024 * 1024;
+        const byteWidth = 4 * 1024;
         const rowHeight = 5;
         const padding = 10;
         let y = 0;

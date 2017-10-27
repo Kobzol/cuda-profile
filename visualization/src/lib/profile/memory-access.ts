@@ -1,4 +1,5 @@
 import {Dim3} from './dim3';
+import {DebugLocation} from './metadata';
 
 export enum AccessType
 {
@@ -15,12 +16,15 @@ export enum AddressSpace
 
 export interface MemoryAccessGroup
 {
+    key: string;
     size: number;
     kind: AccessType;
     space: AddressSpace;
-    typeIndex: number;
+    type: string;
     timestamp: number;
-    debugId: number;
+    location: DebugLocation | null;
+    blockIdx: Dim3;
+    warpId: number;
     accesses: MemoryAccess[];
 }
 

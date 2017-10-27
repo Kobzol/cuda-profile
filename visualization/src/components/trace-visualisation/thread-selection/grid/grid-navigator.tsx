@@ -19,6 +19,14 @@ export class GridNavigator extends PureComponent<Props>
                 {this.renderNumberSelect(this.props.dimensions, this.props.selection.width, 'width')}
                 {this.renderNumberSelect(this.props.dimensions, this.props.selection.height, 'height')}
                 {this.renderNumberSelect(_.range(0, this.props.bounds.z), this.props.selection.z, 'z')}
+                {this.renderMoveButton(this.props.bounds.x, this.props.selection.x, this.props.selection.width,
+                    'r', false)}
+                {this.renderMoveButton(this.props.bounds.x, this.props.selection.x, this.props.selection.width,
+                    'l', true)}
+                {this.renderMoveButton(this.props.bounds.y, this.props.selection.y, this.props.selection.height,
+                    'u', false)}
+                {this.renderMoveButton(this.props.bounds.y, this.props.selection.y, this.props.selection.height,
+                    'd', true)}
             </div>
         );
     }
@@ -48,5 +56,19 @@ export class GridNavigator extends PureComponent<Props>
             ...this.props.selection,
             [attribute]: value
         });
+    }
+
+    private renderMoveButton(bound: number, selection: number,
+                             dimension: number, name: string,
+                             positive: boolean): JSX.Element
+    {
+        console.log(bound, selection, dimension);
+        const enabled =
+            (positive && (selection + dimension) < bound) ||
+            (!positive && (selection > 0));
+
+        return (
+            <button disabled={!enabled}>{name}</button>
+        );
     }
 }

@@ -53,8 +53,8 @@ export class AccessTimeline extends PureComponent<Props>
             const start = this.recalculateTime(trace, group.timestamp);
             const end = this.recalculateTime(trace, group.timestamp) + 2;
             const content = `#${index}`;
-            const location = group.debugId !== 1 ? kernel.metadata.locations[group.debugId] : null;
-            const type = kernel.metadata.typeMap[group.typeIndex];
+            const location = group.location;
+            const type = group.type;
             let title = `${content}: ${group.kind === AccessType.Read ? 'Read' : 'Write'}`;
             title += ` ${group.size} bytes of ${type} (${group.accesses.length} threads)`;
             if (location !== null)

@@ -22,10 +22,10 @@ export interface GridBounds
     z: number;
 }
 
-export interface DataSelection<T>
+export interface AddressSelection
 {
-    data: GridData<T>;
-    selection: GridSelection;
+    start: string;
+    size: number;
 }
 
 function prepareDict<V>(dict: {[key: number]: V}, key: number): V

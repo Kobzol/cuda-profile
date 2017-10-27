@@ -11,11 +11,10 @@ import {Trace} from '../../lib/profile/trace';
 import {selectedAccessGroup, selectedKernel, selectedTrace} from '../../lib/trace/reducer';
 import {AccessTimeline} from './access-timeline/access-timeline';
 import {ToggleWrapper} from '../toggle-wrapper/toggle-wrapper';
-import {MemoryMap} from './memory-map/memory-map';
 import {MemoryAccessGroup} from '../../lib/profile/memory-access';
 
 import './trace-visualisation.css';
-import {TraceAccess} from './trace-access/trace-access';
+import {WarpList} from './warp-list/trace-access';
 
 interface StateProps
 {
@@ -113,7 +112,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         return (
             <div>
                 {accessGroup !== null &&
-                    <TraceAccess
+                    <WarpList
                         trace={trace}
                         accessGroup={accessGroup} />}
                 {this.renderAccessTimeline(kernel, trace)}
