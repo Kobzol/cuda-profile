@@ -5,12 +5,16 @@
     #include "protobuf/generated/kernel-trace.pb.h"
 #endif
 
+#include <google/protobuf/io/gzip_stream.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+
+using namespace google::protobuf::io;
 using namespace cupr::proto;
 
 void cupr::ProtobufTraceFormatter::formatTrace(std::ostream& os, const std::string& kernel, DeviceDimensions dimensions,
                                                const std::vector<cupr::AccessRecord>& accesses,
                                                const std::vector<cupr::AllocRecord>& allocations, double start,
-                                               double end, bool prettify)
+                                               double end, bool prettify, bool compress)
 {
 #ifdef CUPR_USE_PROTOBUF
     KernelTrace trace;
@@ -60,7 +64,14 @@ void cupr::ProtobufTraceFormatter::formatTrace(std::ostream& os, const std::stri
     trace.mutable_blockdim()->set_y(dimensions.block.y);
     trace.mutable_blockdim()->set_z(dimensions.block.z);
     trace.set_warpsize(dimensions.warpSize);
-    trace.SerializeToOstream(&os);
+
+    if (compress)
+    {
+        OstreamOutputStream stream(&os);
+        GzipOutputStream gs(&stream);
+        trace.SerializeToZeroCopyStream(&gs);
+    }
+    else trace.SerializeToOstream(&os);
 #endif
 }
 

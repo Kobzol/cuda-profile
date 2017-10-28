@@ -9,6 +9,7 @@ namespace cupr
     public:
         static uint32_t getBufferSize();
         static bool isPrettifyEnabled();
+        static bool isCompressionEnabled();
         static bool isProtobufEnabled();
         static bool isMappedMemoryEnabled();
 

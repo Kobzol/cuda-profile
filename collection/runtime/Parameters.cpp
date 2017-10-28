@@ -20,6 +20,11 @@ bool Parameters::isPrettifyEnabled()
     return isParameterEnabled("CUPR_PRETTIFY");
 }
 
+bool Parameters::isCompressionEnabled()
+{
+    return isParameterEnabled("CUPR_COMPRESS");
+}
+
 bool Parameters::isProtobufEnabled()
 {
 #ifdef CUPR_USE_PROTOBUF

@@ -26,7 +26,8 @@ namespace cupr
                                  const std::vector<AllocRecord>& allocations,
                                  double start,
                                  double end,
-                                 bool prettify) = 0;
+                                 bool prettify,
+                                 bool compress) = 0;
         virtual std::string getSuffix() = 0;
     protected:
         std::string hexPointer(const void* ptr);

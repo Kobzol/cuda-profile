@@ -14,7 +14,8 @@ static std::unique_ptr<TraceFormatter> createFormatter()
     else return std::make_unique<JsonTraceFormatter>();
 }
 
-RuntimeState::RuntimeState(): emitter(createFormatter(), Parameters::isPrettifyEnabled())
+RuntimeState::RuntimeState()
+        : emitter(createFormatter(), Parameters::isPrettifyEnabled(), Parameters::isCompressionEnabled())
 {
 
 }

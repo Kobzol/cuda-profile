@@ -1,4 +1,5 @@
 import glob
+import gzip
 import json
 import os
 import pytest
@@ -62,7 +63,7 @@ def find_cupr_dir(dir):
     raise Exception("CUPR directory not found in {}".format(dir))
 
 
-def run(root, dir, exe, env):
+def run(root, dir, exe, env, compress):
     runenv = os.environ.copy()
     runenv.update(env)
     runenv["LD_LIBRARY_PATH"] = os.path.join(root, RUNTIME_LIB_DIR)
@@ -78,13 +79,13 @@ def run(root, dir, exe, env):
     cuprdir = find_cupr_dir(dir)
 
     for protobuf_file in glob.glob("{}/*.protobuf".format(cuprdir)):
-        with open(protobuf_file) as f:
+        with (gzip.open(protobuf_file) if compress else open(protobuf_file)) as f:
             kernel = KernelTrace()
             kernel.ParseFromString(f.read())
             mappings[os.path.basename(protobuf_file)] = json_format.MessageToDict(kernel,
                                                                                   preserving_proto_field_name=True)
     for json_file in glob.glob("{}/*.json".format(cuprdir)):
-        with open(json_file) as f:
+        with (gzip.open(json_file) if (compress and "trace" in json_file) else open(json_file)) as f:
             mappings[os.path.basename(json_file)] = json.load(f)
 
     return (mappings, process.returncode, out, err)
@@ -96,6 +97,7 @@ def compile_and_run(code,
                     with_main=False,
                     buffer_size=None,
                     debug=True,
+                    compress=False,
                     format="json"):
     tmpdir = create_test_dir()
 
@@ -104,6 +106,8 @@ def compile_and_run(code,
         env["CUPR_BUFFER_SIZE"] = str(buffer_size)
     if format == "protobuf":
         env["CUPR_PROTOBUF"] = "1"
+    if compress:
+        env["CUPR_COMPRESS"] = "1"
 
     prelude = ""
     if add_include:
@@ -121,7 +125,7 @@ def compile_and_run(code,
         if retcode != 0:
             raise Exception(str(retcode) + "\n" + out + "\n" + err)
 
-        (mappings, retcode, out, err) = run(PROJECT_DIR, tmpdir, exe, env)
+        (mappings, retcode, out, err) = run(PROJECT_DIR, tmpdir, exe, env, compress)
         if retcode != 0:
             raise Exception(retcode)
     finally:

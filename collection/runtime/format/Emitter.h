@@ -13,7 +13,7 @@ namespace cupr
     class Emitter
     {
     public:
-        Emitter(std::unique_ptr<TraceFormatter> formatter, bool prettify);
+        Emitter(std::unique_ptr<TraceFormatter> formatter, bool prettify, bool compress);
         void emitProgramRun();
 
         void emitKernelTrace(const std::string& kernelName,
@@ -30,6 +30,7 @@ namespace cupr
 
         std::unique_ptr<TraceFormatter> formatter;
         bool prettify;
+        bool compress;
 
         int kernelCounter = 0;
         int64_t timestampStart = getTimestamp();

@@ -1,11 +1,11 @@
 #include "Emitter.h"
 
-#include "picojson.h"
+#include "json/picojson.h"
 
 using namespace cupr;
 
-Emitter::Emitter(std::unique_ptr<TraceFormatter> formatter, bool prettify)
-        : formatter(std::move(formatter)), prettify(prettify)
+Emitter::Emitter(std::unique_ptr<TraceFormatter> formatter, bool prettify, bool compress)
+        : formatter(std::move(formatter)), prettify(prettify), compress(compress)
 {
     this->directory = this->generateDirectoryName();
     createDirectory(this->directory);
@@ -17,7 +17,8 @@ void Emitter::emitProgramRun()
     auto value = picojson::value(picojson::object {
             {"type", picojson::value("run")},
             {"start", picojson::value((double) this->timestampStart)},
-            {"end", picojson::value((double) getTimestamp())}
+            {"end", picojson::value((double) getTimestamp())},
+            {"compress", picojson::value(this->compress)}
     });
 
     runFile << value.serialize(true);
@@ -35,7 +36,7 @@ void Emitter::emitKernelTrace(const std::string& kernelName, const DeviceDimensi
 
     std::ofstream kernelOutput(kernelFile + ".trace." + this->formatter->getSuffix());
     this->formatter->formatTrace(kernelOutput, kernelName, dimensions, records, allocations,
-                                 start, end, this->prettify);
+                                 start, end, this->prettify, this->compress);
 }
 
 std::string Emitter::generateDirectoryName()

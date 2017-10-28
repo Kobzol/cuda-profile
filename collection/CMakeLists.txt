@@ -13,6 +13,7 @@ add_definitions(${LLVM_DEFINITIONS})
 message("LLVM found at ${LLVM_DIR}")
 
 find_package(Protobuf REQUIRED)
+find_package(ZLIB REQUIRED)
 
 set(CMAKE_CXX_COMPILER "${LLVM_TOOLS_BINARY_DIR}/clang++")
 set(CUDA_HOST_COMPILER "g++")

@@ -1,5 +1,7 @@
 #include "JsonTraceFormatter.h"
 
+#include "zlib/zstr.hpp"
+
 picojson::value cupr::JsonTraceFormatter::jsonify(const cupr::AccessRecord& record)
 {
     return picojson::value(picojson::object{
@@ -51,7 +53,8 @@ void cupr::JsonTraceFormatter::formatTrace(std::ostream& os,
                                            const std::vector<cupr::AllocRecord>& allocations,
                                            double start,
                                            double end,
-                                           bool prettify)
+                                           bool prettify,
+                                           bool compress)
 {
     auto value = picojson::value(picojson::object {
             {"type", picojson::value("trace")},
@@ -73,7 +76,12 @@ void cupr::JsonTraceFormatter::formatTrace(std::ostream& os,
             {"warpSize", picojson::value((double) dimensions.warpSize)}
     });
 
-    os << value.serialize(prettify);
+    if (compress)
+    {
+        zstr::ostream compressed(os);
+        compressed << value.serialize(prettify);
+    }
+    else os << value.serialize(prettify);
 }
 
 std::string cupr::JsonTraceFormatter::getSuffix()

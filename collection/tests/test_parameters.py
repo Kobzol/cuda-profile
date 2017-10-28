@@ -1,3 +1,6 @@
+from conftest import param_all_formats, kernel_file, run_file
+
+
 def test_parameters_buffer_size(profile):
     code = """
     #include <cstdio>
@@ -37,3 +40,34 @@ def test_parameters_protobuf(profile):
     """, format="protobuf")
 
     assert "kernel-0.trace.protobuf" in data
+
+
+@param_all_formats
+def test_parameters_compression_content(profile, format):
+    code = """
+    __global__ void kernel(int* p) {
+        *p = 5;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }
+    """
+
+    uncompressed = profile(code, format=format)
+    compressed = profile(code, format=format, compress=True)
+
+    assert (uncompressed[kernel_file("kernel", format=format)]["kernel"] ==
+            compressed[kernel_file("kernel", format=format)]["kernel"])
+
+
+@param_all_formats
+def test_parameters_compression_run(profile, format):
+    uncompressed = profile("", with_main=True, format=format)
+    compressed = profile("", with_main=True, format=format, compress=True)
+
+    assert not uncompressed[run_file()]["compress"]
+    assert compressed[run_file()]["compress"]
