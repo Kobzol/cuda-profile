@@ -13,6 +13,7 @@ import {MemoryAllocation as MemoryAllocationFormat} from '../format/memory-alloc
 import {MemoryAllocation} from './memory-allocation';
 import {hasOwnProperty} from 'tslint/lib/utils';
 import {Dictionary} from 'lodash';
+import {getLaneId, getWarpStart} from './api';
 
 
 function parseMetadata(metadata: MetadataFormat): Metadata
@@ -41,7 +42,7 @@ function parseTrace(trace: TraceFormat, metadata: Metadata): Trace
     return {
         start: trace.start,
         end: trace.end,
-        warps: groupAccessesByWarp(trace.accesses, metadata),
+        warps: groupAccessesByWarp(trace, trace.accesses, metadata),
         allocations: parseAllocations(trace.allocations, metadata),
         gridDimension: trace.gridDim,
         blockDimension: trace.blockDim,
@@ -57,7 +58,7 @@ function parseRun(run: RunFormat): Run
     };
 }
 
-function groupAccessesByWarp(accesses: MemoryAccessFormat[], metadata: Metadata): Warp[]
+function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[], metadata: Metadata): Warp[]
 {
     // imperative implementation to exploit already sorted input
     if (accesses.length === 0) return [];
@@ -83,13 +84,13 @@ function groupAccessesByWarp(accesses: MemoryAccessFormat[], metadata: Metadata)
             dict[key] = createGroup(accesses[i], key);
         }
         dict[key].accesses.push({
-            id: dict[key].accesses.length,
+            id: getLaneId(threadIdx, getWarpStart(dict[key].warpId, trace.warpSize, trace.blockDim), trace.blockDim),
             address,
-            threadIdx: threadIdx
+            threadIdx
         });
     }
 
-    return Object.keys(dict).map(key => dict[key]).slice(0, 100);
+    return Object.keys(dict).map(key => dict[key]).slice(-100);
 }
 
 export function parseProfile(files: TraceFile[]): Profile

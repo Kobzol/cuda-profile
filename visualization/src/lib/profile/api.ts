@@ -1,16 +1,14 @@
-import {MemoryAccess, Warp} from './memory-access';
-import {Trace} from './trace';
 import {Dim3} from './dim3';
 
-export function getWarpStart(trace: Trace, warp: Warp): Dim3
+export function getWarpStart(warpId: number, warpSize: number, blockDim: Dim3): Dim3
 {
-    let tid = warp.warpId * trace.warpSize;
-    const blockSize = trace.blockDimension.x * trace.blockDimension.y;
+    let tid = warpId * warpSize;
+    const blockSize = blockDim.x * blockDim.y;
 
-    const z = tid / blockSize;
+    const z = Math.floor(tid / blockSize);
     tid = tid % blockSize;
-    const y = tid / trace.blockDimension.x;
-    tid = tid % trace.blockDimension.x;
+    const y = Math.floor(tid / blockDim.x);
+    tid = tid % blockDim.x;
 
     return { x: tid, y, z };
 }
@@ -20,10 +18,10 @@ export function getCtaId(index: Dim3, blockDim: Dim3)
     return index.z * blockDim.x * blockDim.y + index.y * blockDim.x + index.x;
 }
 
-export function getLaneId(access: MemoryAccess, warpStart: Dim3, blockDim: Dim3): number
+export function getLaneId(index: Dim3, warpStart: Dim3, blockDim: Dim3): number
 {
     const startid = getCtaId(warpStart, blockDim);
-    const tid = getCtaId(access.threadIdx, blockDim);
+    const tid = getCtaId(index, blockDim);
 
     return tid - startid;
 }

@@ -1,28 +1,6 @@
-import {MemoryAccess, Warp} from '../../../../lib/profile/memory-access';
+import {MemoryAccess, Warp} from '../../../lib/profile/memory-access';
 import {createSelector} from 'reselect';
 import {Dictionary} from 'lodash';
-
-export interface GridSelection
-{
-    z: number;
-    y: number;
-    x: number;
-    width: number;
-    height: number;
-}
-
-export interface GridBounds
-{
-    x: number;
-    y: number;
-    z: number;
-}
-
-export interface AddressSelection
-{
-    start: string;
-    size: number;
-}
 
 export function createBlockSelector()
 {

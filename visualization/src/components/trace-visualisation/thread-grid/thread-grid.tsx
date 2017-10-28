@@ -1,8 +1,8 @@
 import React, {PureComponent} from 'react';
-import {MemoryAccess, Warp} from '../../../lib/profile/memory-access';
+import {AccessType, MemoryAccess, Warp} from '../../../lib/profile/memory-access';
 import {Trace} from '../../../lib/profile/trace';
 import {getLaneId, getWarpStart} from '../../../lib/profile/api';
-import {createBlockSelector} from './grid/grid-data';
+import {createBlockSelector} from './grid-data';
 import {Selector} from 'reselect';
 import {Dictionary} from 'lodash';
 import GridLayout from 'd3-v4-grid';
@@ -32,9 +32,10 @@ export class ThreadGrid extends PureComponent<Props, State>
 
     render()
     {
+        const {width, height} = this.props.canvasDimensions;
         const layout = this.calculateLayout(
             { rows: 4, cols: 8 },
-            { width: this.props.canvasDimensions.width, height: this.props.canvasDimensions.height }
+            { width, height }
         );
         const nodeSize = {
             width: layout.nodeSize()[0],
@@ -44,8 +45,7 @@ export class ThreadGrid extends PureComponent<Props, State>
         const grid = this.renderGrid(layout.nodes(), nodeSize);
 
         return (
-            <svg width='100%' height='100%'
-                 viewBox={`0 0 ${this.props.canvasDimensions.width} ${this.props.canvasDimensions.height}`}>
+            <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
                 <g>{grid}</g>
             </svg>
         );
@@ -57,9 +57,10 @@ export class ThreadGrid extends PureComponent<Props, State>
         const grid: JSX.Element[] = [];
         const width = 8;
         const height = 4;
-        
-        const accesses = this.createWarpAccesses(this.props.trace, this.props.warp);
 
+        debugger;
+
+        const accesses = this.createWarpAccesses(this.props.trace, this.props.warp);
         for (let y = 0; y < height; y++)
         {
             for (let x = 0; x < width; x++)
@@ -74,7 +75,7 @@ export class ThreadGrid extends PureComponent<Props, State>
                         y={nodes[index].y}
                         width={nodeSize.width}
                         height={nodeSize.height}
-                        fill={access === null ? 'rgb(255, 255, 255)' : 'rgb(255, 0, 0)'}
+                        fill={this.getAccessColor(this.props.warp, access)}
                         stroke='rgb(0, 0, 0)'
                         strokeWidth={1} />
                 );
@@ -103,13 +104,20 @@ export class ThreadGrid extends PureComponent<Props, State>
         : Array<MemoryAccess | null>
     {
         const accesses = _.range(trace.warpSize).map(() => null);
-        const start = getWarpStart(trace, warp);
-
         for (const access of warp.accesses)
         {
-            accesses[getLaneId(access, start, trace.blockDimension)] = access;
+            accesses[access.id] = access;
         }
-
         return accesses;
+    }
+
+    private getAccessColor(warp: Warp, access: MemoryAccess): string
+    {
+        if (access === null) return 'rgb(255, 255, 255)';
+        if (warp.kind === AccessType.Read)
+        {
+            return 'rgb(255, 0, 0)';
+        }
+        else return 'rgb(0, 0, 255)';
     }
 }
