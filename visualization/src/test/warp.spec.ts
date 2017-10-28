@@ -1,4 +1,5 @@
-import {getCtaId, getLaneId, getWarpStart} from '../lib/profile/api';
+import {getCtaId, getLaneId, getWarpId, getWarpStart} from '../lib/profile/api';
+import {InvalidWarpData} from '../lib/profile/errors';
 
 test('Warp start is calculated correctly', () => {
     expect(getWarpStart(1, 32, {
@@ -69,10 +70,21 @@ test('Lane id is calculated correctly', () => {
 
     const blockDim = {x: 256, y: 1, z: 1};
     const start = getWarpStart(44, 32, blockDim);
-    expect(getLaneId({
+    expect(() => getLaneId({
         x: 160,
         y: 0,
         z: 0
-    }, start, blockDim)).toEqual(6);
+    }, start, blockDim)).toThrow(InvalidWarpData);
 
+});
+test('Warp id is calculated correctly', () => {
+    expect(getWarpId({
+        x: 2,
+        y: 0,
+        z: 1
+    }, 32, {
+        x: 16,
+        y: 18,
+        z: 2
+    })).toEqual(9);
 });

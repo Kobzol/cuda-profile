@@ -7,4 +7,4 @@ const actionCreator = actionCreatorFactory('trace');
 
 export const buildProfile = actionCreator.async<TraceFile[], Profile>('build-profile');
 export const selectTrace = actionCreator<TraceSelection>('select-trace');
-export const selectAccessGroup = actionCreator<number>('select-access-group');
+export const selectWarps = actionCreator<number[]>('select-warps');

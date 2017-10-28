@@ -13,7 +13,7 @@ import {MemoryAllocation as MemoryAllocationFormat} from '../format/memory-alloc
 import {MemoryAllocation} from './memory-allocation';
 import {hasOwnProperty} from 'tslint/lib/utils';
 import {Dictionary} from 'lodash';
-import {getLaneId, getWarpStart} from './api';
+import {getLaneId, getWarpId, getWarpStart} from './api';
 
 
 function parseMetadata(metadata: MetadataFormat): Metadata
@@ -69,7 +69,8 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
         size, timestamp, kind, space,
         location: debugId === -1 ? null : metadata.locations[debugId],
         type: metadata.typeMap[typeIndex],
-        warpId, blockIdx,
+        warpId: getWarpId(threadIdx, trace.warpSize, trace.blockDim),
+        blockIdx,
         key, accesses: []
     });
 

@@ -1,12 +1,13 @@
 import React, {PureComponent} from 'react';
 import {AccessType, MemoryAccess, Warp} from '../../../lib/profile/memory-access';
 import {Trace} from '../../../lib/profile/trace';
-import {getLaneId, getWarpStart} from '../../../lib/profile/api';
 import {createBlockSelector} from './grid-data';
 import {Selector} from 'reselect';
 import {Dictionary} from 'lodash';
 import GridLayout from 'd3-v4-grid';
 import * as _ from 'lodash';
+
+import './thread-grid.css';
 
 interface Props
 {
@@ -45,7 +46,7 @@ export class ThreadGrid extends PureComponent<Props, State>
         const grid = this.renderGrid(layout.nodes(), nodeSize);
 
         return (
-            <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+            <svg className='thread-grid' width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
                 <g>{grid}</g>
             </svg>
         );
@@ -58,26 +59,37 @@ export class ThreadGrid extends PureComponent<Props, State>
         const width = 8;
         const height = 4;
 
-        debugger;
+        const warp = this.props.warp;
+        const {x: bx, y: by, z: bz } = warp.blockIdx;
 
-        const accesses = this.createWarpAccesses(this.props.trace, this.props.warp);
+        const accesses = this.createWarpAccesses(this.props.trace, warp);
         for (let y = 0; y < height; y++)
         {
             for (let x = 0; x < width; x++)
             {
                 const index = y * (width) + x;
                 const access = accesses[index];
+                let label = 'Inactive thread';
+
+                if (access !== null)
+                {
+                    const {x: tx, y: ty, z: tz} = access.threadIdx;
+                    label = `${bz}.${by}.${bx}.${tz}.${ty}.${tx}: ${warp.size} at ${access.address}`;
+                }
 
                 grid.push(
-                    <rect
-                        key={index}
-                        x={nodes[index].x}
-                        y={nodes[index].y}
-                        width={nodeSize.width}
-                        height={nodeSize.height}
-                        fill={this.getAccessColor(this.props.warp, access)}
-                        stroke='rgb(0, 0, 0)'
-                        strokeWidth={1} />
+                    <g>
+                        <rect
+                            key={index}
+                            x={nodes[index].x}
+                            y={nodes[index].y}
+                            width={nodeSize.width}
+                            height={nodeSize.height}
+                            fill={this.getAccessColor(warp, access)}
+                            stroke='rgb(0, 0, 0)'
+                            strokeWidth={0.5} />
+                        <title>{label}</title>
+                    </g>
                 );
             }
         }

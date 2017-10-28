@@ -9,7 +9,7 @@ interface Props
 {
     kernel: Kernel;
     trace: Trace;
-    selectAccessGroup: (index: number) => void;
+    selectWarps: (warps: number[]) => void;
 }
 
 export class WarpTimeline extends PureComponent<Props>
@@ -31,6 +31,7 @@ export class WarpTimeline extends PureComponent<Props>
                 }
             },
             showTooltips: true,
+            multiselect: true,
             start, end,
             min: start,
             max: end,
@@ -49,7 +50,6 @@ export class WarpTimeline extends PureComponent<Props>
 
     createTimelineItems = (kernel: Kernel, trace: Trace) =>
     {
-        console.log(trace.warps);
         return trace.warps.map((group, index) => {
             const start = this.recalculateTime(trace, group.timestamp);
             const end = this.recalculateTime(trace, group.timestamp) + 2;
@@ -73,7 +73,7 @@ export class WarpTimeline extends PureComponent<Props>
 
     handleAccessSelect = ({items}: {items: string[]}) =>
     {
-        this.props.selectAccessGroup(parseInt(items[0], 10));
+        this.props.selectWarps(items.map(item => parseInt(item, 10)));
     }
 
     private recalculateTime(trace: Trace, timestamp: number): number

@@ -20,7 +20,7 @@ export class WarpList extends PureComponent<Props>
                     key={warp.key}
                     trace={this.props.trace}
                     warp={warp}
-                    canvasDimensions={{width: 120, height: 30}}/>
+                    canvasDimensions={{width: 220, height: 40}}/>
                 )}
             </div>
         );

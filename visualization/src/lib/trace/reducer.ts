@@ -1,5 +1,5 @@
 import {reducerWithInitialState} from 'typescript-fsa-reducers';
-import {buildProfile, selectAccessGroup, selectTrace} from './actions';
+import {buildProfile, selectWarps, selectTrace} from './actions';
 import {Profile} from '../profile/profile';
 import {TraceSelection} from './trace-selection';
 import {createSelector} from 'reselect';
@@ -11,25 +11,25 @@ export interface TraceState
 {
     profile?: Profile;
     selectedTrace?: TraceSelection;
-    selectedAccessGroup?: number;
+    selectedWarps: number[];
 }
 
 const reducer = reducerWithInitialState<TraceState>({
     profile: null,
     selectedTrace: null,
-    selectedAccessGroup: null
+    selectedWarps: []
 }).case(buildProfile.done, (state, payload) => ({
     ...state,
     profile: payload.result,
     selectedTrace: null,
-    selectedAccessGroup: null
+    selectedWarps: []
 })).case(selectTrace, (state, payload) => ({
     ...state,
     selectedTrace: payload,
-    selectedAccessGroup: null
-})).case(selectAccessGroup, (state, payload) => ({
+    selectedWarps: []
+})).case(selectWarps, (state, payload) => ({
     ...state,
-    selectedAccessGroup: payload
+    selectedWarps: payload
 }));
 
 export const selectedKernel = createSelector(
@@ -41,19 +41,10 @@ export const selectedTrace = createSelector(
     selectedKernel,
     (state: TraceState, kernel: Kernel) => kernel !== null ? kernel.traces[state.selectedTrace.trace] : null
 );
-export const selectedAccessGroup = createSelector(
+export const selectedWarps = createSelector(
     (state: AppState) => state.trace,
     selectedTrace,
-    (state: TraceState, trace: Trace) => {
-        if (state.selectedAccessGroup !== null &&
-            state.selectedAccessGroup >= 0 &&
-            state.selectedAccessGroup < trace.warps.length)
-        {
-            return trace.warps[state.selectedAccessGroup];
-        }
-
-        return null;
-    }
+    (state: TraceState, trace: Trace) => state.selectedWarps.map(warp => trace.warps[warp])
 );
 
 export const traceReducer = reducer;

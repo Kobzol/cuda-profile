@@ -1,14 +1,14 @@
 import React, {PureComponent} from 'react';
 import {connect} from 'react-redux';
 import {TraceFile} from '../../lib/file-load/file';
-import {buildProfile, selectAccessGroup, selectTrace} from '../../lib/trace/actions';
+import {buildProfile, selectWarps, selectTrace} from '../../lib/trace/actions';
 import {AppState} from '../../lib/state/reducers';
 import {KernelTimeline} from './kernel-timeline/kernel-timeline';
 import {Profile} from '../../lib/profile/profile';
 import {TraceSelection} from '../../lib/trace/trace-selection';
 import {Kernel} from '../../lib/profile/kernel';
 import {Trace} from '../../lib/profile/trace';
-import {selectedAccessGroup, selectedKernel, selectedTrace} from '../../lib/trace/reducer';
+import {selectedWarps, selectedKernel, selectedTrace} from '../../lib/trace/reducer';
 import {WarpTimeline} from './warp-timeline/warp-timeline';
 import {ToggleWrapper} from '../toggle-wrapper/toggle-wrapper';
 import {Warp} from '../../lib/profile/memory-access';
@@ -22,13 +22,13 @@ interface StateProps
     profile: Profile;
     selectedKernel: Kernel;
     selectedTrace: Trace;
-    selectedAccessGroup: Warp;
+    selectedWarps: Warp[];
 }
 interface DispatchProps
 {
     buildProfile: (files: TraceFile[]) => {};
     selectTrace: (selection: TraceSelection) => {};
-    selectAccessGroup: (index: number) => {};
+    selectWarps: (warps: number[]) => {};
 }
 
 type Props = StateProps & DispatchProps;
@@ -83,7 +83,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
             content = this.renderTraceContent(
                 this.props.selectedKernel,
                 this.props.selectedTrace,
-                this.props.selectedAccessGroup
+                this.props.selectedWarps
             );
         }
         return (
@@ -107,14 +107,13 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         );
     }
 
-    renderTraceContent = (kernel: Kernel, trace: Trace, accessGroup: Warp): JSX.Element =>
+    renderTraceContent = (kernel: Kernel, trace: Trace, warps: Warp[]): JSX.Element =>
     {
         return (
             <div>
-                {accessGroup !== null &&
-                    <WarpList
-                        trace={trace}
-                        warps={[accessGroup]} />}
+                <WarpList
+                    trace={trace}
+                    warps={warps} />
                 {this.renderAccessTimeline(kernel, trace)}
             </div>
         );
@@ -126,7 +125,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                 <WarpTimeline
                     kernel={kernel}
                     trace={trace}
-                    selectAccessGroup={this.props.selectAccessGroup} />
+                    selectWarps={this.props.selectWarps} />
             </div>
         );
     }
@@ -150,9 +149,9 @@ export const TraceVisualisation = connect<StateProps, DispatchProps, {}>((state:
     profile: state.trace.profile,
     selectedKernel: selectedKernel(state),
     selectedTrace: selectedTrace(state),
-    selectedAccessGroup: selectedAccessGroup(state)
+    selectedWarps: selectedWarps(state)
 }), {
     buildProfile: buildProfile.started,
     selectTrace: selectTrace,
-    selectAccessGroup: selectAccessGroup
+    selectWarps: selectWarps
 })(TraceVisualisationComponent);
