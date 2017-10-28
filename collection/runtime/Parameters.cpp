@@ -22,7 +22,11 @@ bool Parameters::isPrettifyEnabled()
 
 bool Parameters::isCompressionEnabled()
 {
+#ifdef CUPR_USE_ZLIB
     return isParameterEnabled("CUPR_COMPRESS");
+#else
+    return false;
+#endif
 }
 
 bool Parameters::isProtobufEnabled()

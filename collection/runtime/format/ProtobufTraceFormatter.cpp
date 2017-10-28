@@ -3,10 +3,9 @@
 #ifdef CUPR_USE_PROTOBUF
     #include "protobuf/generated/memory-access.pb.h"
     #include "protobuf/generated/kernel-trace.pb.h"
+    #include <google/protobuf/io/gzip_stream.h>
+    #include <google/protobuf/io/zero_copy_stream_impl.h>
 #endif
-
-#include <google/protobuf/io/gzip_stream.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
 
 using namespace google::protobuf::io;
 using namespace cupr::proto;

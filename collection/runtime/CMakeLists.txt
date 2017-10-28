@@ -7,11 +7,13 @@ set(SOURCE_FILES
         CudaTimer.cpp
         format/Emitter.cpp
         format/TraceFormatter.cpp
+        format/JsonTraceFormatter.cpp
+        format/ProtobufTraceFormatter.cpp
         RuntimeState.cpp
         Init.cpp
-        Parameters.cpp format/JsonTraceFormatter.cpp format/JsonTraceFormatter.h format/ProtobufTraceFormatter.cpp format/ProtobufTraceFormatter.h)
+        Parameters.cpp
+)
 
 add_library(runtime SHARED ${SOURCE_FILES} ${PROTOBUF_CXX_FILES})
 target_link_libraries(runtime ${CUDA_LIBRARIES} ${PROTOBUF_LIBRARIES})
 target_include_directories(runtime PRIVATE ${CUDA_INCLUDE_DIRS})
-target_compile_definitions(runtime PRIVATE CUPR_USE_PROTOBUF=1)
