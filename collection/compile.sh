@@ -4,12 +4,14 @@ LLVM_DIR=/home/kobzol/libraries/llvm-4.0.1-build
 CLANG=clang++ # ${LLVM_DIR}/bin/clang++
 CUDA_DIR=/usr/local/cuda
 SRC_FILES=$1 #"../main.cpp ../kernel.cu" # ../kernel2.cu
+PROTOBUF=${2-0}
+COMPRESS=${3-0}
 INSTRUMENTED_KERNEL_BC="kernel-instrumented.bc"
 
 pushd cmake-build-debug
     # remove existing files
     # rm -rf *.bc *.ll *.o
-    rm -rf cupr-*
+    # rm -rf cupr-*
 
     # build pass
     make
@@ -22,12 +24,11 @@ pushd cmake-build-debug
             -I/usr/local/cuda/samples/common/inc \
             -L./runtime \
             -Xclang -load -Xclang ./instrument/libinstrument.so \
-            -DCUPR_USE_PROTOBUF \
             -z muldefs -lcudart -ldl -lrt -lruntime -pthread -xcuda \
             ${SRC_FILES} -o cuda
 
     # run instrumented program
-    LD_LIBRARY_PATH=./runtime CUPR_PROTOBUF=0 ./cuda
+    LD_LIBRARY_PATH=./runtime CUPR_PROTOBUF=${PROTOBUF} CUPR_COMPRESS=${COMPRESS} ./cuda
 
     exit 0
 popd

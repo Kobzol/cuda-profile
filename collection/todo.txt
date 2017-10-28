@@ -1,3 +1,4 @@
 - CPU version
 - source code version
 - track more CUDA memory allocations (2D, array, pitched memory)
+- coalesce memory accesses into warps before emit
