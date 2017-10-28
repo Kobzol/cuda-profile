@@ -1,6 +1,7 @@
 #include "Emitter.h"
 
 #include "json/picojson.h"
+#include "json/json_helper.h"
 
 using namespace cupr;
 
@@ -18,7 +19,8 @@ void Emitter::emitProgramRun()
             {"type", picojson::value("run")},
             {"start", picojson::value((double) this->timestampStart)},
             {"end", picojson::value((double) getTimestamp())},
-            {"compress", picojson::value(this->compress)}
+            {"compress", picojson::value(this->compress)},
+            {"traces", jsonify(this->traceFiles)}
     });
 
     runFile << value.serialize(true);
@@ -29,12 +31,26 @@ void Emitter::emitKernelTrace(const std::string& kernelName, const DeviceDimensi
                               const std::vector<AccessRecord>& records,
                               const std::vector<AllocRecord>& allocations, float duration)
 {
-    std::string kernelFile = this->getFilePath(std::string(kernelName) + "-" + std::to_string(this->kernelCounter++));
+    if (this->kernelCount.find(kernelName) == this->kernelCount.end())
+    {
+        this->kernelCount.insert({kernelName, 0});
+    }
+
+    int count = this->kernelCount[kernelName]++;
+
+    std::string filename = std::string(kernelName) +
+            "-" +
+            std::to_string(count) +
+            ".trace." +
+            this->formatter->getSuffix();
+    std::string filepath = this->getFilePath(filename);
     auto timestamp = static_cast<double>(getTimestamp());
     double start = timestamp - static_cast<double>(duration);
     double end = timestamp;
 
-    std::ofstream kernelOutput(kernelFile + ".trace." + this->formatter->getSuffix());
+    this->traceFiles.push_back(filename);
+
+    std::ofstream kernelOutput(filepath);
     this->formatter->formatTrace(kernelOutput, kernelName, dimensions, records, allocations,
                                  start, end, this->prettify, this->compress);
 }

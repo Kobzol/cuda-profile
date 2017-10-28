@@ -1,6 +1,6 @@
 import os
 
-from conftest import offset_line, INPUT_FILENAME, metadata_file, kernel_file, run_file
+from conftest import offset_line, INPUT_FILENAME, metadata_file, kernel_file, run_file, param_all_formats
 
 
 def check_debug_record(data, record, name, line):
@@ -104,9 +104,37 @@ def test_metadata_type_and_name(profile):
     assert metadata["kernel"] == "kernel"
 
 
-def test_metadata_run_file(profile):
+def test_metadata_run_time(profile):
     data = profile("__global__ void kernel() {}", with_main=True)
     run = data[run_file()]
 
     assert run["type"] == "run"
     assert run["end"] >= run["start"]
+
+
+@param_all_formats
+def test_metadata_run_traces(profile, format):
+    data = profile("""
+    __global__ void kernel(int* p) {
+        *p = threadIdx.x;
+    }
+    __global__ void kernel2(int* p) {
+        *p = threadIdx.x;
+    }
+    int main()
+    {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        kernel<<<1, 1>>>(dptr);
+        kernel2<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }
+    """, format=format)
+    run = data[run_file()]
+
+    traces = run["traces"]
+    assert "kernel-0.trace." + format in traces
+    assert "kernel-1.trace." + format in traces
+    assert "kernel2-0.trace." + format in traces

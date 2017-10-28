@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 #include "../tracedata/AccessRecord.h"
 #include "../tracedata/AllocRecord.h"
 #include "TraceFormatter.h"
@@ -14,8 +15,8 @@ namespace cupr
     {
     public:
         Emitter(std::unique_ptr<TraceFormatter> formatter, bool prettify, bool compress);
-        void emitProgramRun();
 
+        void emitProgramRun();
         void emitKernelTrace(const std::string& kernelName,
                              const DeviceDimensions& dimensions,
                              const std::vector<AccessRecord>& records,
@@ -32,8 +33,10 @@ namespace cupr
         bool prettify;
         bool compress;
 
-        int kernelCounter = 0;
         int64_t timestampStart = getTimestamp();
         std::string directory;
+
+        std::unordered_map<std::string, int> kernelCount;
+        std::vector<std::string> traceFiles;
     };
 }
