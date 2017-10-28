@@ -13,7 +13,7 @@ namespace cupr
     class Emitter
     {
     public:
-        void initialize(std::unique_ptr<TraceFormatter> formatter, bool prettify);
+        Emitter(std::unique_ptr<TraceFormatter> formatter, bool prettify);
         void emitProgramRun();
 
         void emitKernelTrace(const std::string& kernelName,

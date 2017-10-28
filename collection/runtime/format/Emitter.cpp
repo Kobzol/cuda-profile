@@ -4,11 +4,9 @@
 
 using namespace cupr;
 
-void Emitter::initialize(std::unique_ptr<TraceFormatter> formatter, bool prettify)
+Emitter::Emitter(std::unique_ptr<TraceFormatter> formatter, bool prettify)
+        : formatter(std::move(formatter)), prettify(prettify)
 {
-    this->formatter = std::move(formatter);
-    this->prettify = prettify;
-
     this->directory = this->generateDirectoryName();
     createDirectory(this->directory);
     this->copyMetadataFiles();
