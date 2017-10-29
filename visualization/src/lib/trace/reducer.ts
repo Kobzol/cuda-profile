@@ -1,7 +1,7 @@
 import {reducerWithInitialState} from 'typescript-fsa-reducers';
 import {buildProfile, selectWarps, selectTrace} from './actions';
 import {Profile} from '../profile/profile';
-import {TraceSelection} from './trace-selection';
+import {TraceSelection} from './selection';
 import {createSelector} from 'reselect';
 import {AppState} from '../state/reducers';
 import {Kernel} from '../profile/kernel';

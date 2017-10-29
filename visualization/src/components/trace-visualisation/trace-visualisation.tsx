@@ -5,16 +5,18 @@ import {buildProfile, selectWarps, selectTrace} from '../../lib/trace/actions';
 import {AppState} from '../../lib/state/reducers';
 import {KernelTimeline} from './kernel-timeline/kernel-timeline';
 import {Profile} from '../../lib/profile/profile';
-import {TraceSelection} from '../../lib/trace/trace-selection';
+import {TraceSelection} from '../../lib/trace/selection';
 import {Kernel} from '../../lib/profile/kernel';
 import {Trace} from '../../lib/profile/trace';
 import {selectedWarps, selectedKernel, selectedTrace} from '../../lib/trace/reducer';
 import {WarpTimeline} from './warp-timeline/warp-timeline';
 import {ToggleWrapper} from '../toggle-wrapper/toggle-wrapper';
-import {Warp} from '../../lib/profile/memory-access';
+import {Warp} from '../../lib/profile/warp';
 
 import './trace-visualisation.css';
 import {WarpList} from './warp-list/warp-list';
+import {MemoryBlock} from './memory-block/memory-block';
+import {WarpAddressSelection} from './selection';
 
 interface StateProps
 {
@@ -36,6 +38,7 @@ type Props = StateProps & DispatchProps;
 interface State
 {
     showKernelTimeline: boolean;
+    rangeSelections: WarpAddressSelection[];
 }
 
 class TraceVisualisationComponent extends PureComponent<Props, State>
@@ -45,7 +48,8 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         super(props);
 
         this.state = {
-            showKernelTimeline: true
+            showKernelTimeline: true,
+            rangeSelections: []
         };
     }
 
@@ -111,9 +115,22 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
     {
         return (
             <div>
-                <WarpList
-                    trace={trace}
-                    warps={warps} />
+                <div className='trace-wrapper'>
+                    <WarpList
+                        trace={trace}
+                        warps={warps}
+                        selectRange={(range) => this.setState({
+                            rangeSelections: range === null ? [] : [range]
+                        })} />
+                    <div>
+                        {trace.allocations.slice(-1).map(alloc =>
+                            <MemoryBlock
+                                key={alloc.address}
+                                allocation={alloc}
+                                rangeSelections={this.state.rangeSelections} />
+                        )}
+                    </div>
+                </div>
                 {this.renderAccessTimeline(kernel, trace)}
             </div>
         );
@@ -121,7 +138,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
     renderAccessTimeline = (kernel: Kernel, trace: Trace): JSX.Element =>
     {
         return (
-            <div className='access-timeline'>
+            <div className='warp-timeline'>
                 <WarpTimeline
                     kernel={kernel}
                     trace={trace}

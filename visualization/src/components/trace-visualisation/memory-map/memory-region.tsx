@@ -2,7 +2,7 @@ import * as React from 'react';
 import {PureComponent} from 'react';
 import {MemoryAllocation} from '../../../lib/profile/memory-allocation';
 import {formatMiB} from '../../../lib/util/format';
-import {AddressSpace} from '../../../lib/profile/memory-access';
+import {AddressSpace} from '../../../lib/profile/warp';
 
 interface Props
 {

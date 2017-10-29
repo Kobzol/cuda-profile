@@ -1,4 +1,4 @@
-import {Warp} from './memory-access';
+import {Warp} from './warp';
 import {MemoryAllocation} from './memory-allocation';
 import {Dim3} from './dim3';
 

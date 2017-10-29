@@ -1,4 +1,4 @@
-import {getCtaId, getLaneId, getWarpId, getWarpStart} from '../lib/profile/api';
+import {getCtaId, getLaneId, getWarpId, getWarpStart} from '../lib/profile/warp';
 import {InvalidWarpData} from '../lib/profile/errors';
 
 test('Warp start is calculated correctly', () => {

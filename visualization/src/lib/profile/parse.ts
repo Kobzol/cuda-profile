@@ -1,7 +1,7 @@
 import {FileType, TraceFile} from '../file-load/file';
 import {Run} from './run';
 import {Trace} from './trace';
-import {Warp} from './memory-access';
+import {Warp} from './warp';
 import {Metadata} from './metadata';
 import {Kernel} from './kernel';
 import {Profile} from './profile';
@@ -13,7 +13,7 @@ import {MemoryAllocation as MemoryAllocationFormat} from '../format/memory-alloc
 import {MemoryAllocation} from './memory-allocation';
 import {hasOwnProperty} from 'tslint/lib/utils';
 import {Dictionary} from 'lodash';
-import {getLaneId, getWarpId, getWarpStart} from './api';
+import {getLaneId, getWarpId, getWarpStart} from './warp';
 
 
 function parseMetadata(metadata: MetadataFormat): Metadata

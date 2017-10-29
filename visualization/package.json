@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@types/d3": "^4.10.1",
+    "big-integer": "^1.6.25",
     "bootstrap": "^3.3.7",
     "d3": "^4.11.0",
     "d3-canvas-transition": "^0.3.7",

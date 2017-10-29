@@ -1,4 +1,4 @@
-import {AddressSpace} from './memory-access';
+import {AddressSpace} from './warp';
 
 export interface MemoryAllocation
 {

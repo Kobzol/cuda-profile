@@ -5,7 +5,7 @@ import Timeline from 'react-visjs-timeline';
 import {Profile} from '../../../lib/profile/profile';
 import * as moment from 'moment';
 import {flatMap} from 'lodash';
-import {TraceSelection} from '../../../lib/trace/trace-selection';
+import {TraceSelection} from '../../../lib/trace/selection';
 
 interface Props
 {

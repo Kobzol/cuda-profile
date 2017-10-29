@@ -1,7 +1,7 @@
 import {actionCreatorFactory} from 'typescript-fsa';
 import {TraceFile} from '../file-load/file';
 import {Profile} from '../profile/profile';
-import {TraceSelection} from './trace-selection';
+import {TraceSelection} from './selection';
 
 const actionCreator = actionCreatorFactory('trace');
 

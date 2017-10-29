@@ -1,6 +1,7 @@
-import {MemoryAccess, Warp} from '../../../lib/profile/memory-access';
+import {MemoryAccess} from '../../../../lib/profile/memory-access';
 import {createSelector} from 'reselect';
 import {Dictionary} from 'lodash';
+import {Warp} from '../../../../lib/profile/warp';
 
 export function createBlockSelector()
 {
