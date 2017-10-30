@@ -10,7 +10,6 @@ Emitter::Emitter(std::unique_ptr<TraceFormatter> formatter, bool prettify, bool 
 {
     this->directory = this->generateDirectoryName();
     createDirectory(this->directory);
-    this->copyMetadataFiles();
 }
 void Emitter::emitProgramRun()
 {
@@ -25,6 +24,8 @@ void Emitter::emitProgramRun()
 
     runFile << value.serialize(true);
     runFile.flush();
+
+    this->copyMetadataFiles();
 }
 
 void Emitter::emitKernelTrace(const std::string& kernelName, const DeviceDimensions& dimensions,
@@ -67,9 +68,12 @@ std::string Emitter::getFilePath(const std::string& name)
 
 void Emitter::copyMetadataFiles()
 {
-    for (auto& metadata : glob("*.metadata.json"))
+    for (auto& kernel: this->kernelCount)
     {
-        std::string fileName = metadata.substr(metadata.find_last_of('/') + 1);
-        copyFile(metadata, this->getFilePath(fileName));
+        auto meta = kernel.first + ".metadata.json";
+        if (fileExists(meta))
+        {
+            copyFile(meta, this->getFilePath(meta));
+        }
     }
 }

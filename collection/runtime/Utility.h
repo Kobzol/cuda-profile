@@ -52,6 +52,11 @@ namespace cupr
         std::ofstream dst(to, std::ios::binary);
         dst << src.rdbuf();
     }
+    inline bool fileExists(const std::string& path)
+    {
+        std::fstream fs(path);
+        return fs.good();
+    }
 }
 
 #define CHECK_CUDA_CALL(ans) { cupr::checkCudaCall((ans), __FILE__, __LINE__); }

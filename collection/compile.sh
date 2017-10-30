@@ -3,7 +3,7 @@
 LLVM_DIR=/home/kobzol/libraries/llvm-4.0.1-build
 CLANG=clang++ # ${LLVM_DIR}/bin/clang++
 CUDA_DIR=/usr/local/cuda
-SRC_FILES=$1 #"../main.cpp ../kernel.cu" # ../kernel2.cu
+SRC_FILES=${1-"../main.cpp ../kernel.cu"} # ../kernel2.cu
 PROTOBUF=${2-0}
 COMPRESS=${3-0}
 INSTRUMENTED_KERNEL_BC="kernel-instrumented.bc"
