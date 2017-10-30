@@ -2,8 +2,9 @@ import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/observable/throw';
 import {Metadata} from '../format/metadata';
-import {readFileBinary, readFileText} from '../util/fs';
+import {readFile} from '../util/fs';
 import {createWorkerJob} from '../util/worker';
 import {InvalidFileContent, InvalidFileFormat} from './errors';
 import {Run} from '../format/run';
@@ -36,21 +37,23 @@ export interface FileLoadData
 /**
  * Loads file and parses its content as JSON using a web worker.
  * @param {File} file
+ * @param {boolean} decompress
  * @returns {Observable<Object>}
  */
-function parseFileJson(file: File): Observable<Trace | Metadata>
+function parseFileJson(file: File, decompress: boolean): Observable<Trace | Metadata | Run>
 {
-    return readFileText(file)
+    return readFile(file, false, decompress)
         .flatMap(data => createWorkerJob(process.env.PUBLIC_URL + './json.worker.js', data));
 }
 /**
  * Loads file and parses its content as Protobuf using a web worker.
  * @param {File} file
+ * @param {boolean} decompress
  * @returns {Observable<Object>}
  */
-function parseFileProtobuf(file: File): Observable<Trace | Metadata>
+function parseFileProtobuf(file: File, decompress: boolean): Observable<Trace>
 {
-    return readFileBinary(file)
+    return readFile(file, true, decompress)
         .flatMap(data => createWorkerJob(process.env.PUBLIC_URL + './protobuf.worker.js', data));
 }
 /**
@@ -58,18 +61,15 @@ function parseFileProtobuf(file: File): Observable<Trace | Metadata>
  * @param {File} file
  * @returns {Observable<Object>}
  */
-function parseFile(file: File): Observable<Trace | Metadata>
+function parseFile(file: File): Observable<Trace | Metadata | Run>
 {
     if (file.name.match(/\.json$/))
     {
-        return parseFileJson(file);
+        return parseFileJson(file, file.name.match(/\.gzip\.\.json$/).length > 0);
     }
     else if (file.name.match(/\.protobuf$/))
     {
-        return parseFileProtobuf(file).map(content => ({
-            ...content,
-            type: 'trace'
-        }));
+        return parseFileProtobuf(file, file.name.match(/\.gzip\.\.protobuf$/).length > 0);
     }
     else return Observable.throw(new InvalidFileFormat());
 }
@@ -156,7 +156,10 @@ export function parseAndValidateFile(file: File): Observable<FileLoadData>
 {
     return parseFile(file)
         .catch(error => {
-            if (!(error instanceof InvalidFileFormat)) return Observable.throw(new InvalidFileContent());
+            if (!(error instanceof InvalidFileFormat))
+            {
+                return Observable.throw(new InvalidFileContent());
+            }
             else return Observable.throw(error);
         })
         .do(content => {

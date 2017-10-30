@@ -12,5 +12,7 @@ export const getErrorId = (error: Error) =>
 {
     if (error instanceof InvalidFileFormat) return Errors.InvalidFileFormat;
     if (error instanceof InvalidFileContent) return Errors.InvalidFileContent;
+
+    console.error(error);
     return Errors.Unknown;
 };
