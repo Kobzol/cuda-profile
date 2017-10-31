@@ -43,7 +43,7 @@ void Emitter::emitKernelTrace(const std::string& kernelName, const DeviceDimensi
             "-" +
             std::to_string(count) +
             ".trace." +
-            this->formatter->getSuffix();
+            this->getTraceSuffix();
     std::string filepath = this->getFilePath(filename);
     auto timestamp = static_cast<double>(getTimestamp());
     double start = timestamp - static_cast<double>(duration);
@@ -76,4 +76,14 @@ void Emitter::copyMetadataFiles()
             copyFile(meta, this->getFilePath(meta));
         }
     }
+}
+
+std::string Emitter::getTraceSuffix()
+{
+    auto suffix = this->formatter->getSuffix();
+    if (this->compress)
+    {
+        return "gzip." + suffix;
+    }
+    else return suffix;
 }

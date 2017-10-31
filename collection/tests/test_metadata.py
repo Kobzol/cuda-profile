@@ -11,17 +11,23 @@ def check_debug_record(data, record, name, line):
 
 def test_metadata_empty_debug(profile):
     data = profile("__global__ void kernel() {}", with_main=True)
-    assert len(data) == 2
-    assert metadata_file("kernel") in data
-    assert data[metadata_file("kernel")]["locations"] == []
+    assert len(data) == 1
+    assert metadata_file("kernel") not in data
 
 
 def test_metadata_debug_location(profile):
     data = profile("""
     __global__ void kernel(int* p) {
-            int x = *p;
-            *p = 5;
-        }""", with_metadata=True, with_main=True)
+        int x = *p;
+        *p = 5;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }""", with_metadata=True)
     records = data["mappings"][metadata_file("kernel")]["locations"]
 
     assert len(records) == 2

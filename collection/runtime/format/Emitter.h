@@ -28,6 +28,7 @@ namespace cupr
         std::string getFilePath(const std::string& name);
 
         void copyMetadataFiles();
+        std::string getTraceSuffix();
 
         std::unique_ptr<TraceFormatter> formatter;
         bool prettify;

@@ -85,7 +85,7 @@ def run(root, dir, exe, env, compress):
             mappings[os.path.basename(protobuf_file)] = json_format.MessageToDict(kernel,
                                                                                   preserving_proto_field_name=True)
     for json_file in glob.glob("{}/*.json".format(cuprdir)):
-        with (gzip.open(json_file) if (compress and "trace" in json_file) else open(json_file)) as f:
+        with (gzip.open(json_file) if (compress and json_file.endswith(".gzip.json")) else open(json_file)) as f:
             mappings[os.path.basename(json_file)] = json.load(f)
 
     return (mappings, process.returncode, out, err)
@@ -155,8 +155,8 @@ def metadata_file(kernel="kernel"):
     return "{}.metadata.json".format(kernel)
 
 
-def kernel_file(kernel="kernel", index=0, format="json"):
-    return "{}-{}.trace.{}".format(kernel, index, format)
+def kernel_file(kernel="kernel", index=0, format="json", compress=False):
+    return "{}-{}.trace.{}{}".format(kernel, index, "gzip." if compress else "", format)
 
 
 def run_file():
