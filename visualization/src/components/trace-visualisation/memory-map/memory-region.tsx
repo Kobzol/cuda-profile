@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {PureComponent} from 'react';
 import {MemoryAllocation} from '../../../lib/profile/memory-allocation';
-import {formatMiB} from '../../../lib/util/format';
+import {formatByteSize} from '../../../lib/util/format';
 import {AddressSpace} from '../../../lib/profile/warp';
 
 interface Props
@@ -24,7 +24,7 @@ export class MemoryRegion extends PureComponent<Props>
 
         return (
             <g>
-                <title>{address}: {formatMiB(size)} MiB ({count}x {type})</title>
+                <title>{address}: {formatByteSize(size)} MiB ({count}x {type})</title>
                 <g y={this.props.y} transform='translate(-50, 0)'>
                     <text
                         y={this.props.y + this.props.rowHeight}

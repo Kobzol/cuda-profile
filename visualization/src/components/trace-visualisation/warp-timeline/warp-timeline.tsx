@@ -67,16 +67,16 @@ export class WarpTimeline extends PureComponent<Props>
             }
 
             return {
-                id: `${index}`,
+                id: index,
                 start, end,
                 content, title
             };
         });
     }
 
-    handleAccessSelect = ({items}: {items: string[]}) =>
+    handleAccessSelect = ({items}: {items: number[]}) =>
     {
-        this.props.selectWarps(items.map(item => parseInt(item, 10)));
+        this.props.selectWarps(items);
     }
 
     private recalculateTime(trace: Trace, timestamp: number): number

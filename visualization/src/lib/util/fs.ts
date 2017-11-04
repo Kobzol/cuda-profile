@@ -10,9 +10,9 @@ import pako from 'pako';
  * @returns {Observable<string | ArrayBuffer>}
  */
 export function readFile(file: File, binary: boolean = false, decompress: boolean = false)
-: Observable<string | ArrayBuffer>
+: Observable<string | ArrayBuffer | Uint8Array>
 {
-    const subject = new Subject<string>();
+    const subject = new Subject<string | ArrayBuffer | Uint8Array>();
 
     const reader = new FileReader();
     reader.onload = (event: FileReaderEvent) =>
@@ -29,7 +29,7 @@ export function readFile(file: File, binary: boolean = false, decompress: boolea
                 options['to'] = 'string';
             }
 
-            subject.next(pako.ungzip(content, options) as any);
+            subject.next(pako.ungzip(content, options));
         }
         else subject.next(content);
 

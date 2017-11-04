@@ -130,8 +130,8 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                         selectRange={(range) => this.setState({
                             rangeSelections: range === null ? [] : [range]
                         })} />
-                    <div>
-                        {trace.allocations.slice(-1).map(alloc =>
+                    <div className='memory-block-wrapper'>
+                        {trace.allocations.map(alloc =>
                             <MemoryBlock
                                 key={alloc.address}
                                 allocation={alloc}

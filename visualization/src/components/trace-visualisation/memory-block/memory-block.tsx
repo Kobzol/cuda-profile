@@ -12,6 +12,9 @@ import {select} from 'd3-selection';
 import {range} from 'd3-array';
 import * as d3 from 'd3';
 import * as bigInt from 'big-integer';
+import {formatAddressSpace, formatByteSize} from '../../../lib/util/format';
+
+import './memory-block.css';
 
 
 interface Props
@@ -27,6 +30,8 @@ interface State
 
 export class MemoryBlock extends PureComponent<Props, State>
 {
+    private svg: SVGSVGElement = null;
+
     componentDidMount()
     {
         this.renderd3();
@@ -39,14 +44,9 @@ export class MemoryBlock extends PureComponent<Props, State>
 
     renderd3()
     {
-        const container = select('#memory-block');
-
-        const width = (container.node() as any).getBoundingClientRect().width;
-        const height = (container.node() as any).getBoundingClientRect().height;
-
-        const svg = container.select('svg')
-            .attr('width', width)
-            .attr('height', height);
+        const svg = select(this.svg);
+        const width = (svg.node() as Element).getBoundingClientRect().width;
+        const height = (svg.node() as Element).getBoundingClientRect().height;
 
         const allocRange = getAllocationAddressRange(this.props.allocation);
         const effectiveRange = clampAddressRange(this.props.rangeSelections.length > 0 ?
@@ -55,7 +55,7 @@ export class MemoryBlock extends PureComponent<Props, State>
 
         const dim = 16;
         const elements = dim * dim;
-        const blockSize = Math.ceil(size / elements);
+        const blockSize = Math.max(4, Math.ceil(size / elements));
 
         const grid = GridLayout()
             .data(range(elements).map(index => ({ index })))
@@ -128,12 +128,11 @@ export class MemoryBlock extends PureComponent<Props, State>
 
     render()
     {
+        const {size, address, space, type} = this.props.allocation;
         return (
-            <div id='memory-block' style={{
-                width: '600px',
-                height: '120px'
-            }}>
-                <svg>
+            <div className='memory-block' id='memory-block'>
+                <div>{formatByteSize(size)} of {type} allocated at {address} ({formatAddressSpace(space)})</div>
+                <svg width={'100%'} ref={(svg) => this.svg = svg}>
                     <g className='block-wrapper' />
                     <rect className='zoom-wrapper' />
                 </svg>

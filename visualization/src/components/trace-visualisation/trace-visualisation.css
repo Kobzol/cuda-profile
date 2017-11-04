@@ -1,3 +1,6 @@
 .trace-wrapper {
     display: flex;
 }
+.memory-block-wrapper {
+    width: 100%;
+}
