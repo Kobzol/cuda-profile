@@ -65,11 +65,11 @@ function parseFile(file: File): Observable<Trace | Metadata | Run>
 {
     if (file.name.match(/\.json$/))
     {
-        return parseFileJson(file, file.name.match(/\.gzip\.\.json$/).length > 0);
+        return parseFileJson(file, file.name.match(/\.gzip\.json$/) !== null);
     }
     else if (file.name.match(/\.protobuf$/))
     {
-        return parseFileProtobuf(file, file.name.match(/\.gzip\.\.protobuf$/).length > 0);
+        return parseFileProtobuf(file, file.name.match(/\.gzip\.protobuf$/) !== null);
     }
     else return Observable.throw(new InvalidFileFormat());
 }
@@ -144,7 +144,7 @@ function getFileType(file: File): FileType
     }
 
     const metadata = file.name.match(/.*\.metadata\..*/);
-    return metadata ? FileType.Metadata : FileType.Trace;
+    return metadata !== null ? FileType.Metadata : FileType.Trace;
 }
 
 /**

@@ -1,7 +1,7 @@
 import React, {PureComponent} from 'react';
 import {connect} from 'react-redux';
 import {TraceFile} from '../../lib/file-load/file';
-import {buildProfile, selectWarps, selectTrace} from '../../lib/trace/actions';
+import {selectWarps, selectTrace} from '../../lib/trace/actions';
 import {AppState} from '../../lib/state/reducers';
 import {KernelTimeline} from './kernel-timeline/kernel-timeline';
 import {Profile} from '../../lib/profile/profile';
@@ -12,11 +12,13 @@ import {selectedWarps, selectedKernel, selectedTrace} from '../../lib/trace/redu
 import {WarpTimeline} from './warp-timeline/warp-timeline';
 import {ToggleWrapper} from '../toggle-wrapper/toggle-wrapper';
 import {Warp} from '../../lib/profile/warp';
-
-import './trace-visualisation.css';
 import {WarpList} from './warp-list/warp-list';
 import {MemoryBlock} from './memory-block/memory-block';
 import {WarpAddressSelection} from './selection';
+import {Routes} from '../../lib/nav/routes';
+import {push} from 'react-router-redux';
+
+import './trace-visualisation.css';
 
 interface StateProps
 {
@@ -28,9 +30,9 @@ interface StateProps
 }
 interface DispatchProps
 {
-    buildProfile: (files: TraceFile[]) => {};
     selectTrace: (selection: TraceSelection) => {};
     selectWarps: (warps: number[]) => {};
+    goToPage: (page: string) => {};
 }
 
 type Props = StateProps & DispatchProps;
@@ -55,7 +57,10 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
 
     componentWillMount()
     {
-        this.props.buildProfile(this.props.files);
+        if (this.props.profile === null)
+        {
+            this.props.goToPage(Routes.Root);
+        }
     }
     componentWillReceiveProps(nextProps: Props)
     {
@@ -163,12 +168,12 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
 
 export const TraceVisualisation = connect<StateProps, DispatchProps, {}>((state: AppState) => ({
     files: state.fileLoader.files,
-    profile: state.trace.profile,
+    profile: state.profile.profile,
     selectedKernel: selectedKernel(state),
     selectedTrace: selectedTrace(state),
     selectedWarps: selectedWarps(state)
 }), {
-    buildProfile: buildProfile.started,
     selectTrace: selectTrace,
-    selectWarps: selectWarps
+    selectWarps: selectWarps,
+    goToPage: push
 })(TraceVisualisationComponent);

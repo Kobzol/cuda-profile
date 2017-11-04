@@ -20,10 +20,16 @@ export function readFile(file: File, binary: boolean = false, decompress: boolea
         const content = event.target.result;
         if (decompress)
         {
-            subject.next(pako.ungzip(content, {
-                raw: false,
-                to: 'string'
-            }));
+            const options = {
+                raw: false
+            };
+
+            if (!binary)
+            {
+                options['to'] = 'string';
+            }
+
+            subject.next(pako.ungzip(content, options) as any);
         }
         else subject.next(content);
 

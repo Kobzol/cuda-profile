@@ -1,24 +1,24 @@
 import React, {ChangeEvent, DragEvent, PureComponent} from 'react';
 import {connect} from 'react-redux';
-import {push} from 'react-router-redux';
 import {loadFile} from '../../lib/file-load/actions';
 import {TraceFile} from '../../lib/file-load/file';
 import {loadingFiles, validTraceFiles} from '../../lib/file-load/reducer';
 import {AppState} from '../../lib/state/reducers';
 import {Button, Glyphicon} from 'react-bootstrap';
-import {Routes} from '../../lib/nav/routes';
+import {buildProfile} from '../../lib/profile/actions';
 
 interface StateProps
 {
     files: TraceFile[];
     validTraceFiles: TraceFile[];
     loadingFiles: TraceFile[];
+    buildError: string;
 }
 
 interface DispatchProps
 {
     loadFile: (file: File) => {};
-    goToNextPage: () => {};
+    buildProfile: (files: TraceFile[]) => {};
 }
 
 class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
@@ -32,11 +32,12 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
                     {this.props.files.map(this.renderFile)}
                 </ul>
                 <Button
-                    disabled={!this.canGoToNextPage()}
-                    onClick={this.props.goToNextPage}
+                    disabled={!this.canBuildProfile()}
+                    onClick={this.buildProfile}
                     bsStyle='primary'>
                     <Glyphicon glyph='flash' /> Load trace
                 </Button>
+                {this.props.buildError && <div className='error'>{this.props.buildError}</div>}
             </div>
         );
     }
@@ -66,17 +67,22 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
         }
     }
 
-    canGoToNextPage = (): boolean =>
+    canBuildProfile = (): boolean =>
     {
         return this.props.validTraceFiles.length > 0 && this.props.loadingFiles.length < 1;
+    }
+    buildProfile = () =>
+    {
+        this.props.buildProfile(this.props.validTraceFiles);
     }
 }
 
 export const TraceLoader = connect<StateProps, DispatchProps, {}>((state: AppState) => ({
     files: state.fileLoader.files,
+    buildError: state.profile.buildError,
     validTraceFiles: validTraceFiles(state),
     loadingFiles: loadingFiles(state)
 }), ({
     loadFile: loadFile.started,
-    goToNextPage: () => push(Routes.TraceVisualisation)
+    buildProfile: buildProfile.started
 }))(TraceLoaderComponent);

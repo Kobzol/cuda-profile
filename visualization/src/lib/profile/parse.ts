@@ -14,6 +14,7 @@ import {MemoryAllocation} from './memory-allocation';
 import {hasOwnProperty} from 'tslint/lib/utils';
 import {Dictionary} from 'lodash';
 import {getLaneId, getWarpId, getWarpStart} from './warp';
+import {MissingProfileData} from './errors';
 
 
 function parseMetadata(metadata: MetadataFormat): Metadata
@@ -94,6 +95,31 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
     return Object.keys(dict).map(key => dict[key]).slice(-100);
 }
 
+function validateProfile({run, kernels}: {run: Run; kernels: Kernel[]})
+{
+    if (run === null)
+    {
+        throw new MissingProfileData('Run file is missing');
+    }
+
+    if (kernels.length < 1)
+    {
+        throw new MissingProfileData('No kernels found');
+    }
+
+    for (const kernel of kernels)
+    {
+        if (kernel.metadata === null)
+        {
+            throw new MissingProfileData(`No metadata found for kernel ${kernel.name}`);
+        }
+        if (kernel.traces.length === 0)
+        {
+            throw new MissingProfileData(`No traces found for kernel ${kernel.name}`);
+        }
+    }
+}
+
 export function parseProfile(files: TraceFile[]): Profile
 {
     function prepareKey(dict: {[key: string]: Kernel}, key: MetadataFormat | TraceFormat)
@@ -108,9 +134,14 @@ export function parseProfile(files: TraceFile[]): Profile
         }
     }
 
-    if (files.length === 0) return null;
+    if (files.length === 0)
+    {
+        throw new MissingProfileData('No files found');
+    }
 
-    let run: Run;
+    files.sort((a, b) => a.type === FileType.Metadata ? -1 : 1);
+
+    let run: Run = null;
     let kernelMap: {[key: string]: Kernel} = {};
 
     for (const file of files)
@@ -126,6 +157,12 @@ export function parseProfile(files: TraceFile[]): Profile
         {
             const trace = file.content as TraceFormat;
             prepareKey(kernelMap, trace);
+
+            if (kernelMap[trace.kernel].metadata === null)
+            {
+                throw new MissingProfileData(`No metadata found for kernel ${trace.kernel}`);
+            }
+
             kernelMap[trace.kernel].traces.push(parseTrace(trace, kernelMap[trace.kernel].metadata));
             kernelMap[trace.kernel].name = trace.kernel;
         }
@@ -135,8 +172,12 @@ export function parseProfile(files: TraceFile[]): Profile
         }
     }
 
-    return {
+    const profile = {
         run: run,
         kernels: Object.keys(kernelMap).map(key => kernelMap[key])
     };
+
+    validateProfile(profile);
+
+    return profile;
 }

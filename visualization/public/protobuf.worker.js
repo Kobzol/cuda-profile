@@ -3,5 +3,5 @@ importScripts('./proto-bundle.js');
 
 self.onmessage = function(message)
 {
-    self.postMessage(protobuf.roots.default.KernelTrace.decode(new Uint8Array(message.data)).toJSON());
+    self.postMessage(protobuf.roots.default.cupr.proto.KernelTrace.decode(new Uint8Array(message.data)).toJSON());
 };

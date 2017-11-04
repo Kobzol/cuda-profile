@@ -1,29 +1,22 @@
 import {reducerWithInitialState} from 'typescript-fsa-reducers';
-import {buildProfile, selectWarps, selectTrace} from './actions';
-import {Profile} from '../profile/profile';
+import {selectWarps, selectTrace} from './actions';
 import {TraceSelection} from './selection';
 import {createSelector} from 'reselect';
 import {AppState} from '../state/reducers';
 import {Kernel} from '../profile/kernel';
 import {Trace} from '../profile/trace';
+import {ProfileState} from '../profile/reducer';
 
 export interface TraceState
 {
-    profile?: Profile;
     selectedTrace?: TraceSelection;
     selectedWarps: number[];
 }
 
 const reducer = reducerWithInitialState<TraceState>({
-    profile: null,
     selectedTrace: null,
     selectedWarps: []
-}).case(buildProfile.done, (state, payload) => ({
-    ...state,
-    profile: payload.result,
-    selectedTrace: null,
-    selectedWarps: []
-})).case(selectTrace, (state, payload) => ({
+}).case(selectTrace, (state, payload) => ({
     ...state,
     selectedTrace: payload,
     selectedWarps: []
@@ -34,7 +27,9 @@ const reducer = reducerWithInitialState<TraceState>({
 
 export const selectedKernel = createSelector(
     (state: AppState) => state.trace,
-    (state: TraceState) => state.selectedTrace !== null ? state.profile.kernels[state.selectedTrace.kernel] : null
+    (state: AppState) => state.profile,
+    (trace: TraceState, profile: ProfileState) =>
+        trace.selectedTrace !== null ? profile.profile.kernels[trace.selectedTrace.kernel] : null
 );
 export const selectedTrace = createSelector(
     (state: AppState) => state.trace,
