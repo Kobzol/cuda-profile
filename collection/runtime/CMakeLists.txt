@@ -12,7 +12,7 @@ set(SOURCE_FILES
         RuntimeState.cpp
         Init.cpp
         Parameters.cpp
-)
+        memtracker.cpp)
 
 add_library(runtime SHARED ${SOURCE_FILES} ${PROTOBUF_CXX_FILES})
 target_link_libraries(runtime ${CUDA_LIBRARIES} ${PROTOBUF_LIBRARIES})

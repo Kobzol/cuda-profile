@@ -28,7 +28,7 @@ pushd cmake-build-debug
             ${SRC_FILES} -o cuda
 
     # run instrumented program
-    LD_LIBRARY_PATH=./runtime CUPR_PROTOBUF=${PROTOBUF} CUPR_COMPRESS=${COMPRESS} ./cuda
+    LD_LIBRARY_PATH=./runtime LD_PRELOAD=./memtracker/libmemtracker.so CUPR_PROTOBUF=${PROTOBUF} CUPR_COMPRESS=${COMPRESS} ./cuda
 
     exit 0
 popd

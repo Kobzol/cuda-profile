@@ -14,6 +14,7 @@ from generated.kernel_trace_pb2 import KernelTrace
 PROJECT_DIR = os.path.dirname(os.path.dirname(__file__))
 INSTRUMENT_LIB = "cmake-build-debug/instrument/libinstrument.so"
 RUNTIME_LIB_DIR = "cmake-build-debug/runtime"
+RUNTIME_TRACKING_LIB_DIR = "cmake-build-debug/memtracker"
 INPUT_FILENAME = "input.cu"
 
 
@@ -98,6 +99,7 @@ def compile_and_run(code,
                     buffer_size=None,
                     debug=True,
                     compress=False,
+                    runtime_tracking=False,
                     format="json"):
     tmpdir = create_test_dir()
 
@@ -108,6 +110,8 @@ def compile_and_run(code,
         env["CUPR_PROTOBUF"] = "1"
     if compress:
         env["CUPR_COMPRESS"] = "1"
+    if runtime_tracking:
+        env["LD_PRELOAD"] = os.path.join(PROJECT_DIR, RUNTIME_TRACKING_LIB_DIR, "libmemtracker.so")
 
     prelude = ""
     if add_include:

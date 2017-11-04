@@ -16,6 +16,7 @@
 #include "../runtime/RuntimeState.h"
 #include "../runtime/Parameters.h"
 #include "../runtime/DeviceDimensions.h"
+#include "../runtime/memtracker.h"
 
 
 #define ATOMIC_INSERT(buffer, index, maxSize, item) \
@@ -112,16 +113,22 @@ extern "C"
     void CU_PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type,
                            const char* name, const char* location)
     {
-        cupr::state.getAllocations().emplace_back(address, size, elementSize, cupr::AddressSpace::Global,
-                                                  type, name, location);
+        if (!CU_PREFIX(isRuntimeTrackingEnabled)())
+        {
+            cupr::state.getAllocations().emplace_back(address, size, elementSize, cupr::AddressSpace::Global,
+                                                      type, name, location);
+        }
     }
     void CU_PREFIX(free)(void* address)
     {
-        for (auto& alloc: cupr::state.getAllocations())
+        if (!CU_PREFIX(isRuntimeTrackingEnabled)())
         {
-            if (alloc.address == address)
+            for (auto& alloc: cupr::state.getAllocations())
             {
-                alloc.active = false;
+                if (alloc.address == address)
+                {
+                    alloc.active = false;
+                }
             }
         }
     }

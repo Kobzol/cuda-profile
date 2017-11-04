@@ -42,6 +42,29 @@ def test_parameters_protobuf(profile):
     assert "kernel-0.trace.protobuf" in data
 
 
+def test_parameters_runtime_tracking(profile):
+    code = """
+    __global__ void kernel(int* p) {
+        *p = 5;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }
+    """
+
+    data = profile(code, with_metadata=True, runtime_tracking=True)
+    allocations = data["mappings"][kernel_file("kernel")]["allocations"]
+    assert len(allocations) > 1
+
+    data = profile(code, with_metadata=True)
+    allocations = data["mappings"][kernel_file("kernel")]["allocations"]
+    assert len(allocations) == 1
+
+
 @param_all_formats
 def test_parameters_compression_content(profile, format):
     code = """

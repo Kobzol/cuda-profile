@@ -11,6 +11,11 @@ namespace cupr
     public:
         AllocRecord() = default;
 
+        AllocRecord(void* address, size_t size, AddressSpace addressSpace)
+                : address(address), size(size), addressSpace(addressSpace)
+        {
+
+        }
         AllocRecord(void* address, size_t size, size_t elementSize,
                     AddressSpace addressSpace, const char* type,
                     const char* name, const char* location)
