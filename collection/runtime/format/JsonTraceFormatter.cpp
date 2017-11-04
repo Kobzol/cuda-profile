@@ -42,7 +42,9 @@ picojson::value cupr::JsonTraceFormatter::jsonify(const cupr::AllocRecord& recor
             {"elementSize", picojson::value((double) record.elementSize)},
             {"space",       picojson::value((double) record.addressSpace)},
             {typeKey,       typeValue},
-            {"active",      picojson::value(record.active)}
+            {"active",      picojson::value(record.active)},
+            {"name",        picojson::value(record.name == nullptr ? "" : record.name)},
+            {"location",    picojson::value(record.location == nullptr ? "" : record.location)},
     });
 }
 

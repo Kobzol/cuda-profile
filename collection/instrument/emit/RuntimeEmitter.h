@@ -39,7 +39,8 @@ public:
     void kernelEnd(llvm::Value* kernelContext);
 
     void malloc(llvm::Value* address, llvm::Value* size,
-                llvm::Value* elementSize, llvm::Value* type);
+                llvm::Value* elementSize, llvm::Value* type,
+                llvm::Value* name, llvm::Value* location);
     void free(llvm::Value* address);
 
     llvm::IRBuilder<>& getBuilder()

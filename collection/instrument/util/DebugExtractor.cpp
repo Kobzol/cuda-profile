@@ -76,7 +76,7 @@ std::unique_ptr<DebugInfo> DebugExtractor::getGlobalVarDebugInfo(const GlobalVar
             auto* compileUnit = cast<DICompileUnit>(cu->getOperand(i));
             for (DIGlobalVariableExpression* globalDI : compileUnit->getGlobalVariables())
             {
-                /*if (globalDI->getVariable() == global)
+                /*if (globalDI->getVariable()->get == global) TODO
                 {
                     return std::make_unique<DebugInfo>(globalDI);
                 }*/

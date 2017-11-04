@@ -109,9 +109,11 @@ extern "C"
         cupr::state.getEmitter().emitKernelTrace(context->kernelName, dimensions,
                                             records, sharedBuffers, context->timer->get_time());
     }
-    void CU_PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type)
+    void CU_PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type,
+                           const char* name, const char* location)
     {
-        cupr::state.getAllocations().emplace_back(address, size, elementSize, cupr::AddressSpace::Global, type);
+        cupr::state.getAllocations().emplace_back(address, size, elementSize, cupr::AddressSpace::Global,
+                                                  type, name, location);
     }
     void CU_PREFIX(free)(void* address)
     {

@@ -12,9 +12,11 @@ namespace cupr
         AllocRecord() = default;
 
         AllocRecord(void* address, size_t size, size_t elementSize,
-                    AddressSpace addressSpace, const char* type)
+                    AddressSpace addressSpace, const char* type,
+                    const char* name, const char* location)
                 : address(address), size(size), elementSize(elementSize),
-                  addressSpace(addressSpace), type(type)
+                  addressSpace(addressSpace), type(type),
+                  name(name), location(location)
         {
 
         }
@@ -31,6 +33,8 @@ namespace cupr
         size_t size = 0;
         size_t elementSize = 0;
         const char* type = nullptr;
+        const char* name = nullptr;
+        const char* location = nullptr;
         size_t typeIndex = 0;
         bool active = true;
         AddressSpace addressSpace = AddressSpace::Global;

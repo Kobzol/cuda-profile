@@ -11,5 +11,7 @@ message AllocRecord {
         int32 typeIndex = 5;
         string typeString = 6;
     }
-    required bool active = 7;
+    required string name = 7;
+    required string location = 8;
+    required bool active = 9;
 }

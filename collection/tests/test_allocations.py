@@ -10,7 +10,7 @@ def test_global_allocation(profile, format):
     }
     int main() {
         int* dptr;
-        cudaMalloc(&dptr, sizeof(int) * 10);
+        cudaMalloc((void**) &dptr, sizeof(int) * 10);
         printf("%p\\n", dptr);
         kernel<<<1, 1>>>(dptr);
         cudaFree(dptr);
@@ -27,6 +27,8 @@ def test_global_allocation(profile, format):
     assert allocations[0]["typeString"] == "i32"
     assert allocations[0]["space"] == 0
     assert allocations[0]["address"] == data["stdout"].strip()
+    assert allocations[0]["name"] == "dptr"
+    assert allocations[0]["location"].endswith("input.cu:9")
 
 
 @param_all_formats

@@ -1,4 +1,5 @@
 - CPU version
 - source code version
-- track more CUDA memory allocations (2D, array, pitched memory)
+- track more CUDA memory allocations (2D, array, pitched memory), dynamic tracking (LD_PRELOAD)
 - coalesce memory accesses into warps before emit
+- documentation
