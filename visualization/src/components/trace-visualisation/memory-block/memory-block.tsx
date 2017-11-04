@@ -5,7 +5,7 @@ import {
     checkIntersection, clampAddressRange, getAddressRangeSize,
     getAllocationAddressRange
 } from '../../../lib/profile/address';
-import {WarpAddressSelection} from '../selection';
+import {WarpAddressSelection} from '../../../lib/trace/selection';
 import {zoom} from 'd3-zoom';
 import GridLayout from 'd3-v4-grid';
 import {select} from 'd3-selection';

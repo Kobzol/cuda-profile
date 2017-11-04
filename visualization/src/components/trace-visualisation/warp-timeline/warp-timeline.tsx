@@ -9,6 +9,7 @@ interface Props
 {
     kernel: Kernel;
     trace: Trace;
+    selectedWraps: number[];
     selectWarps: (warps: number[]) => void;
 }
 
@@ -37,12 +38,14 @@ export class WarpTimeline extends PureComponent<Props>
             max: end,
             dataAttributes: ['id']
         };
+
         return (
             <Panel className='trace' header={`Access timeline (select access)`}>
                 <Timeline
                     options={options}
                     items={this.createTimelineItems(this.props.kernel, this.props.trace)}
                     selectHandler={this.handleAccessSelect}
+                    selection={this.props.selectedWraps}
                 />
             </Panel>
         );

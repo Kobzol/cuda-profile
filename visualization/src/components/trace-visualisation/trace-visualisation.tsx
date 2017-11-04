@@ -14,7 +14,7 @@ import {ToggleWrapper} from '../toggle-wrapper/toggle-wrapper';
 import {Warp} from '../../lib/profile/warp';
 import {WarpList} from './warp-list/warp-list';
 import {MemoryBlock} from './memory-block/memory-block';
-import {WarpAddressSelection} from './selection';
+import {WarpAddressSelection} from '../../lib/trace/selection';
 import {Routes} from '../../lib/nav/routes';
 import {push} from 'react-router-redux';
 
@@ -27,6 +27,8 @@ interface StateProps
     selectedKernel: Kernel;
     selectedTrace: Trace;
     selectedWarps: Warp[];
+    traceSelection: TraceSelection;
+    warpSelection: number[];
 }
 interface DispatchProps
 {
@@ -111,7 +113,8 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                 toggleText={'Select trace'}>
                 <KernelTimeline
                     selectTrace={this.props.selectTrace}
-                    profile={this.props.profile} />
+                    profile={this.props.profile}
+                    selection={this.props.traceSelection} />
             </ToggleWrapper>
         );
     }
@@ -147,7 +150,8 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                 <WarpTimeline
                     kernel={kernel}
                     trace={trace}
-                    selectWarps={this.props.selectWarps} />
+                    selectWarps={this.props.selectWarps}
+                    selectedWraps={this.props.warpSelection} />
             </div>
         );
     }
@@ -171,7 +175,9 @@ export const TraceVisualisation = connect<StateProps, DispatchProps, {}>((state:
     profile: state.profile.profile,
     selectedKernel: selectedKernel(state),
     selectedTrace: selectedTrace(state),
-    selectedWarps: selectedWarps(state)
+    selectedWarps: selectedWarps(state),
+    traceSelection: state.trace.selectedTrace,
+    warpSelection: state.trace.selectedWarps
 }), {
     selectTrace: selectTrace,
     selectWarps: selectWarps,

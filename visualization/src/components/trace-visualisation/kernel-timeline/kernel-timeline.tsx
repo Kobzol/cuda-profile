@@ -10,6 +10,7 @@ import {TraceSelection} from '../../../lib/trace/selection';
 interface Props
 {
     profile: Profile;
+    selection: TraceSelection;
     selectTrace: (selection: TraceSelection) => void;
 }
 
@@ -37,12 +38,16 @@ export class KernelTimeline extends PureComponent<Props>
             max: end,
             dataAttributes: ['id']
         };
+        const selection = this.props.selection === null ? [] :
+            [this.makeId(this.props.selection.kernel, this.props.selection.trace)];
+
         return (
             <Panel className='kernel' header={`Timeline (select a trace)`}>
                 <Timeline
                     options={options}
                     items={this.createTimelineItems(this.props.profile)}
                     selectHandler={this.handleTraceSelect}
+                    selection={selection}
                 />
             </Panel>
         );
@@ -57,7 +62,7 @@ export class KernelTimeline extends PureComponent<Props>
                 const label = `${kernel.name} #${index}`;
 
                 return {
-                    id: `${kernelIndex}-${index}`,
+                    id: this.makeId(kernelIndex, index),
                     start,
                     end,
                     content: label,
@@ -65,6 +70,11 @@ export class KernelTimeline extends PureComponent<Props>
                 };
             });
         });
+    }
+
+    makeId = (kernelIndex: number, traceIndex: number): string =>
+    {
+        return `${kernelIndex}-${traceIndex}`;
     }
 
     handleTraceSelect = (props: {items: string[]}) =>

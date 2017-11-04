@@ -3,7 +3,7 @@ import {reducerWithInitialState} from 'typescript-fsa-reducers';
 import {getErrorId, Errors} from '../state/errors';
 import {AppState} from '../state/reducers';
 import {pushOrReplaceArray, replaceArray} from '../util/immutable';
-import {loadFile} from './actions';
+import {loadFile, resetFiles} from './actions';
 import {FileType, TraceFile} from './file';
 
 export interface FileLoaderState
@@ -14,6 +14,10 @@ export interface FileLoaderState
 const reducer = reducerWithInitialState<FileLoaderState>({
     files: [],
 })
+.case(resetFiles, (state) => ({
+    ...state,
+    files: []
+}))
 .case(loadFile.started, (state, payload) => ({
         ...state,
         files: pushOrReplaceArray(state.files, ((file) => file.name === payload.name), {

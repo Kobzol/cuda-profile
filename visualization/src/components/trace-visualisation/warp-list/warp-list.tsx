@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 import {Trace} from '../../../lib/profile/trace';
 import {Warp} from '../../../lib/profile/warp';
 import {WarpGrid} from './thread-grid/warp-grid';
-import {WarpAddressSelection} from '../selection';
+import {WarpAddressSelection} from '../../../lib/trace/selection';
 
 interface Props
 {

@@ -22,5 +22,5 @@ export const store = createStore(
     composeEnhancers(applyMiddleware(router, epic, logger), autoRehydrate())
 );
 persistStore(store, {
-    whitelist: ['trace']
+    whitelist: ['trace', 'profile']
 });

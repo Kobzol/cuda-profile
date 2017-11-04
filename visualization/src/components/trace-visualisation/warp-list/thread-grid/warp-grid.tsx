@@ -5,7 +5,7 @@ import {createBlockSelector} from './grid-data';
 import {AddressRange} from '../../../../lib/trace/selection';
 import {Warp} from '../../../../lib/profile/warp';
 import {Thread} from './thread';
-import {WarpAddressSelection} from '../../selection';
+import {WarpAddressSelection} from '../../../../lib/trace/selection';
 import {Selector} from 'reselect';
 import {Dictionary} from 'lodash';
 import GridLayout from 'd3-v4-grid';
