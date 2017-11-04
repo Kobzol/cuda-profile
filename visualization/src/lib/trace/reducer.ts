@@ -2,7 +2,7 @@ import {reducerWithInitialState} from 'typescript-fsa-reducers';
 import {selectWarps, selectTrace} from './actions';
 import {TraceSelection} from './selection';
 import {createSelector} from 'reselect';
-import {AppState} from '../state/reducers';
+import {GlobalState} from '../state/reducers';
 import {Kernel} from '../profile/kernel';
 import {Trace} from '../profile/trace';
 import {ProfileState} from '../profile/reducer';
@@ -26,18 +26,18 @@ const reducer = reducerWithInitialState<TraceState>({
 }));
 
 export const selectedKernel = createSelector(
-    (state: AppState) => state.trace,
-    (state: AppState) => state.profile,
+    (state: GlobalState) => state.trace,
+    (state: GlobalState) => state.profile,
     (trace: TraceState, profile: ProfileState) =>
         trace.selectedTrace !== null ? profile.profile.kernels[trace.selectedTrace.kernel] : null
 );
 export const selectedTrace = createSelector(
-    (state: AppState) => state.trace,
+    (state: GlobalState) => state.trace,
     selectedKernel,
     (state: TraceState, kernel: Kernel) => kernel !== null ? kernel.traces[state.selectedTrace.trace] : null
 );
 export const selectedWarps = createSelector(
-    (state: AppState) => state.trace,
+    (state: GlobalState) => state.trace,
     selectedTrace,
     (state: TraceState, trace: Trace) => state.selectedWarps.map(warp => trace.warps[warp])
 );

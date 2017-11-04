@@ -1,7 +1,7 @@
 import {createSelector} from 'reselect';
 import {reducerWithInitialState} from 'typescript-fsa-reducers';
 import {getErrorId, Errors} from '../state/errors';
-import {AppState} from '../state/reducers';
+import {GlobalState} from '../state/reducers';
 import {pushOrReplaceArray, replaceArray} from '../util/immutable';
 import {loadFile, resetFiles} from './actions';
 import {FileType, TraceFile} from './file';
@@ -46,7 +46,7 @@ const reducer = reducerWithInitialState<FileLoaderState>({
 }));
 
 export const validTraceFiles = createSelector(
-    (state: AppState) => state.fileLoader,
+    (state: GlobalState) => state.fileLoader,
     (state: FileLoaderState) =>
         state.files.filter((file) =>
             !file.loading &&
@@ -55,7 +55,7 @@ export const validTraceFiles = createSelector(
             file.error === Errors.None,
         ));
 export const loadingFiles = createSelector(
-    (state: AppState) => state.fileLoader,
+    (state: GlobalState) => state.fileLoader,
     (state: FileLoaderState) =>
         state.files.filter((file) => file.loading)
 );

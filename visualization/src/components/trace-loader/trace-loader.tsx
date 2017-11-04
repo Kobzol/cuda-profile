@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 import {loadFile} from '../../lib/file-load/actions';
 import {TraceFile} from '../../lib/file-load/file';
 import {loadingFiles, validTraceFiles} from '../../lib/file-load/reducer';
-import {AppState} from '../../lib/state/reducers';
+import {GlobalState} from '../../lib/state/reducers';
 import {Button, Glyphicon} from 'react-bootstrap';
 import {buildProfile} from '../../lib/profile/actions';
 
@@ -77,7 +77,7 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
     }
 }
 
-export const TraceLoader = connect<StateProps, DispatchProps, {}>((state: AppState) => ({
+export const TraceLoader = connect<StateProps, DispatchProps, {}>((state: GlobalState) => ({
     files: state.fileLoader.files,
     buildError: state.profile.buildError,
     validTraceFiles: validTraceFiles(state),

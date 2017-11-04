@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 import {connect} from 'react-redux';
 import {TraceFile} from '../../lib/file-load/file';
 import {selectWarps, selectTrace} from '../../lib/trace/actions';
-import {AppState} from '../../lib/state/reducers';
+import {GlobalState} from '../../lib/state/reducers';
 import {KernelTimeline} from './kernel-timeline/kernel-timeline';
 import {Profile} from '../../lib/profile/profile';
 import {TraceSelection} from '../../lib/trace/selection';
@@ -22,6 +22,7 @@ import './trace-visualisation.css';
 
 interface StateProps
 {
+    appLoaded: boolean;
     files: TraceFile[];
     profile: Profile;
     selectedKernel: Kernel;
@@ -59,7 +60,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
 
     componentWillMount()
     {
-        if (this.props.profile === null)
+        if (this.props.appLoaded && this.props.profile === null)
         {
             this.props.goToPage(Routes.Root);
         }
@@ -170,7 +171,8 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
     }
 }
 
-export const TraceVisualisation = connect<StateProps, DispatchProps, {}>((state: AppState) => ({
+export const TraceVisualisation = connect<StateProps, DispatchProps, {}>((state: GlobalState) => ({
+    appLoaded: state.app.loaded,
     files: state.fileLoader.files,
     profile: state.profile.profile,
     selectedKernel: selectedKernel(state),
