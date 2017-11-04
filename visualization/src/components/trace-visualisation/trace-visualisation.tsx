@@ -22,7 +22,6 @@ import './trace-visualisation.css';
 
 interface StateProps
 {
-    appLoaded: boolean;
     files: TraceFile[];
     profile: Profile;
     selectedKernel: Kernel;
@@ -60,7 +59,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
 
     componentWillMount()
     {
-        if (this.props.appLoaded && this.props.profile === null)
+        if (this.props.profile === null)
         {
             this.props.goToPage(Routes.Root);
         }
@@ -172,7 +171,6 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
 }
 
 export const TraceVisualisation = connect<StateProps, DispatchProps, {}>((state: GlobalState) => ({
-    appLoaded: state.app.loaded,
     files: state.fileLoader.files,
     profile: state.profile.profile,
     selectedKernel: selectedKernel(state),

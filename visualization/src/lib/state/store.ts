@@ -5,7 +5,8 @@ import {createLogger} from 'redux-logger';
 import {createEpicMiddleware} from 'redux-observable';
 import {rootEpic} from './epics';
 import {reducers} from './reducers';
-import {persistStore, autoRehydrate} from 'redux-persist';
+import {persistStore, persistCombineReducers} from 'redux-persist';
+import storage from 'redux-persist/es/storage';
 
 export const history = createHistory();
 
@@ -13,14 +14,17 @@ const composeEnhancers = window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compo
 const router = routerMiddleware(history);
 const epic = createEpicMiddleware(rootEpic);
 const logger = createLogger();
+const persistConfig = {
+    key: 'root',
+    storage,
+    whitelist: ['trace', 'profile']
+};
 
 export const store = createStore(
-    combineReducers({
+    persistCombineReducers(persistConfig, {
         ...reducers,
         router: routerReducer
     }),
-    composeEnhancers(applyMiddleware(router, epic, logger), autoRehydrate())
+    composeEnhancers(applyMiddleware(router, epic, logger))
 );
-persistStore(store, {
-    whitelist: ['trace', 'profile']
-});
+export const persistor = persistStore(store);

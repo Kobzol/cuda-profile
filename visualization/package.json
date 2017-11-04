@@ -26,7 +26,7 @@
     "react-visjs-timeline": "^1.4.0",
     "redux": "^3.7.2",
     "redux-observable": "^0.16.0",
-    "redux-persist": "^4.10.1",
+    "redux-persist": "^5.2.2",
     "reselect": "^3.0.1",
     "rxjs": "^5.4.3",
     "typescript-fsa": "^2.5.0",
