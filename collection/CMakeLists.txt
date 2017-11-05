@@ -35,7 +35,7 @@ add_subdirectory("runtime")
 add_subdirectory("device")
 
 # Memtracker
-add_subdirectory("memtracker")
+add_subdirectory("runtimetracker")
 
 # Tests
 add_custom_target(tests COMMAND py.test ${CMAKE_CURRENT_SOURCE_DIR}/tests)

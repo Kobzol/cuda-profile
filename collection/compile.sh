@@ -6,6 +6,7 @@ CUDA_DIR=/usr/local/cuda
 SRC_FILES=${1-"../main.cpp ../kernel.cu"} # ../kernel2.cu
 PROTOBUF=${2-0}
 COMPRESS=${3-0}
+RUNTIME_TRACKING=${4-0}
 INSTRUMENTED_KERNEL_BC="kernel-instrumented.bc"
 
 pushd cmake-build-debug
@@ -27,8 +28,12 @@ pushd cmake-build-debug
             -z muldefs -lcudart -ldl -lrt -lruntime -pthread -xcuda \
             ${SRC_FILES} -o cuda
 
+    if [ ${RUNTIME_TRACKING} == 1 ]; then
+        export LD_PRELOAD="./runtimetracker/libruntimetracker.so"
+    fi
+
     # run instrumented program
-    LD_LIBRARY_PATH=./runtime LD_PRELOAD=./memtracker/libmemtracker.so CUPR_PROTOBUF=${PROTOBUF} CUPR_COMPRESS=${COMPRESS} ./cuda
+    LD_LIBRARY_PATH=./runtime CUPR_PROTOBUF=${PROTOBUF} CUPR_COMPRESS=${COMPRESS} ./cuda
 
     exit 0
 popd

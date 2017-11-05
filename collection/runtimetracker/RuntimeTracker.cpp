@@ -1,7 +1,7 @@
-#include "../runtime/RuntimeState.h"
-#include "../runtime/Prefix.h"
+#include "../runtime/tracking/Memtracker.h"
 
 #include <dlfcn.h>
+#include <driver_types.h>
 
 extern "C" bool CU_PREFIX(isRuntimeTrackingEnabled)()
 {
@@ -22,6 +22,10 @@ extern "C" bool CU_PREFIX(isRuntimeTrackingEnabled)()
 
 WRAP(cudaMalloc, cudaError_t, {
     auto err = cudaMalloc_orig(devPtr, size);
-    cupr::state.getAllocations().emplace_back(*devPtr, size, cupr::AddressSpace::Global);
+    cupr::memTracker.malloc(*devPtr, size, 1, "", "", "");
     return err;
 }, void** devPtr, size_t size)
+WRAP(cudaFree, cudaError_t, {
+    cupr::memTracker.free(devPtr);
+    return cudaFree_orig(devPtr);
+}, void* devPtr)

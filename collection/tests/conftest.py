@@ -14,7 +14,7 @@ from generated.kernel_trace_pb2 import KernelTrace
 PROJECT_DIR = os.path.dirname(os.path.dirname(__file__))
 INSTRUMENT_LIB = "cmake-build-debug/instrument/libinstrument.so"
 RUNTIME_LIB_DIR = "cmake-build-debug/runtime"
-RUNTIME_TRACKING_LIB_DIR = "cmake-build-debug/memtracker"
+RUNTIME_TRACKING_LIB_DIR = "cmake-build-debug/runtimetracker"
 INPUT_FILENAME = "input.cu"
 
 

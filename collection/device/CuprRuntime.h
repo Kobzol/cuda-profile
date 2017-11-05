@@ -16,7 +16,6 @@
 #include "../runtime/RuntimeState.h"
 #include "../runtime/Parameters.h"
 #include "../runtime/DeviceDimensions.h"
-#include "../runtime/memtracker.h"
 
 
 #define ATOMIC_INSERT(buffer, index, maxSize, item) \
@@ -109,28 +108,6 @@ extern "C"
 
         cupr::state.getEmitter().emitKernelTrace(context->kernelName, dimensions,
                                             records, sharedBuffers, context->timer->get_time());
-    }
-    void CU_PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type,
-                           const char* name, const char* location)
-    {
-        if (!CU_PREFIX(isRuntimeTrackingEnabled)())
-        {
-            cupr::state.getAllocations().emplace_back(address, size, elementSize, cupr::AddressSpace::Global,
-                                                      type, name, location);
-        }
-    }
-    void CU_PREFIX(free)(void* address)
-    {
-        if (!CU_PREFIX(isRuntimeTrackingEnabled)())
-        {
-            for (auto& alloc: cupr::state.getAllocations())
-            {
-                if (alloc.address == address)
-                {
-                    alloc.active = false;
-                }
-            }
-        }
     }
 
     static __forceinline__ __device__ uint32_t warpid()
