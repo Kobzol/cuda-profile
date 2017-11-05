@@ -128,14 +128,33 @@ export class MemoryBlock extends PureComponent<Props, State>
 
     render()
     {
-        const {size, address, space, type} = this.props.allocation;
         return (
             <div className='memory-block' id='memory-block'>
-                <div>{formatByteSize(size)} of {type} allocated at {address} ({formatAddressSpace(space)})</div>
+                {this.renderLabel(this.props.allocation)}
                 <svg width={'100%'} ref={(svg) => this.svg = svg}>
                     <g className='block-wrapper' />
                     <rect className='zoom-wrapper' />
                 </svg>
+            </div>
+        );
+    }
+
+    renderLabel = (allocation: MemoryAllocation): JSX.Element =>
+    {
+        const {size, address, space, type, name, location} = allocation;
+        let label = `${formatByteSize(size)} of ${type} allocated at ${address} (${formatAddressSpace(space)})`;
+        if (name !== '')
+        {
+            label += ` variable ${name}`;
+        }
+        if (location !== '')
+        {
+            label += ` at ${location}`;
+        }
+
+        return (
+            <div>
+                {label}
             </div>
         );
     }

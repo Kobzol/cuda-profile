@@ -128,7 +128,9 @@ test('Allocation address range is calculated correctly ', () => {
         size: 64,
         elementSize: 4,
         space: 0,
-        type: ''
+        type: '',
+        name: '',
+        location: ''
     })).toEqual({
         from: address,
         to: '0xFFFFAFC'

@@ -7,4 +7,6 @@ export interface MemoryAllocation
     elementSize: number;
     space: AddressSpace;
     type: string;
+    name: string;
+    location: string;
 }

@@ -34,7 +34,9 @@ function parseAllocations(allocations: MemoryAllocationFormat[], metadata: Metad
             size: allocation.size,
             space: allocation.space,
             elementSize: allocation.elementSize,
-            type: allocation.typeString !== '' ? allocation.typeString : metadata.typeMap[allocation.typeIndex]
+            type: allocation.typeString !== '' ? allocation.typeString : metadata.typeMap[allocation.typeIndex],
+            name: allocation.name,
+            location: allocation.location
     }));
 }
 
