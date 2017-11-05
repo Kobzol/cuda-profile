@@ -72,7 +72,8 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
         size, timestamp, kind, space,
         location: debugId === -1 ? null : metadata.locations[debugId],
         type: metadata.typeMap[typeIndex],
-        warpId: getWarpId(threadIdx, trace.warpSize, trace.blockDim),
+        id: getWarpId(threadIdx, trace.warpSize, trace.blockDim),
+        slot: warpId,
         blockIdx,
         key, accesses: []
     });
@@ -88,7 +89,7 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
             dict[key] = createGroup(accesses[i], key);
         }
         dict[key].accesses.push({
-            id: getLaneId(threadIdx, getWarpStart(dict[key].warpId, trace.warpSize, trace.blockDim), trace.blockDim),
+            id: getLaneId(threadIdx, getWarpStart(dict[key].id, trace.warpSize, trace.blockDim), trace.blockDim),
             address,
             threadIdx
         });

@@ -3,21 +3,22 @@ import {MemoryAccess} from '../../../../lib/profile/memory-access';
 import {Trace} from '../../../../lib/profile/trace';
 import {createBlockSelector} from './grid-data';
 import {AddressRange} from '../../../../lib/trace/selection';
-import {Warp} from '../../../../lib/profile/warp';
+import {getBlockId, Warp} from '../../../../lib/profile/warp';
 import {Thread} from './thread';
 import {WarpAddressSelection} from '../../../../lib/trace/selection';
+import {getAccessAddressRange} from '../../../../lib/profile/address';
 import {Selector} from 'reselect';
 import {Dictionary} from 'lodash';
 import GridLayout from 'd3-v4-grid';
 import * as _ from 'lodash';
 
 import './warp-grid.css';
-import {getAccessAddressRange} from '../../../../lib/profile/address';
 
 interface Props
 {
     trace: Trace;
     warp: Warp;
+    memorySelection: AddressRange;
     canvasDimensions: { width: number, height: number };
     selectRange: (range: WarpAddressSelection) => void;
 }
@@ -57,12 +58,23 @@ export class WarpGrid extends PureComponent<Props, State>
         const grid = this.renderGrid(layout.nodes(), nodeSize);
 
         return (
-            <svg className='warp-grid'
-                 width={width}
-                 height={height}
-                 viewBox={`0 0 ${width} ${height}`}>
-                <g>{grid}</g>
-            </svg>
+            <div className='warp-grid'>
+                {this.renderLabel(this.props.warp, this.props.trace)}
+                <svg width={width}
+                     height={height}
+                     viewBox={`0 0 ${width} ${height}`}>
+                    <g>{grid}</g>
+                </svg>
+            </div>
+        );
+    }
+
+    renderLabel = (warp: Warp, trace: Trace): JSX.Element =>
+    {
+        const blockId = getBlockId(warp.blockIdx, trace.gridDimension);
+
+        return (
+            <div>{`Warp ${warp.id} in block ${blockId} (slot ${warp.slot})`}</div>
         );
     }
 
@@ -91,6 +103,7 @@ export class WarpGrid extends PureComponent<Props, State>
                         height={nodeSize.height}
                         warp={warp}
                         access={access}
+                        memorySelection={this.props.memorySelection}
                         onSelectChanged={this.handleRangeSelectChange} />
                 );
             }

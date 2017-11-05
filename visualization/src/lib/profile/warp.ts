@@ -19,6 +19,8 @@ export enum AddressSpace
 export interface Warp
 {
     key: string;
+    id: number;
+    slot: number;
     size: number;
     kind: AccessType;
     space: AddressSpace;
@@ -26,7 +28,6 @@ export interface Warp
     timestamp: number;
     location: DebugLocation | null;
     blockIdx: Dim3;
-    warpId: number;
     accesses: MemoryAccess[];
 }
 
@@ -45,7 +46,9 @@ export function getWarpStart(warpId: number, warpSize: number, blockDim: Dim3): 
 
 export function getCtaId(index: Dim3, blockDim: Dim3)
 {
-    return index.z * blockDim.x * blockDim.y + index.y * blockDim.x + index.x;
+    return  index.z * (blockDim.x * blockDim.y) +
+            index.y * blockDim.x +
+            index.x;
 }
 
 export function getWarpId(index: Dim3, warpSize: number, blockDim: Dim3)
@@ -62,4 +65,9 @@ export function getLaneId(index: Dim3, warpStart: Dim3, blockDim: Dim3): number
     const laneId = tid - startid;
     if (laneId < 0) throw new InvalidWarpData('Negative lane id');
     return laneId;
+}
+
+export function getBlockId(index: Dim3, gridDim: Dim3): number
+{
+    return getCtaId(index, gridDim);
 }

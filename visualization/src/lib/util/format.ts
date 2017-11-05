@@ -23,7 +23,7 @@ export function formatByteSize(value: number): string
 
         if (scaled >= 1)
         {
-            return `${scaled.toFixed(2)} ${size.label}`;
+            return `${Math.floor(scaled) === scaled ? scaled : scaled.toFixed(2)} ${size.label}`;
         }
     }
 

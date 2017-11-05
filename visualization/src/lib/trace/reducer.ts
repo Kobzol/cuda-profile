@@ -6,6 +6,7 @@ import {GlobalState} from '../state/reducers';
 import {Kernel} from '../profile/kernel';
 import {Trace} from '../profile/trace';
 import {ProfileState} from '../profile/reducer';
+import {buildProfile} from '../profile/actions';
 
 export interface TraceState
 {
@@ -16,7 +17,11 @@ export interface TraceState
 const reducer = reducerWithInitialState<TraceState>({
     selectedTrace: null,
     selectedWarps: []
-}).case(selectTrace, (state, payload) => ({
+}).case(buildProfile.done, (state, payload) => ({
+    ...state,
+    selectedTrace: null,
+    selectedWarps: []
+})).case(selectTrace, (state, payload) => ({
     ...state,
     selectedTrace: payload,
     selectedWarps: []

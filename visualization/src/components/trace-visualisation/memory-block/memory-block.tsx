@@ -2,10 +2,11 @@ import * as React from 'react';
 import {PureComponent} from 'react';
 import {MemoryAllocation} from '../../../lib/profile/memory-allocation';
 import {
+    addressToNum,
     checkIntersection, clampAddressRange, getAddressRangeSize,
-    getAllocationAddressRange
+    getAllocationAddressRange, numToAddress
 } from '../../../lib/profile/address';
-import {WarpAddressSelection} from '../../../lib/trace/selection';
+import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
 import {zoom} from 'd3-zoom';
 import GridLayout from 'd3-v4-grid';
 import {select} from 'd3-selection';
@@ -21,6 +22,7 @@ interface Props
 {
     allocation: MemoryAllocation;
     rangeSelections: WarpAddressSelection[];
+    onMemorySelect: (memorySelection: AddressRange) => void;
 }
 
 interface State
@@ -64,55 +66,76 @@ export class MemoryBlock extends PureComponent<Props, State>
         grid.layout();
 
         const nodeSize = grid.nodeSize();
-        const g = svg.select('.block-wrapper');
+        const group = svg.select('.block-wrapper');
 
-        const z = zoom()
+        const zoomer = zoom()
             .scaleExtent([1, 4])
             .translateExtent([
                 [0, 0], // [-nodeSize[0], -nodeSize[1]],
                 [width, height] // [width + nodeSize[0], height + nodeSize[1]]
             ]);
-        z.on('zoom', () => {
-            g.attr('transform', d3.event.transform);
+        zoomer.on('zoom', () => {
+            group.attr('transform', d3.event.transform);
         });
 
-        const zoomWrapper = svg.select('.zoom-wrapper')
-            .attr('width', width)
-            .attr('height', height)
-            .style('fill', 'none')
-            .style('pointer-events', 'all')
-            .call(z);
+        // zoom
+        group.style('pointer-events', 'all')
+            .call(zoomer);
 
-        let example = g
+        const start = addressToNum(effectiveRange.from);
+
+        let blocks = group
             .selectAll('rect')
-            .data(grid.nodes())
-            .attr('x', (d: {x: number}) => d.x)
-            .attr('y', (d: {y: number}) => d.y)
-            .attr('width', nodeSize[0])
-            .attr('height', nodeSize[1]);
+            .data(grid.nodes());
 
-        let enter = example
+        const props = (selection: typeof blocks) => {
+            selection
+                .attr('x', (d: {x: number}) => d.x)
+                .attr('y', (d: {y: number}) => d.y)
+                .attr('width', nodeSize[0])
+                .attr('height', nodeSize[1]);
+        };
+        const textProps = (selection: typeof blocks) => {
+            selection.text((data: {index: number}) => {
+                const blockFrom = start.add(data.index * blockSize);
+                const blockTo = blockFrom.add(blockSize);
+                return `${numToAddress(blockFrom)} - ${numToAddress(blockTo)} (${blockSize} bytes)`;
+            });
+        };
+
+        blocks.call(props);
+        blocks.select('title').call(textProps);
+        blocks
             .enter()
             .append('rect')
-            .attr('x', (d: {x: number}) => d.x)
-            .attr('y', (d: {y: number}) => d.y)
-            .attr('width', nodeSize[0])
-            .attr('height', nodeSize[1])
+            .call(props)
             .attr('stroke', 'rgb(0, 0, 0)')
             .attr('stroke-width', '0.2')
-            .attr('fill', 'rgb(0, 0, 255)');
+            .attr('fill', 'rgb(0, 0, 255)')
+            .on('mouseenter', (data: {index: number}) => {
+                const blockFrom = start.add(data.index * blockSize);
+                const blockTo = blockFrom.add(blockSize);
+                this.props.onMemorySelect({
+                    from: numToAddress(blockFrom),
+                    to: numToAddress(blockTo)
+                });
+            })
+            .on('mouseleave', () => {
+                this.props.onMemorySelect(null);
+            })
+            .append('title')
+            .call(textProps);
 
-        let exit = example
+        blocks
             .exit()
             .remove();
 
         if (this.props.rangeSelections.length > 0)
         {
-            const start = bigInt(effectiveRange.from.substr(2), 16);
-            const rangeFrom = bigInt(this.props.rangeSelections[0].threadRange.from.substr(2), 16);
-            const rangeTo = bigInt(this.props.rangeSelections[0].threadRange.to.substr(2), 16);
+            const rangeFrom = addressToNum(this.props.rangeSelections[0].threadRange.from);
+            const rangeTo = addressToNum(this.props.rangeSelections[0].threadRange.to);
 
-            example.attr('fill', (data: {index: number}) => {
+            blocks.attr('fill', (data: {index: number}) => {
                 const blockFrom = start.add(data.index * blockSize);
                 const blockTo = blockFrom.add(blockSize);
 
@@ -123,7 +146,7 @@ export class MemoryBlock extends PureComponent<Props, State>
                 else return 'rgb(0, 0, 255)';
             });
         }
-        else example.attr('fill', 'rgb(0, 0, 255)');
+        else blocks.attr('fill', 'rgb(0, 0, 255)');
     }
 
     render()
@@ -133,7 +156,6 @@ export class MemoryBlock extends PureComponent<Props, State>
                 {this.renderLabel(this.props.allocation)}
                 <svg width={'100%'} ref={(svg) => this.svg = svg}>
                     <g className='block-wrapper' />
-                    <rect className='zoom-wrapper' />
                 </svg>
             </div>
         );
@@ -142,14 +164,14 @@ export class MemoryBlock extends PureComponent<Props, State>
     renderLabel = (allocation: MemoryAllocation): JSX.Element =>
     {
         const {size, address, space, type, name, location} = allocation;
-        let label = `${formatByteSize(size)} of ${type} allocated at ${address} (${formatAddressSpace(space)})`;
+        let label = `${formatByteSize(size)} of ${type} allocated at ${address} (${formatAddressSpace(space)} space)`;
         if (name !== '')
         {
-            label += ` variable ${name}`;
+            label += `, variable ${name}`;
         }
         if (location !== '')
         {
-            label += ` at ${location}`;
+            label += `, at ${location}`;
         }
 
         return (

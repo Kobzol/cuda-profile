@@ -6,8 +6,8 @@ import {MemoryAllocation} from './memory-allocation';
 function createRange(from: BigInteger, to: BigInteger): AddressRange
 {
     return {
-        from: '0x' + from.toString(16).toUpperCase(),
-        to: '0x' + to.toString(16).toUpperCase()
+        from: numToAddress(from),
+        to: numToAddress(to)
     };
 }
 
@@ -17,11 +17,20 @@ export function checkIntersection(rangeFrom: BigInteger, rangeTo: BigInteger,
     return !(blockFrom.geq(rangeTo) ||
             blockTo.leq(rangeFrom));
 }
+export function checkIntersectionRange(range: AddressRange, address: string, size: number): boolean
+{
+    const rangeFrom = addressToNum(range.from);
+    const rangeTo = addressToNum(range.to);
+    const blockFrom = addressToNum(address);
+    const blockTo = blockFrom.add(size);
+
+    return checkIntersection(rangeFrom, rangeTo, blockFrom, blockTo);
+}
 
 export function clampAddressRange(bound: AddressRange, range: AddressRange): AddressRange
 {
-    const from = bigInt.max(bigInt(bound.from.substr(2), 16), bigInt(range.from.substr(2), 16));
-    const to = bigInt.min(bigInt(bound.to.substr(2), 16), bigInt(range.to.substr(2), 16));
+    const from = bigInt.max(addressToNum(bound.from), addressToNum(range.from));
+    const to = bigInt.min(addressToNum(bound.to), addressToNum(range.to));
 
     return createRange(from, to);
 }
@@ -33,7 +42,7 @@ export function getAccessAddressRange(accesses: MemoryAccess[], size: number = 1
 
     for (const access of accesses)
     {
-        const addressStart = bigInt(access.address.substr(2), 16);
+        const addressStart = addressToNum(access.address);
         const addressEnd = addressStart.add(size);
         if (addressStart.lt(minAddress))
         {
@@ -50,7 +59,7 @@ export function getAccessAddressRange(accesses: MemoryAccess[], size: number = 1
 
 export function getAllocationAddressRange(allocation: MemoryAllocation): AddressRange
 {
-    const from = bigInt(allocation.address.substr(2), 16);
+    const from = addressToNum(allocation.address);
     const to = from.add(allocation.size);
 
     return createRange(from, to);
@@ -58,5 +67,14 @@ export function getAllocationAddressRange(allocation: MemoryAllocation): Address
 
 export function getAddressRangeSize(range: AddressRange)
 {
-    return (bigInt(range.to.substr(2), 16).subtract(bigInt(range.from.substr(2), 16))).toJSNumber();
+    return (addressToNum(range.to).subtract(addressToNum(range.from))).toJSNumber();
+}
+
+export function addressToNum(address: string): BigInteger
+{
+    return bigInt(address.substr(2), 16);
+}
+export function numToAddress(num: BigInteger): string
+{
+    return `0x${num.toString(16).toUpperCase()}`;
 }

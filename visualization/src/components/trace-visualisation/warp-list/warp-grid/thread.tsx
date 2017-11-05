@@ -1,7 +1,7 @@
 import React, {PureComponent} from 'react';
 import {AccessType, Warp} from '../../../../lib/profile/warp';
 import {MemoryAccess} from '../../../../lib/profile/memory-access';
-import {getAccessAddressRange} from '../../../../lib/profile/address';
+import {getAccessAddressRange, checkIntersectionRange} from '../../../../lib/profile/address';
 import {AddressRange} from '../../../../lib/trace/selection';
 
 interface Props
@@ -12,6 +12,7 @@ interface Props
     height: number;
     warp: Warp;
     access: MemoryAccess;
+    memorySelection: AddressRange;
     onSelectChanged: (range: AddressRange | null) => void;
 }
 
@@ -64,6 +65,14 @@ export class Thread extends PureComponent<Props>
     private getAccessColor = (warp: Warp, access: MemoryAccess): string =>
     {
         if (access === null) return 'rgb(255, 255, 255)';
+
+        if (this.props.memorySelection !== null)
+        {
+            if (checkIntersectionRange(this.props.memorySelection, access.address, warp.size))
+            {
+                return 'rgb(0, 255, 0)';
+            }
+        }
         if (warp.kind === AccessType.Read)
         {
             return 'rgb(255, 0, 0)';

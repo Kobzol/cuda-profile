@@ -5,7 +5,7 @@ import {selectWarps, selectTrace} from '../../lib/trace/actions';
 import {GlobalState} from '../../lib/state/reducers';
 import {KernelTimeline} from './kernel-timeline/kernel-timeline';
 import {Profile} from '../../lib/profile/profile';
-import {TraceSelection} from '../../lib/trace/selection';
+import {AddressRange, TraceSelection} from '../../lib/trace/selection';
 import {Kernel} from '../../lib/profile/kernel';
 import {Trace} from '../../lib/profile/trace';
 import {selectedWarps, selectedKernel, selectedTrace} from '../../lib/trace/reducer';
@@ -43,6 +43,7 @@ interface State
 {
     showKernelTimeline: boolean;
     rangeSelections: WarpAddressSelection[];
+    memorySelection: AddressRange | null;
 }
 
 class TraceVisualisationComponent extends PureComponent<Props, State>
@@ -53,7 +54,8 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
 
         this.state = {
             showKernelTimeline: true,
-            rangeSelections: []
+            rangeSelections: [],
+            memorySelection: null
         };
     }
 
@@ -129,13 +131,15 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                         warps={warps}
                         selectRange={(range) => this.setState({
                             rangeSelections: range === null ? [] : [range]
-                        })} />
+                        })}
+                        memorySelection={this.state.memorySelection} />
                     <div className='memory-block-wrapper'>
                         {trace.allocations.map(alloc =>
                             <MemoryBlock
                                 key={alloc.address}
                                 allocation={alloc}
-                                rangeSelections={this.state.rangeSelections} />
+                                rangeSelections={this.state.rangeSelections}
+                                onMemorySelect={this.setMemorySelection} />
                         )}
                     </div>
                 </div>
@@ -154,6 +158,13 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                     selectedWraps={this.props.warpSelection} />
             </div>
         );
+    }
+
+    setMemorySelection = (memorySelection: AddressRange) =>
+    {
+        this.setState({
+            memorySelection
+        });
     }
 
     showKernelTimeline = () =>

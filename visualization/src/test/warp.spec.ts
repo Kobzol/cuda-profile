@@ -1,4 +1,4 @@
-import {getCtaId, getLaneId, getWarpId, getWarpStart} from '../lib/profile/warp';
+import {getBlockId, getCtaId, getLaneId, getWarpId, getWarpStart} from '../lib/profile/warp';
 import {InvalidWarpData} from '../lib/profile/errors';
 
 test('Warp start is calculated correctly', () => {
@@ -87,4 +87,15 @@ test('Warp id is calculated correctly', () => {
         y: 18,
         z: 2
     })).toEqual(9);
+});
+test('Block id is calculated correctly', () => {
+    expect(getBlockId({
+        x: 2,
+        y: 1,
+        z: 1
+    }, {
+        x: 16,
+        y: 18,
+        z: 2
+    })).toEqual(306);
 });
