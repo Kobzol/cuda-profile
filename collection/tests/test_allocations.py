@@ -1,6 +1,14 @@
 from conftest import kernel_file, param_all_formats
 
 
+def validate_allocations(allocations):
+    by_address = {}
+    for alloc in allocations:
+        if alloc["address"] in by_address and alloc["active"] and by_address[alloc["address"]]["active"]:
+            raise Exception("Multiple active allocations")
+        by_address[alloc["address"]] = alloc
+
+
 @param_all_formats
 def test_global_allocation(profile, format):
     data = profile("""
@@ -54,3 +62,56 @@ def test_shared_allocation(profile, format):
     assert "typeIndex" in allocations[0]
     assert allocations[0]["space"] == 1
     assert allocations[0]["address"] == data["stdout"].strip()
+
+
+def test_parameters_runtime_tracking_capture(profile):
+    code = """
+    __global__ void kernel(int* p) {
+        *p = 5;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc((void**) &dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }
+    """
+
+    data = profile(code, with_metadata=True, runtime_tracking=True)
+    allocations = data["mappings"][kernel_file("kernel")]["allocations"]
+    assert len(allocations) > 1
+
+    data = profile(code, with_metadata=True)
+    allocations = data["mappings"][kernel_file("kernel")]["allocations"]
+    assert len(allocations) == 1
+
+
+def test_parameters_runtime_tracking_overwrite(profile):
+    code = """
+    __global__ void kernel(int* p) {
+        *p = 5;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc((void**) &dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }
+    """
+
+    data = profile(code, with_metadata=True)
+    allocations = data["mappings"][kernel_file("kernel")]["allocations"]
+    alloc = allocations[0]
+
+    data = profile(code, with_metadata=True, runtime_tracking=True)
+    allocations = data["mappings"][kernel_file("kernel")]["allocations"]
+    validate_allocations(allocations)
+
+    for record in allocations:
+        if record["address"] == alloc["address"]:
+            assert record["name"] == "dptr"
+            return
+
+    assert False  # allocation was not overwritten by static tracking

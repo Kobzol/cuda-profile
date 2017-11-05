@@ -3,22 +3,23 @@
 
 using namespace cupr;
 
-bool CU_PREFIX(isRuntimeTrackingEnabled)()
+void CU_PREFIX(malloc)(void* address, size_t size, size_t elementSize, const char* type,
+                                  const char* name, const char* location)
 {
-    return false;
-}
+    AllocRecord record(address, size, elementSize, cupr::AddressSpace::Global, type, name, location);
 
-namespace cupr {
-    MemTracker memTracker;
-}
+    for (auto& allocated: cupr::state.getAllocations())
+    {
+        if (allocated.address == record.address && allocated.active)
+        {
+            allocated = record;
+            return;
+        }
+    }
 
-void MemTracker::malloc(void* address, size_t size, size_t elementSize, const char* type,
-                       const char* name, const char* location)
-{
-    cupr::state.getAllocations().emplace_back(address, size, elementSize, cupr::AddressSpace::Global,
-                                              type, name, location);
+    cupr::state.getAllocations().push_back(record);
 }
-void MemTracker::free(void* address)
+void CU_PREFIX(free)(void* address)
 {
     for (auto& alloc: cupr::state.getAllocations())
     {

@@ -111,7 +111,7 @@ def compile_and_run(code,
     if compress:
         env["CUPR_COMPRESS"] = "1"
     if runtime_tracking:
-        env["LD_PRELOAD"] = os.path.join(PROJECT_DIR, RUNTIME_TRACKING_LIB_DIR, "libmemtracker.so")
+        env["LD_PRELOAD"] = os.path.join(PROJECT_DIR, RUNTIME_TRACKING_LIB_DIR, "libruntimetracker.so")
 
     prelude = ""
     if add_include:

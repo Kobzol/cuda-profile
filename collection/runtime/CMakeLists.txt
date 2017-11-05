@@ -9,7 +9,6 @@ set(SOURCE_FILES
         format/JsonTraceFormatter.cpp
         format/ProtobufTraceFormatter.cpp
         tracking/Memtracker.cpp
-        tracking/StaticTracker.cpp
         CudaTimer.cpp
         RuntimeState.cpp
         Init.cpp
