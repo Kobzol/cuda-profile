@@ -40,7 +40,7 @@ export class WarpTimeline extends PureComponent<Props>
         };
 
         return (
-            <Panel className='trace' header={`Access timeline (select access)`}>
+            <Panel className='trace' header={`Access timeline (select access)`} bsStyle='success'>
                 <Timeline
                     options={options}
                     items={this.createTimelineItems(this.props.kernel, this.props.trace)}

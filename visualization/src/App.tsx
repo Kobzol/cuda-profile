@@ -22,9 +22,9 @@ export class App extends React.Component
                     loading={'Loading...'}>
                     <ConnectedRouter history={history}>
                         <div className='app'>
-                            <nav className='nav'>
-                                <Link to={'/'}>Home</Link>
-                            </nav>
+                            <ul className='nav nav-pills'>
+                                <li><Link to={'/'}>Home</Link></li>
+                            </ul>
                             <div className='content'>
                                 <Route path='/' exact component={TraceLoader} />
                                 <Route path={Routes.TraceVisualisation} component={TraceVisualisation} />

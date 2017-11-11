@@ -30,6 +30,9 @@ interface State
 
 }
 
+const selectedBlock = 'rgb(220, 0, 0)';
+const activeBlock = 'rgb(65, 105, 225)';
+
 export class MemoryBlock extends PureComponent<Props, State>
 {
     private blockWrapper: HTMLDivElement = null;
@@ -115,8 +118,8 @@ export class MemoryBlock extends PureComponent<Props, State>
             .append('rect')
             .call(props)
             .attr('stroke', 'rgb(0, 0, 0)')
-            .attr('stroke-width', '0.2')
-            .attr('fill', 'rgb(0, 0, 255)')
+            .attr('stroke-width', '0.5')
+            .attr('fill', activeBlock)
             .on('mouseenter', (data: {index: number}) => {
                 const blockFrom = start.add(data.index * blockSize);
                 const blockTo = blockFrom.add(blockSize);
@@ -146,19 +149,20 @@ export class MemoryBlock extends PureComponent<Props, State>
 
                 if (checkIntersection(rangeFrom, rangeTo, blockFrom, blockTo))
                 {
-                    return 'rgb(255, 0, 0)';
+                    return selectedBlock;
                 }
-                else return 'rgb(0, 0, 255)';
+                else return activeBlock;
             });
         }
-        else blocks.attr('fill', 'rgb(0, 0, 255)');
+        else blocks.attr('fill', activeBlock);
     }
 
     render()
     {
         return (
             <Panel className='memory-block' id='memory-block'
-                   header={this.createLabel(this.props.allocation)}>
+                   header={this.createLabel(this.props.allocation)}
+                   bsStyle='primary'>
                 <div className='block-wrapper' ref={(wrapper) => this.blockWrapper = wrapper}>
                     <div className='block-label' />
                     <svg width={'100%'}>

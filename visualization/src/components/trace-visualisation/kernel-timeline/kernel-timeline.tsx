@@ -42,7 +42,7 @@ export class KernelTimeline extends PureComponent<Props>
             [this.makeId(this.props.selection.kernel, this.props.selection.trace)];
 
         return (
-            <Panel className='kernel' header={`Timeline (select a trace)`}>
+            <Panel className='kernel' header={'Kernel timeline'} bsStyle='info'>
                 <Timeline
                     options={options}
                     items={this.createTimelineItems(this.props.profile)}

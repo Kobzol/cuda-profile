@@ -13,12 +13,12 @@ import {WarpTimeline} from './warp-timeline/warp-timeline';
 import {ToggleWrapper} from '../toggle-wrapper/toggle-wrapper';
 import {Warp} from '../../lib/profile/warp';
 import {WarpList} from './warp-list/warp-list';
-import {MemoryBlock} from './memory-block/memory-block';
 import {WarpAddressSelection} from '../../lib/trace/selection';
 import {Routes} from '../../lib/nav/routes';
 import {push} from 'react-router-redux';
 
 import './trace-visualisation.css';
+import {MemoryList} from './memory-list/memory-list';
 
 interface StateProps
 {
@@ -133,15 +133,10 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                             rangeSelections: range === null ? [] : [range]
                         })}
                         memorySelection={this.state.memorySelection} />
-                    <div className='memory-block-wrapper'>
-                        {trace.allocations.map(alloc =>
-                            <MemoryBlock
-                                key={alloc.address}
-                                allocation={alloc}
-                                rangeSelections={this.state.rangeSelections}
-                                onMemorySelect={this.setMemorySelection} />
-                        )}
-                    </div>
+                    <MemoryList
+                        allocations={this.props.selectedTrace.allocations}
+                        rangeSelections={this.state.rangeSelections}
+                        onMemorySelect={this.setMemorySelection} />
                 </div>
                 {this.renderAccessTimeline(kernel, trace)}
             </div>

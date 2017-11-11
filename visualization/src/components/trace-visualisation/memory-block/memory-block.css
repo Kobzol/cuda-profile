@@ -1,2 +1,4 @@
 .memory-block {
   width: 100%; }
+  .memory-block .panel-body {
+    padding: 10px; }
