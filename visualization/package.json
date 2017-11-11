@@ -35,11 +35,14 @@
     "vis": "^4.20.1"
   },
   "scripts": {
-    "start": "npm run prepare && react-scripts-ts start",
-    "build": "npm run prepare && react-scripts-ts build",
+    "start-js": "react-scripts-ts start",
+    "start": "npm-run-all -p prepare watch-css start-js",
+    "build-js": "react-scripts-ts build",
+    "build": "npm-run-all prepare build-css build-js",
     "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject",
-    "prepare": "pbjs -t static-module -o ./public/proto-bundle.js -w closure ../collection/runtime/format/protobuf/*.proto"
+    "prepare": "pbjs -t static-module -o ./public/proto-bundle.js -w closure ../collection/runtime/format/protobuf/*.proto",
+    "build-css": "node-sass-chokidar --include-path ./src --include-path ./node_modules src/ -o src/",
+    "watch-css": "npm run build-css && node-sass-chokidar --include-path ./src --include-path ./node_modules src/ -o src/ --watch --recursive"
   },
   "devDependencies": {
     "@types/d3": "^4.11.0",
@@ -56,6 +59,8 @@
     "@types/react-router-dom": "^4.0.7",
     "@types/react-router-redux": "^5.0.8",
     "@types/redux-logger": "^3.0.3",
+    "node-sass-chokidar": "0.0.3",
+    "npm-run-all": "^4.1.2",
     "redux-logger": "^3.0.6",
     "tslint": "^5.7.0"
   }

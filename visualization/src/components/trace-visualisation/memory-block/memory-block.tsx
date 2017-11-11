@@ -12,8 +12,8 @@ import GridLayout from 'd3-v4-grid';
 import {select} from 'd3-selection';
 import {range} from 'd3-array';
 import * as d3 from 'd3';
-import * as bigInt from 'big-integer';
 import {formatAddressSpace, formatByteSize} from '../../../lib/util/format';
+import {Panel} from 'react-bootstrap';
 
 import './memory-block.css';
 
@@ -32,7 +32,7 @@ interface State
 
 export class MemoryBlock extends PureComponent<Props, State>
 {
-    private svg: SVGSVGElement = null;
+    private blockWrapper: HTMLDivElement = null;
 
     componentDidMount()
     {
@@ -46,7 +46,7 @@ export class MemoryBlock extends PureComponent<Props, State>
 
     renderd3()
     {
-        const svg = select(this.svg);
+        const svg = select(this.blockWrapper).select('svg');
         const width = (svg.node() as Element).getBoundingClientRect().width;
         const height = (svg.node() as Element).getBoundingClientRect().height;
 
@@ -59,6 +59,11 @@ export class MemoryBlock extends PureComponent<Props, State>
         const elements = dim * dim;
         const blockSize = Math.max(4, Math.ceil(size / elements));
 
+        // label
+        select(this.blockWrapper)
+            .select('.block-label')
+            .text(`${effectiveRange.from} (block size ${blockSize})`);
+
         const grid = GridLayout()
             .data(range(elements).map(index => ({ index })))
             .bands(true)
@@ -66,7 +71,7 @@ export class MemoryBlock extends PureComponent<Props, State>
         grid.layout();
 
         const nodeSize = grid.nodeSize();
-        const group = svg.select('.block-wrapper');
+        const group = svg.select('.blocks');
 
         const zoomer = zoom()
             .scaleExtent([1, 4])
@@ -152,16 +157,19 @@ export class MemoryBlock extends PureComponent<Props, State>
     render()
     {
         return (
-            <div className='memory-block' id='memory-block'>
-                {this.renderLabel(this.props.allocation)}
-                <svg width={'100%'} ref={(svg) => this.svg = svg}>
-                    <g className='block-wrapper' />
-                </svg>
-            </div>
+            <Panel className='memory-block' id='memory-block'
+                   header={this.createLabel(this.props.allocation)}>
+                <div className='block-wrapper' ref={(wrapper) => this.blockWrapper = wrapper}>
+                    <div className='block-label' />
+                    <svg width={'100%'}>
+                        <g className='blocks' />
+                    </svg>
+                </div>
+            </Panel>
         );
     }
 
-    renderLabel = (allocation: MemoryAllocation): JSX.Element =>
+    createLabel = (allocation: MemoryAllocation): string =>
     {
         const {size, address, space, type, name, location} = allocation;
         let label = `${formatByteSize(size)} of ${type} allocated at ${address} (${formatAddressSpace(space)} space)`;
@@ -174,10 +182,6 @@ export class MemoryBlock extends PureComponent<Props, State>
             label += `, at ${location}`;
         }
 
-        return (
-            <div>
-                {label}
-            </div>
-        );
+        return label;
     }
 }
