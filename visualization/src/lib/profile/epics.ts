@@ -4,7 +4,7 @@ import {combineEpics, ActionsObservable} from 'redux-observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/concat';
 import 'rxjs/add/observable/of';
-import 'typescript-fsa-redux-observable';
+import '../util/redux-observable';
 import {buildProfile} from './actions';
 import {push} from 'react-router-redux';
 import {Routes} from '../nav/routes';

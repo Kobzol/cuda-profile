@@ -31,7 +31,6 @@
     "rxjs": "^5.4.3",
     "typescript-fsa": "^2.5.0",
     "typescript-fsa-reducers": "^0.4.4",
-    "typescript-fsa-redux-observable": "^0.16.0",
     "vis": "^4.20.1"
   },
   "scripts": {
@@ -63,5 +62,6 @@
     "npm-run-all": "^4.1.2",
     "redux-logger": "^3.0.6",
     "tslint": "^5.7.0"
-  }
+  },
+  "homepage": "https://kobzol.github.io/cuda-profile"
 }

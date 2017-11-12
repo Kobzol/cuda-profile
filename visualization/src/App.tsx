@@ -7,7 +7,7 @@ import {TraceVisualisation} from './components/trace-visualisation/trace-visuali
 import {TraceLoader} from './components/trace-loader/trace-loader';
 import {history, persistor, store} from './lib/state/store';
 import {Routes} from './lib/nav/routes';
-import { PersistGate } from 'redux-persist/es/integration/react';
+import {PersistGate} from 'redux-persist/es/integration/react';
 
 import './App.css';
 
@@ -26,7 +26,7 @@ export class App extends React.Component
                                 <li><Link to={'/'}>Home</Link></li>
                             </ul>
                             <div className='content'>
-                                <Route path='/' exact component={TraceLoader} />
+                                <Route path={Routes.Root} exact component={TraceLoader} />
                                 <Route path={Routes.TraceVisualisation} component={TraceVisualisation} />
                             </div>
                         </div>
