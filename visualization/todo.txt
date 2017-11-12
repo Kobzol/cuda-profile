@@ -1,1 +1,2 @@
 - fit initial zoom in timelines to data
+- dont persist errors in redux store

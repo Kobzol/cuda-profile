@@ -15,7 +15,7 @@ import * as d3 from 'd3';
 import {formatAddressSpace, formatByteSize} from '../../../lib/util/format';
 import {Panel} from 'react-bootstrap';
 
-import './memory-block.css';
+import './memory-block.scss';
 
 
 interface Props

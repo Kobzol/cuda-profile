@@ -16,9 +16,9 @@ import {WarpList} from './warp-list/warp-list';
 import {WarpAddressSelection} from '../../lib/trace/selection';
 import {Routes} from '../../lib/nav/routes';
 import {push} from 'react-router-redux';
-
-import './trace-visualisation.css';
 import {MemoryList} from './memory-list/memory-list';
+
+import './trace-visualisation.scss';
 
 interface StateProps
 {

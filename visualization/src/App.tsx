@@ -9,7 +9,7 @@ import {history, persistor, store} from './lib/state/store';
 import {Routes} from './lib/nav/routes';
 import {PersistGate} from 'redux-persist/es/integration/react';
 
-import './App.css';
+import './App.scss';
 
 export class App extends React.Component
 {

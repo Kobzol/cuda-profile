@@ -3,14 +3,13 @@ import {Subject} from 'rxjs/Subject';
 
 /**
  * Creates a worker job with a single input and output.
- * @param {string} file File with code for the worker.
+ * @param {Worker} worker File with code for the worker.
  * @param {Input} data Input data.
  * @returns {Observable<Output>} Output data.
  */
-export function createWorkerJob<Input, Output>(file: string, data: Input): Observable<Output>
+export function createWorkerJob<Input, Output>(worker: Worker, data: Input): Observable<Output>
 {
     const subject = new Subject<Output>();
-    const worker = new Worker(file);
 
     worker.onmessage = message =>
     {

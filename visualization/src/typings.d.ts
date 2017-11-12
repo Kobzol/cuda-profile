@@ -3,6 +3,10 @@ declare module 'd3-v4-grid';
 declare module 'redux-persist';
 declare module 'redux-persist/*';
 
+interface WebpackWorker extends Worker {
+    new(): WebpackWorker;
+}
+
 interface FileReaderEventTarget extends EventTarget
 {
     result: string;

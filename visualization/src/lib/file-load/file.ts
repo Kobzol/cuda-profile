@@ -10,6 +10,9 @@ import {InvalidFileContent, InvalidFileFormat} from './errors';
 import {Run} from '../format/run';
 import {Trace} from '../format/trace';
 
+import JsonWorker from '../../worker/json.worker';
+import ProtobufWorker from '../../worker/protobuf.worker';
+
 export enum FileType
 {
     Trace = 0,
@@ -43,7 +46,7 @@ export interface FileLoadData
 function parseFileJson(file: File, decompress: boolean): Observable<Trace | Metadata | Run>
 {
     return readFile(file, false, decompress)
-        .flatMap(data => createWorkerJob(process.env.PUBLIC_URL + '/json.worker.js', data));
+        .flatMap(data => createWorkerJob(new JsonWorker(), data));
 }
 /**
  * Loads file and parses its content as Protobuf using a web worker.
@@ -54,7 +57,7 @@ function parseFileJson(file: File, decompress: boolean): Observable<Trace | Meta
 function parseFileProtobuf(file: File, decompress: boolean): Observable<Trace>
 {
     return readFile(file, true, decompress)
-        .flatMap(data => createWorkerJob(process.env.PUBLIC_URL + '/protobuf.worker.js', data));
+        .flatMap(data => createWorkerJob(new ProtobufWorker(), data));
 }
 /**
  * Loads file as JSON or Protobuf, according to the extension (.json or .proto).

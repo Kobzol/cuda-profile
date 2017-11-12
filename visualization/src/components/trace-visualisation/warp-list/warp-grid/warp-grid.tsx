@@ -12,7 +12,7 @@ import {Dictionary} from 'lodash';
 import GridLayout from 'd3-v4-grid';
 import * as _ from 'lodash';
 
-import './warp-grid.css';
+import './warp-grid.scss';
 
 interface Props
 {

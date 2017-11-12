@@ -6,7 +6,7 @@ import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
 import {getAccessAddressRange} from '../../../lib/profile/address';
 import * as _ from 'lodash';
 
-import './warp-list.css';
+import './warp-list.scss';
 
 interface Props
 {
