@@ -43,7 +43,7 @@ export interface FileLoadData
 function parseFileJson(file: File, decompress: boolean): Observable<Trace | Metadata | Run>
 {
     return readFile(file, false, decompress)
-        .flatMap(data => createWorkerJob(process.env.PUBLIC_URL + './json.worker.js', data));
+        .flatMap(data => createWorkerJob(process.env.PUBLIC_URL + '/json.worker.js', data));
 }
 /**
  * Loads file and parses its content as Protobuf using a web worker.
@@ -54,7 +54,7 @@ function parseFileJson(file: File, decompress: boolean): Observable<Trace | Meta
 function parseFileProtobuf(file: File, decompress: boolean): Observable<Trace>
 {
     return readFile(file, true, decompress)
-        .flatMap(data => createWorkerJob(process.env.PUBLIC_URL + './protobuf.worker.js', data));
+        .flatMap(data => createWorkerJob(process.env.PUBLIC_URL + '/protobuf.worker.js', data));
 }
 /**
  * Loads file as JSON or Protobuf, according to the extension (.json or .proto).

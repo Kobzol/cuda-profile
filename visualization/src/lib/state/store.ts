@@ -7,8 +7,11 @@ import {rootEpic} from './epics';
 import {reducers} from './reducers';
 import {persistStore, persistCombineReducers} from 'redux-persist';
 import storage from 'redux-persist/es/storage';
+import url from 'url';
 
-export const history = createHistory();
+export const history = createHistory({
+    basename: url.parse(process.env.PUBLIC_URL).pathname
+});
 
 const composeEnhancers = window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
 const router = routerMiddleware(history);
