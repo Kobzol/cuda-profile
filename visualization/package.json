@@ -30,7 +30,7 @@
     "postcss-loader": "2.0.6",
     "promise": "8.0.1",
     "protobufjs": "~6.8.0",
-    "react": "^16.0.0",
+    "react": "^16.1.1",
     "react-bootstrap": "^0.31.3",
     "react-dev-utils": "^4.0.1",
     "react-dom": "^16.0.0",
