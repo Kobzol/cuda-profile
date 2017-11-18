@@ -3,7 +3,7 @@ import {PureComponent} from 'react';
 import {MemoryAllocation} from '../../../lib/profile/memory-allocation';
 import {
     addressToNum,
-    checkIntersection, clampAddressRange, getAddressRangeSize,
+    checkIntersection, getIntersection, getAddressRangeSize,
     getAllocationAddressRange, numToAddress
 } from '../../../lib/profile/address';
 import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
@@ -53,9 +53,7 @@ export class MemoryBlock extends PureComponent<Props, State>
         const width = (svg.node() as Element).getBoundingClientRect().width;
         const height = (svg.node() as Element).getBoundingClientRect().height;
 
-        const allocRange = getAllocationAddressRange(this.props.allocation);
-        const effectiveRange = clampAddressRange(this.props.rangeSelections.length > 0 ?
-            this.props.rangeSelections[0].warpRange : allocRange, allocRange);
+        const effectiveRange = this.calculateRange();
         const size = getAddressRangeSize(effectiveRange);
 
         const dim = 16;
@@ -68,7 +66,7 @@ export class MemoryBlock extends PureComponent<Props, State>
             .text(`${effectiveRange.from} (block size ${blockSize})`);
 
         const grid = GridLayout()
-            .data(range(elements).map(index => ({ index })))
+            .data(range(elements).map((index: number) => ({ index })))
             .bands(true)
             .size([width, height]);
         grid.layout();
@@ -187,5 +185,12 @@ export class MemoryBlock extends PureComponent<Props, State>
         }
 
         return label;
+    }
+
+    calculateRange = (): AddressRange =>
+    {
+        const allocRange = getAllocationAddressRange(this.props.allocation);
+        return getIntersection(this.props.rangeSelections.length > 0 ?
+            this.props.rangeSelections[0].warpRange : allocRange, allocRange);
     }
 }

@@ -3,14 +3,13 @@ import {connect} from 'react-redux';
 import {TraceFile} from '../../lib/file-load/file';
 import {selectWarps, selectTrace} from '../../lib/trace/actions';
 import {GlobalState} from '../../lib/state/reducers';
-import {KernelTimeline} from './kernel-timeline/kernel-timeline';
+import {TraceTimeline} from './trace-timeline/trace-timeline';
 import {Profile} from '../../lib/profile/profile';
 import {AddressRange, TraceSelection} from '../../lib/trace/selection';
 import {Kernel} from '../../lib/profile/kernel';
 import {Trace} from '../../lib/profile/trace';
 import {selectedWarps, selectedKernel, selectedTrace} from '../../lib/trace/reducer';
 import {WarpTimeline} from './warp-timeline/warp-timeline';
-import {ToggleWrapper} from '../toggle-wrapper/toggle-wrapper';
 import {Warp} from '../../lib/profile/warp';
 import {WarpList} from './warp-list/warp-list';
 import {WarpAddressSelection} from '../../lib/trace/selection';
@@ -19,6 +18,8 @@ import {push} from 'react-router-redux';
 import {MemoryList} from './memory-list/memory-list';
 
 import './trace-visualisation.scss';
+import {Button, Glyphicon} from 'react-bootstrap';
+import * as moment from 'moment';
 
 interface StateProps
 {
@@ -41,7 +42,6 @@ type Props = StateProps & DispatchProps;
 
 interface State
 {
-    showKernelTimeline: boolean;
     rangeSelections: WarpAddressSelection[];
     memorySelection: AddressRange | null;
 }
@@ -53,7 +53,6 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         super(props);
 
         this.state = {
-            showKernelTimeline: true,
             rangeSelections: [],
             memorySelection: null
         };
@@ -64,13 +63,6 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         if (this.props.profile === null)
         {
             this.props.goToPage(Routes.Root);
-        }
-    }
-    componentWillReceiveProps(nextProps: Props)
-    {
-        if (this.props.selectedTrace === null && nextProps.selectedTrace !== null)
-        {
-            this.hideKernelTimeline();
         }
     }
 
@@ -101,24 +93,44 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         }
         return (
             <div className='trace-visualisation'>
-                {this.renderKernelTimeline()}
+                {this.renderTraceTimeline()}
                 {content}
             </div>
         );
     }
-    renderKernelTimeline = (): JSX.Element =>
+    renderTraceTimeline = (): JSX.Element =>
     {
-        return (
-            <ToggleWrapper
-                onShow={this.showKernelTimeline}
-                showContent={this.state.showKernelTimeline}
-                toggleText={'Select trace'}>
-                <KernelTimeline
+        if (this.props.selectedKernel !== null)
+        {
+            const start = moment(this.props.selectedTrace.start).format('HH:mm:ss.SSS');
+            const end = moment(this.props.selectedTrace.end).format('HH:mm:ss.SSS');
+
+            return (
+                <div className='kernel-details'>
+                    <div>
+                        <h3>
+                            Selected trace
+                        </h3>
+                        <div>{`${this.props.selectedKernel.name} from ${start} to ${end}`}</div>
+                    </div>
+                    <Button
+                        className='kernel-deselect'
+                        onClick={this.deselectTrace}
+                        bsStyle='primary'>
+                        <Glyphicon glyph='list' /> Select another trace
+                    </Button>
+                </div>
+            );
+        }
+        else
+        {
+            return (
+                <TraceTimeline
                     selectTrace={this.props.selectTrace}
                     profile={this.props.profile}
                     selection={this.props.traceSelection} />
-            </ToggleWrapper>
-        );
+            );
+        }
     }
 
     renderTraceContent = (kernel: Kernel, trace: Trace, warps: Warp[]): JSX.Element =>
@@ -162,17 +174,9 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         });
     }
 
-    showKernelTimeline = () =>
+    deselectTrace = () =>
     {
-        this.setState(() => ({
-            showKernelTimeline: true
-        }));
-    }
-    hideKernelTimeline = () =>
-    {
-        this.setState(() => ({
-            showKernelTimeline: false
-        }));
+        this.props.selectTrace(null);
     }
 }
 

@@ -1,5 +1,5 @@
 import {
-    checkIntersection, clampAddressRange, getAccessAddressRange, getAddressRangeSize,
+    checkIntersection, getIntersection, getAccessAddressRange, getAddressRangeSize,
     getAllocationAddressRange
 } from '../lib/profile/address';
 import bigInt from 'big-integer';
@@ -76,7 +76,7 @@ test('Address should be clamped when overlapping from left', () => {
         to: '0xFFFF150'
     };
 
-    expect(clampAddressRange(bound, range)).toEqual({
+    expect(getIntersection(bound, range)).toEqual({
         from: bound.from,
         to: range.to
     });
@@ -87,7 +87,7 @@ test('Address should be clamped when overlapping from right', () => {
         to: '0xFFFF300'
     };
 
-    expect(clampAddressRange(bound, range)).toEqual({
+    expect(getIntersection(bound, range)).toEqual({
         from: range.from,
         to: bound.to
     });
@@ -98,7 +98,7 @@ test('Address should be clamped when inside', () => {
         to: '0xFFFF199'
     };
 
-    expect(clampAddressRange(bound, range)).toEqual({
+    expect(getIntersection(bound, range)).toEqual({
         from: range.from,
         to: range.to
     });

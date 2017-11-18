@@ -3,5 +3,13 @@
   min-height: 450px;
 }
 .memory-block-wrapper {
-    width: 100%;
+  width: 100%;
+}
+.kernel-details {
+  display: flex;
+  justify-content: space-between;
+
+  .kernel-deselect {
+    align-self: center;
+  }
 }

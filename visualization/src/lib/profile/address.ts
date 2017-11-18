@@ -27,8 +27,21 @@ export function checkIntersectionRange(range: AddressRange, address: string, siz
     return checkIntersection(rangeFrom, rangeTo, blockFrom, blockTo);
 }
 
-export function clampAddressRange(bound: AddressRange, range: AddressRange): AddressRange
+/**
+ * Returns the intersection between bound and range or bound if there is no intersection.
+ * @param {AddressRange} bound
+ * @param {AddressRange} range
+ * @returns {AddressRange}
+ */
+export function getIntersection(bound: AddressRange, range: AddressRange): AddressRange
 {
+    if (!checkIntersection(
+            addressToNum(range.from), addressToNum(range.to),
+            addressToNum(bound.from), addressToNum(bound.to)))
+    {
+        return bound;
+    }
+
     const from = bigInt.max(addressToNum(bound.from), addressToNum(range.from));
     const to = bigInt.min(addressToNum(bound.to), addressToNum(range.to));
 

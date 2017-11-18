@@ -22,6 +22,8 @@
     "build",
     "scripts",
     "webpack",
-    "jest"
+    "jest",
+    "config",
+    "scripts"
   ]
 }
