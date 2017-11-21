@@ -1,4 +1,12 @@
 .warp-grid {
     display: block;
     margin-bottom: 5px;
+
+  .content {
+    display: flex;
+
+    .action {
+      align-self: center;
+    }
+  }
 }

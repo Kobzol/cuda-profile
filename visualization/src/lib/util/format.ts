@@ -1,4 +1,5 @@
-import {AddressSpace} from '../profile/warp';
+import {AccessType, AddressSpace} from '../profile/warp';
+import {Dim3} from '../profile/dim3';
 
 export function formatByteSize(value: number): string
 {
@@ -38,4 +39,12 @@ export function formatAddressSpace(space: AddressSpace): string
         case AddressSpace.Constant: return 'constant';
         default: return 'unknown';
     }
+}
+export function formatDim3(index: Dim3): string
+{
+    return `${index.z}.${index.y}.${index.x}`;
+}
+export function formatAccessType(access: AccessType): string
+{
+    return access === AccessType.Read ? 'read' : 'write';
 }

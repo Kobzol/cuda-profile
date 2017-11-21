@@ -2,6 +2,9 @@ import {Dim3} from './dim3';
 import {InvalidWarpData} from './errors';
 import {MemoryAccess} from './memory-access';
 import {DebugLocation} from './metadata';
+import {addressAddStr, addressToNum, numToAddress} from './address';
+import {AddressRange} from '../trace/selection';
+import * as _ from 'lodash';
 
 export enum AccessType
 {
@@ -19,16 +22,26 @@ export enum AddressSpace
 export interface Warp
 {
     key: string;
+    index: number;
     id: number;
     slot: number;
     size: number;
-    kind: AccessType;
+    accessType: AccessType;
     space: AddressSpace;
     type: string;
     timestamp: number;
     location: DebugLocation | null;
     blockIdx: Dim3;
     accesses: MemoryAccess[];
+}
+
+export interface WarpConflict
+{
+    address: AddressRange;
+    accesses: [{
+        warp: Warp,
+        access: MemoryAccess
+    }];
 }
 
 export function getWarpStart(warpId: number, warpSize: number, blockDim: Dim3): Dim3
@@ -70,4 +83,72 @@ export function getLaneId(index: Dim3, warpStart: Dim3, blockDim: Dim3): number
 export function getBlockId(index: Dim3, gridDim: Dim3): number
 {
     return getCtaId(index, gridDim);
+}
+
+export function coalesceConflicts(conflicts: WarpConflict[]): WarpConflict[]
+{
+    const coalesced: WarpConflict[] = [];
+
+    for (let i = 0; i < conflicts.length;)
+    {
+        const conflict = conflicts[i];
+        let start = i + 1;
+
+        while (start < conflicts.length && _.isEqual(conflicts[start].accesses, conflict.accesses))
+        {
+            start++;
+        }
+
+        coalesced.push({
+            address: {
+                from: conflict.address.from,
+                to: addressAddStr(conflict.address.from, start - i)
+            },
+            accesses: conflict.accesses
+        });
+
+        i = start;
+    }
+
+    return coalesced;
+}
+export function getConflicts(warps: Warp[]): WarpConflict[]
+{
+    const memoryMap: {[key: string]: [{
+        warp: Warp
+        access: MemoryAccess
+    }]} = {};
+
+    for (const warp of warps)
+    {
+        for (let i = 0; i < warp.accesses.length; i++)
+        {
+            const address = warp.accesses[i].address;
+            for (let j = 0; j < warp.size; j++)
+            {
+                const str = addressAddStr(address, j);
+                if (!memoryMap.hasOwnProperty(str))
+                {
+                    memoryMap[str] = [] as typeof memoryMap[0];
+                }
+
+                memoryMap[str].push({
+                    warp,
+                    access: warp.accesses[i]
+                });
+            }
+        }
+    }
+
+    return Object.keys(memoryMap)
+    .sort((key1: string, key2: string) => {
+        if (key1 === key2) return 0;
+        return key1 < key2 ? -1 : 1;
+    }).map(key => ({
+            address: {
+                from: key,
+                to: addressAddStr(key, 1)
+            },
+            accesses: memoryMap[key]
+    })).filter(access => access.accesses.length > 1);
 }

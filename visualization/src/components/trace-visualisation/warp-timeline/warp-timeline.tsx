@@ -3,14 +3,14 @@ import {Panel} from 'react-bootstrap';
 import Timeline from 'react-visjs-timeline';
 import {Kernel} from '../../../lib/profile/kernel';
 import {Trace} from '../../../lib/profile/trace';
-import {AccessType} from '../../../lib/profile/warp';
+import {AccessType, Warp} from '../../../lib/profile/warp';
 
 interface Props
 {
     kernel: Kernel;
     trace: Trace;
-    selectedWraps: number[];
-    selectWarps: (warps: number[]) => void;
+    selectedWarps: Warp[];
+    selectWarps: (warps: Warp[]) => void;
 }
 
 export class WarpTimeline extends PureComponent<Props>
@@ -45,7 +45,7 @@ export class WarpTimeline extends PureComponent<Props>
                     options={options}
                     items={this.createTimelineItems(this.props.kernel, this.props.trace)}
                     selectHandler={this.handleAccessSelect}
-                    selection={this.props.selectedWraps}
+                    selection={this.props.selectedWarps.map(warp => warp.index)}
                 />
             </Panel>
         );
@@ -53,21 +53,21 @@ export class WarpTimeline extends PureComponent<Props>
 
     createTimelineItems = (kernel: Kernel, trace: Trace) =>
     {
-        return trace.warps.map((group, index) => {
-            const start = this.recalculateTime(trace, group.timestamp);
-            const end = this.recalculateTime(trace, group.timestamp) + 2;
+        return trace.warps.map((warp, index) => {
+            const start = this.recalculateTime(trace, warp.timestamp);
+            const end = this.recalculateTime(trace, warp.timestamp) + 2;
             const content = `#${index}`;
-            const location = group.location;
-            const type = group.type;
-            let title = `${content}: ${group.kind === AccessType.Read ? 'Read' : 'Write'}`;
-            title += ` ${group.size} bytes of ${type} (${group.accesses.length} threads)`;
+            const location = warp.location;
+            const type = warp.type;
+            let title = `${content}: ${warp.accessType === AccessType.Read ? 'Read' : 'Write'}`;
+            title += ` ${warp.size} bytes of ${type} (${warp.accesses.length} threads)`;
             if (location !== null)
             {
                 title += ` (${location.file}:${location.line})`;
             }
 
             return {
-                id: index,
+                id: warp.index,
                 start, end,
                 content, title
             };
@@ -76,7 +76,7 @@ export class WarpTimeline extends PureComponent<Props>
 
     handleAccessSelect = ({items}: {items: number[]}) =>
     {
-        this.props.selectWarps(items);
+        this.props.selectWarps(items.map(index => this.props.trace.warps[index]));
     }
 
     private recalculateTime(trace: Trace, timestamp: number): number

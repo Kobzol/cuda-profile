@@ -15,6 +15,9 @@ import {hasOwnProperty} from 'tslint/lib/utils';
 import {Dictionary} from 'lodash';
 import {getLaneId, getWarpId, getWarpStart} from './warp';
 import {MissingProfileData} from './errors';
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/observable/throw';
 
 
 function parseMetadata(metadata: MetadataFormat): Metadata
@@ -66,10 +69,12 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
     // imperative implementation to exploit already sorted input
     if (accesses.length === 0) return [];
 
-    const createGroup = ({
-        size, timestamp, kind, space, debugId, typeIndex, address, threadIdx, blockIdx, warpId }: MemoryAccessFormat,
-                         key: string): Warp => ({
-        size, timestamp, kind, space,
+    const createWarp = (
+        { size, timestamp, kind, space, debugId, typeIndex, address, threadIdx, blockIdx, warpId }: MemoryAccessFormat,
+        key: string
+    ): Warp => ({
+        index: 0,
+        size, timestamp, accessType: kind, space,
         location: debugId === -1 ? null : metadata.locations[debugId],
         type: metadata.typeMap[typeIndex],
         id: getWarpId(threadIdx, trace.warpSize, trace.blockDim),
@@ -78,6 +83,7 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
         key, accesses: []
     });
 
+    let minTimestamp = accesses[0].timestamp;
     const dict: Dictionary<Warp> = {};
     for (let i = 0; i < accesses.length; i++)
     {
@@ -86,7 +92,8 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
 
         if (!hasOwnProperty(dict, key))
         {
-            dict[key] = createGroup(accesses[i], key);
+            dict[key] = createWarp(accesses[i], key);
+            minTimestamp = Math.min(minTimestamp, accesses[i].timestamp);
         }
         dict[key].accesses.push({
             id: getLaneId(threadIdx, getWarpStart(dict[key].id, trace.warpSize, trace.blockDim), trace.blockDim),
@@ -95,7 +102,19 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
         });
     }
 
-    return Object.keys(dict).map(key => dict[key]).slice(-100);
+    const warps = Object.keys(dict).map(key => dict[key]).slice(-100); // TODO;
+    warps.sort((a: Warp, b: Warp) => {
+        if (a.timestamp === b.timestamp) return 0;
+        return a.timestamp < b.timestamp ? -1 : 1;
+    });
+
+    for (let i = 0; i < warps.length; i++)
+    {
+        warps[i].index = i;
+        warps[i].timestamp -= minTimestamp;
+    }
+
+    return warps;
 }
 
 function validateProfile({run, kernels}: {run: Run; kernels: Kernel[]})
@@ -183,4 +202,16 @@ export function parseProfile(files: TraceFile[]): Profile
     validateProfile(profile);
 
     return profile;
+}
+
+export function parseProfileAsync(files: TraceFile[]): Observable<Profile>
+{
+    try
+    {
+        return Observable.of(parseProfile(files));
+    }
+    catch (error)
+    {
+        return Observable.throw(error);
+    }
 }

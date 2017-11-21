@@ -1,5 +1,40 @@
-import {getBlockId, getCtaId, getLaneId, getWarpId, getWarpStart} from '../lib/profile/warp';
+import {
+    AccessType, AddressSpace, getBlockId, getConflicts, getCtaId, getLaneId, getWarpId, getWarpStart,
+    Warp
+} from '../lib/profile/warp';
 import {InvalidWarpData} from '../lib/profile/errors';
+import {DebugLocation} from '../lib/profile/metadata';
+import {Dim3} from '../lib/profile/dim3';
+import {MemoryAccess} from '../lib/profile/memory-access';
+
+function createWarp(params: {key?: string,
+                    index?: number,
+                    id?: number,
+                    slot?: number,
+                    size?: number,
+                    accessType?: AccessType,
+                    space?: AddressSpace,
+                    type?: string,
+                    timestamp?: number,
+                    location?: DebugLocation | null,
+                    blockIdx?: Dim3,
+                    accesses?: MemoryAccess[]}): Warp
+{
+    return {
+        key: params.key || '',
+        index: params.index || 0,
+        id: params.id || 0,
+        slot: params.slot || 0,
+        size: params.size || 4,
+        accessType: params.accessType || AccessType.Read,
+        space: params.space || AddressSpace.Global,
+        type: params.type || '',
+        timestamp: params.timestamp || 0,
+        location: params.location || null,
+        blockIdx: params.blockIdx || {x: 0, y: 0, z: 0},
+        accesses: params.accesses || []
+    };
+}
 
 test('Warp start is calculated correctly', () => {
     expect(getWarpStart(1, 32, {
@@ -98,4 +133,49 @@ test('Block id is calculated correctly', () => {
         y: 18,
         z: 2
     })).toEqual(306);
+});
+test('Conflict in one warp is calculated correctly', () => {
+    const warp: Warp = createWarp({
+        size: 4,
+        accesses: [
+            {
+                id: 0,
+                threadIdx: {z: 0, y: 0, x: 0},
+                address: '0xAA04'
+            },
+            {
+                id: 1,
+                threadIdx: {z: 0, y: 0, x: 1},
+                address: '0xAA07'
+            },
+            {
+                id: 2,
+                threadIdx: {z: 0, y: 0, x: 2},
+                address: '0xAA05'
+            }
+        ]
+    });
+
+    const conflicts = getConflicts([warp]);
+    expect(conflicts.length).toEqual(4);
+    expect(conflicts[0].address).toEqual('0xAA05');
+    expect(conflicts[0].accesses.length).toEqual(2);
+    expect(conflicts[0].accesses).toContainEqual({ warp, access: warp.accesses[0] });
+    expect(conflicts[0].accesses).toContainEqual({ warp, access: warp.accesses[2] });
+
+    expect(conflicts[1].address).toEqual('0xAA06');
+    expect(conflicts[1].accesses.length).toEqual(2);
+    expect(conflicts[1].accesses).toContainEqual({ warp, access: warp.accesses[0] });
+    expect(conflicts[1].accesses).toContainEqual({ warp, access: warp.accesses[2] });
+
+    expect(conflicts[2].address).toEqual('0xAA07');
+    expect(conflicts[2].accesses.length).toEqual(3);
+    expect(conflicts[2].accesses).toContainEqual({ warp, access: warp.accesses[0] });
+    expect(conflicts[2].accesses).toContainEqual({ warp, access: warp.accesses[1] });
+    expect(conflicts[2].accesses).toContainEqual({ warp, access: warp.accesses[2] });
+
+    expect(conflicts[3].address).toEqual('0xAA08');
+    expect(conflicts[3].accesses.length).toEqual(2);
+    expect(conflicts[3].accesses).toContainEqual({ warp, access: warp.accesses[1] });
+    expect(conflicts[3].accesses).toContainEqual({ warp, access: warp.accesses[2] });
 });

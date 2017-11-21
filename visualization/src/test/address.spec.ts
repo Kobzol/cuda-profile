@@ -1,5 +1,5 @@
 import {
-    checkIntersection, getIntersection, getAccessAddressRange, getAddressRangeSize,
+    checkIntersection, getIntersection, getAccessesAddressRange, getAddressRangeSize,
     getAllocationAddressRange
 } from '../lib/profile/address';
 import bigInt from 'big-integer';
@@ -59,7 +59,7 @@ test('Warp address range is calculated correctly', () => {
         threadIdx: tid
     }];
 
-    expect(getAccessAddressRange(accesses)).toEqual({
+    expect(getAccessesAddressRange(accesses)).toEqual({
         from: '0x16',
         to: '0x1555B7A'
     });
@@ -105,7 +105,7 @@ test('Address should be clamped when inside', () => {
 });
 
 test('Address size should be used for access address range calculation', () => {
-    expect(getAccessAddressRange([{
+    expect(getAccessesAddressRange([{
         address: '0xFFFF100',
         id: 0,
         threadIdx: {x: 0, y: 0, z: 0}

@@ -1,18 +1,18 @@
 import * as React from 'react';
 import {PureComponent} from 'react';
-import {MemoryAllocation} from '../../../lib/profile/memory-allocation';
+import {MemoryAllocation} from '../../../../lib/profile/memory-allocation';
 import {
     addressToNum,
     checkIntersection, getIntersection, getAddressRangeSize,
-    getAllocationAddressRange, numToAddress
-} from '../../../lib/profile/address';
-import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
+    getAllocationAddressRange, numToAddress, getSelectionRange
+} from '../../../../lib/profile/address';
+import {AddressRange, WarpAddressSelection} from '../../../../lib/trace/selection';
 import {zoom} from 'd3-zoom';
 import GridLayout from 'd3-v4-grid';
 import {select} from 'd3-selection';
 import {range} from 'd3-array';
 import * as d3 from 'd3';
-import {formatAddressSpace, formatByteSize} from '../../../lib/util/format';
+import {formatAddressSpace, formatByteSize} from '../../../../lib/util/format';
 import {Panel} from 'react-bootstrap';
 
 import './memory-block.scss';
@@ -25,15 +25,10 @@ interface Props
     onMemorySelect: (memorySelection: AddressRange) => void;
 }
 
-interface State
-{
-
-}
-
 const selectedBlock = 'rgb(220, 0, 0)';
 const activeBlock = 'rgb(65, 105, 225)';
 
-export class MemoryBlock extends PureComponent<Props, State>
+export class MemoryBlock extends PureComponent<Props>
 {
     private blockWrapper: HTMLDivElement = null;
 
@@ -189,8 +184,6 @@ export class MemoryBlock extends PureComponent<Props, State>
 
     calculateRange = (): AddressRange =>
     {
-        const allocRange = getAllocationAddressRange(this.props.allocation);
-        return getIntersection(this.props.rangeSelections.length > 0 ?
-            this.props.rangeSelections[0].warpRange : allocRange, allocRange);
+        return getSelectionRange(getAllocationAddressRange(this.props.allocation), this.props.rangeSelections);
     }
 }

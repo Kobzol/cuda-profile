@@ -1,7 +1,7 @@
 import React, {PureComponent} from 'react';
 import {connect} from 'react-redux';
 import {TraceFile} from '../../lib/file-load/file';
-import {selectWarps, selectTrace} from '../../lib/trace/actions';
+import {selectWarps, selectTrace, deselectWarp} from '../../lib/trace/actions';
 import {GlobalState} from '../../lib/state/reducers';
 import {TraceTimeline} from './trace-timeline/trace-timeline';
 import {Profile} from '../../lib/profile/profile';
@@ -9,7 +9,6 @@ import {AddressRange, TraceSelection} from '../../lib/trace/selection';
 import {Kernel} from '../../lib/profile/kernel';
 import {Trace} from '../../lib/profile/trace';
 import {selectedWarps, selectedKernel, selectedTrace} from '../../lib/trace/reducer';
-import {WarpTimeline} from './warp-timeline/warp-timeline';
 import {Warp} from '../../lib/profile/warp';
 import {WarpList} from './warp-list/warp-list';
 import {WarpAddressSelection} from '../../lib/trace/selection';
@@ -20,6 +19,9 @@ import {MemoryList} from './memory-list/memory-list';
 import './trace-visualisation.scss';
 import {Button, Glyphicon} from 'react-bootstrap';
 import * as moment from 'moment';
+import {WarpPanel} from './warp-panel/warp-panel';
+import {WarpTimeline} from './warp-timeline/warp-timeline';
+import {WarpDetail} from './warp-detail/warp-detail';
 
 interface StateProps
 {
@@ -29,12 +31,12 @@ interface StateProps
     selectedTrace: Trace;
     selectedWarps: Warp[];
     traceSelection: TraceSelection;
-    warpSelection: number[];
 }
 interface DispatchProps
 {
     selectTrace: (selection: TraceSelection) => {};
-    selectWarps: (warps: number[]) => {};
+    selectWarps: (warps: Warp[]) => {};
+    deselectWarp: (warp: Warp) => {};
     goToPage: (page: string) => {};
 }
 
@@ -132,11 +134,13 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
             );
         }
     }
-
     renderTraceContent = (kernel: Kernel, trace: Trace, warps: Warp[]): JSX.Element =>
     {
         return (
-            <div>
+            <div className='trace-content-wrapper'>
+                <div className='warp-panel'>
+                    {this.renderAccessTimeline(kernel, trace)}
+                </div>
                 <div className='trace-wrapper'>
                     <WarpList
                         trace={trace}
@@ -144,26 +148,25 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                         selectRange={(range) => this.setState({
                             rangeSelections: range === null ? [] : [range]
                         })}
-                        memorySelection={this.state.memorySelection} />
-                    <MemoryList
-                        allocations={this.props.selectedTrace.allocations}
+                        memorySelection={this.state.memorySelection}
+                        deselect={this.props.deselectWarp} />
+                    <WarpDetail
+                        trace={trace}
+                        warps={warps}
                         rangeSelections={this.state.rangeSelections}
                         onMemorySelect={this.setMemorySelection} />
                 </div>
-                {this.renderAccessTimeline(kernel, trace)}
             </div>
         );
     }
     renderAccessTimeline = (kernel: Kernel, trace: Trace): JSX.Element =>
     {
         return (
-            <div className='warp-timeline'>
-                <WarpTimeline
-                    kernel={kernel}
-                    trace={trace}
-                    selectWarps={this.props.selectWarps}
-                    selectedWraps={this.props.warpSelection} />
-            </div>
+            <WarpTimeline
+                kernel={kernel}
+                trace={trace}
+                selectWarps={this.props.selectWarps}
+                selectedWarps={this.props.selectedWarps} />
         );
     }
 
@@ -186,10 +189,10 @@ export const TraceVisualisation = connect<StateProps, DispatchProps, {}>((state:
     selectedKernel: selectedKernel(state),
     selectedTrace: selectedTrace(state),
     selectedWarps: selectedWarps(state),
-    traceSelection: state.trace.selectedTrace,
-    warpSelection: state.trace.selectedWarps
+    traceSelection: state.trace.selectedTrace
 }), {
     selectTrace: selectTrace,
     selectWarps: selectWarps,
+    deselectWarp: deselectWarp,
     goToPage: push
 })(TraceVisualisationComponent);

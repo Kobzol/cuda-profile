@@ -1,8 +1,9 @@
 import React, {PureComponent} from 'react';
 import {AccessType, Warp} from '../../../../lib/profile/warp';
 import {MemoryAccess} from '../../../../lib/profile/memory-access';
-import {getAccessAddressRange, checkIntersectionRange} from '../../../../lib/profile/address';
+import {getAccessesAddressRange, checkIntersectionRange} from '../../../../lib/profile/address';
 import {AddressRange} from '../../../../lib/trace/selection';
+import {formatDim3} from '../../../../lib/util/format';
 
 interface Props
 {
@@ -16,8 +17,22 @@ interface Props
     onSelectChanged: (range: AddressRange | null) => void;
 }
 
-export class Thread extends PureComponent<Props>
+interface State
 {
+    hovered: boolean;
+}
+
+export class Thread extends PureComponent<Props, State>
+{
+    constructor(props: Props)
+    {
+        super(props);
+
+        this.state = {
+            hovered: false
+        };
+    }
+
     render()
     {
         const {access, warp} = this.props;
@@ -25,9 +40,8 @@ export class Thread extends PureComponent<Props>
         let label = 'Inactive thread';
         if (access !== null)
         {
-            const {x: tx, y: ty, z: tz} = access.threadIdx;
-            label = `${warp.blockIdx.z}.${warp.blockIdx.y}.${warp.blockIdx.x}.` +
-                    `${tz}.${ty}.${tx}: ${warp.size} at ${access.address}`;
+            const dim = formatDim3(access.threadIdx);
+            label = `${dim}: ${access.address}`;
         }
 
         return (
@@ -39,7 +53,7 @@ export class Thread extends PureComponent<Props>
                     y={this.props.y}
                     width={this.props.width}
                     height={this.props.height}
-                    fill={this.getAccessColor(warp, access)}
+                    fill={this.getAccessColor(warp, access, this.state.hovered)}
                     stroke='rgb(0, 0, 0)'
                     strokeWidth={0.5} />
                 <title>{label}</title>
@@ -51,7 +65,10 @@ export class Thread extends PureComponent<Props>
     {
         if (this.props.access !== null)
         {
-            this.props.onSelectChanged(getAccessAddressRange([this.props.access], this.props.warp.size));
+            this.props.onSelectChanged(getAccessesAddressRange([this.props.access], this.props.warp.size));
+            this.setState(() => ({
+                hovered: true
+            }));
         }
     }
     private handleMouseLeave = (event: React.MouseEvent<SVGSVGElement>) =>
@@ -59,24 +76,30 @@ export class Thread extends PureComponent<Props>
         if (this.props.access !== null)
         {
             this.props.onSelectChanged(null);
+            this.setState(() => ({
+                hovered: false
+            }));
         }
     }
 
-    private getAccessColor = (warp: Warp, access: MemoryAccess): string =>
+    private getAccessColor = (warp: Warp, access: MemoryAccess, hovered: boolean): string =>
     {
         if (access === null) return 'rgb(255, 255, 255)';
 
-        if (this.props.memorySelection !== null)
-        {
-            if (checkIntersectionRange(this.props.memorySelection, access.address, warp.size))
-            {
-                return 'rgb(0, 255, 0)';
-            }
-        }
-        if (warp.kind === AccessType.Read)
+        if (hovered)
         {
             return 'rgb(255, 0, 0)';
         }
-        else return 'rgb(0, 0, 255)';
+        else if (this.props.memorySelection !== null &&
+            checkIntersectionRange(this.props.memorySelection, access.address, warp.size))
+        {
+            return 'rgb(0, 255, 0)';
+        }
+
+        if (warp.accessType === AccessType.Read)
+        {
+            return 'rgb(225, 105, 65)';
+        }
+        else return 'rgb(65, 105, 225)';
     }
 }

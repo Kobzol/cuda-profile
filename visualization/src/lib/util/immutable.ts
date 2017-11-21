@@ -32,3 +32,14 @@ export function pushOrReplaceArray<T extends object>(arr: T[],
     if (arr.filter(predicate).length > 0) return replaceArray(arr, predicate, value);
     else return [...arr, value];
 }
+
+/**
+ * Returns an array without the given value.
+ * @param {T[]} arr
+ * @param {T} value
+ * @returns {T[]}
+ */
+export function removeFromArray<T>(arr: T[], value: T): T[]
+{
+    return arr.filter(item => item !== value);
+}

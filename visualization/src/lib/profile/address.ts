@@ -1,5 +1,5 @@
 import bigInt, {BigInteger} from 'big-integer';
-import {AddressRange} from '../trace/selection';
+import {AddressRange, WarpAddressSelection} from '../trace/selection';
 import {MemoryAccess} from './memory-access';
 import {MemoryAllocation} from './memory-allocation';
 
@@ -48,7 +48,20 @@ export function getIntersection(bound: AddressRange, range: AddressRange): Addre
     return createRange(from, to);
 }
 
-export function getAccessAddressRange(accesses: MemoryAccess[], size: number = 1): AddressRange
+export function getSelectionRange(bound: AddressRange, selections: WarpAddressSelection[]): AddressRange
+{
+    return getIntersection(bound, selections.length > 0 ?
+        selections[0].warpRange : bound);
+}
+
+export function getAccessAddressRange(access: MemoryAccess, size: number = 1): AddressRange
+{
+    return {
+        from: access.address,
+        to: numToAddress(addressToNum(access.address).add(size))
+    };
+}
+export function getAccessesAddressRange(accesses: MemoryAccess[], size: number = 1): AddressRange
 {
     let minAddress = bigInt('FFFFFFFFFFFFFFFF', 16);
     let maxAddress = bigInt('0', 16);
@@ -69,7 +82,6 @@ export function getAccessAddressRange(accesses: MemoryAccess[], size: number = 1
 
     return createRange(minAddress, maxAddress);
 }
-
 export function getAllocationAddressRange(allocation: MemoryAllocation): AddressRange
 {
     const from = addressToNum(allocation.address);
@@ -78,7 +90,7 @@ export function getAllocationAddressRange(allocation: MemoryAllocation): Address
     return createRange(from, to);
 }
 
-export function getAddressRangeSize(range: AddressRange)
+export function getAddressRangeSize(range: AddressRange): number
 {
     return (addressToNum(range.to).subtract(addressToNum(range.from))).toJSNumber();
 }
@@ -90,4 +102,8 @@ export function addressToNum(address: string): BigInteger
 export function numToAddress(num: BigInteger): string
 {
     return `0x${num.toString(16).toUpperCase()}`;
+}
+export function addressAddStr(address: string, value: number): string
+{
+    return numToAddress(addressToNum(address).add(value));
 }

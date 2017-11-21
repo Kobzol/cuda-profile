@@ -1,5 +1,5 @@
 import {reducerWithInitialState} from 'typescript-fsa-reducers';
-import {selectWarps, selectTrace} from './actions';
+import {selectWarps, selectTrace, deselectWarp} from './actions';
 import {TraceSelection} from './selection';
 import {createSelector} from 'reselect';
 import {GlobalState} from '../state/reducers';
@@ -7,6 +7,7 @@ import {Kernel} from '../profile/kernel';
 import {Trace} from '../profile/trace';
 import {ProfileState} from '../profile/reducer';
 import {buildProfile} from '../profile/actions';
+import {removeFromArray} from '../util/immutable';
 
 export interface TraceState
 {
@@ -27,7 +28,10 @@ const reducer = reducerWithInitialState<TraceState>({
     selectedWarps: []
 })).case(selectWarps, (state, payload) => ({
     ...state,
-    selectedWarps: payload
+    selectedWarps: payload.map(warp => warp.index)
+})).case(deselectWarp, (state, payload) => ({
+    ...state,
+    selectedWarps: removeFromArray(state.selectedWarps, payload.index)
 }));
 
 export const selectedKernel = createSelector(

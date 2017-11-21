@@ -1,7 +1,8 @@
 import React, {PureComponent} from 'react';
 import {MemoryAllocation} from '../../../lib/profile/memory-allocation';
-import {MemoryBlock} from '../memory-block/memory-block';
+import {MemoryBlock} from './memory-block/memory-block';
 import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
+import {MemoryMinimap} from './memory-minimap/memory-minimap';
 
 interface Props
 {
@@ -19,11 +20,19 @@ export class MemoryList extends PureComponent<Props>
                 <h3>Memory allocations</h3>
                 <div>
                     {this.props.allocations.map(alloc =>
-                        <MemoryBlock
+                        <div
                             key={alloc.address}
-                            allocation={alloc}
-                            rangeSelections={this.props.rangeSelections}
-                            onMemorySelect={this.props.onMemorySelect} />
+                            className='block-row'>
+                            <MemoryBlock
+                                allocation={alloc}
+                                rangeSelections={this.props.rangeSelections}
+                                onMemorySelect={this.props.onMemorySelect} />
+                            <MemoryMinimap
+                                width={200}
+                                height={100}
+                                rangeSelections={this.props.rangeSelections}
+                                allocation={alloc} />
+                        </div>
                     )}
                 </div>
             </div>

@@ -3,16 +3,18 @@ import {MemoryAccess} from '../../../../lib/profile/memory-access';
 import {Trace} from '../../../../lib/profile/trace';
 import {createBlockSelector} from './grid-data';
 import {AddressRange} from '../../../../lib/trace/selection';
-import {getBlockId, Warp} from '../../../../lib/profile/warp';
+import {getBlockId, getWarpId, Warp} from '../../../../lib/profile/warp';
 import {Thread} from './thread';
 import {WarpAddressSelection} from '../../../../lib/trace/selection';
-import {getAccessAddressRange} from '../../../../lib/profile/address';
+import {getAccessesAddressRange} from '../../../../lib/profile/address';
 import {Selector} from 'reselect';
 import {Dictionary} from 'lodash';
 import GridLayout from 'd3-v4-grid';
 import * as _ from 'lodash';
 
 import './warp-grid.scss';
+import {Button, Glyphicon} from 'react-bootstrap';
+import {formatAccessType, formatDim3} from '../../../../lib/util/format';
 
 interface Props
 {
@@ -21,6 +23,7 @@ interface Props
     memorySelection: AddressRange;
     canvasDimensions: { width: number, height: number };
     selectRange: (range: WarpAddressSelection) => void;
+    deselect: (warp: Warp) => void;
 }
 interface State
 {
@@ -60,24 +63,30 @@ export class WarpGrid extends PureComponent<Props, State>
         return (
             <div className='warp-grid'>
                 {this.renderLabel(this.props.warp, this.props.trace)}
-                <svg width={width}
-                     height={height}
-                     viewBox={`0 0 ${width} ${height}`}>
-                    <g>{grid}</g>
-                </svg>
+                <div className='content'>
+                    <svg width={width}
+                         height={height}
+                         viewBox={`0 0 ${width} ${height}`}>
+                        <g>{grid}</g>
+                    </svg>
+                    <Button onClick={this.deselect} title='Deselect' className='action'>
+                        <Glyphicon glyph='remove' />
+                    </Button>
+                </div>
             </div>
         );
     }
 
     renderLabel = (warp: Warp, trace: Trace): JSX.Element =>
     {
-        const blockId = getBlockId(warp.blockIdx, trace.gridDimension);
-
         return (
-            <div>{`Warp ${warp.id} in block ${blockId} (slot ${warp.slot})`}</div>
+            <div>
+                {`Warp id ${getWarpId(warp.accesses[0].threadIdx, trace.warpSize, trace.blockDimension)},
+                block ${formatDim3(warp.blockIdx)}, ${warp.size} bytes ${formatAccessType(warp.accessType)}, at
+                ${warp.timestamp}`}
+            </div>
         );
     }
-
     renderGrid = (nodes: Array<{x: number, y: number}>,
                   nodeSize: {width: number, height: number}): JSX.Element[] =>
     {
@@ -117,7 +126,7 @@ export class WarpGrid extends PureComponent<Props, State>
         if (range !== null)
         {
             this.props.selectRange({
-                warpRange: getAccessAddressRange(this.props.warp.accesses, this.props.warp.size),
+                warpRange: getAccessesAddressRange(this.props.warp.accesses, this.props.warp.size),
                 threadRange: range
             });
         }
@@ -129,7 +138,6 @@ export class WarpGrid extends PureComponent<Props, State>
     {
         const layout = GridLayout()
             .data(_.range(gridSize.rows * gridSize.cols))
-            .padding([0.1, 0.1])
             .bands(true)
             .rows(gridSize.rows)
             .cols(gridSize.cols)
@@ -148,5 +156,10 @@ export class WarpGrid extends PureComponent<Props, State>
             accesses[access.id] = access;
         }
         return accesses;
+    }
+
+    deselect = () =>
+    {
+        this.props.deselect(this.props.warp);
     }
 }

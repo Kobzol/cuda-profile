@@ -1,2 +1,8 @@
 - fit initial zoom in timelines to data
 - dont persist errors in redux store
+
+multiselect
+konflikty
+zabarvení dle vzdálenosti přístupů
+filter na warpy
+zdroják

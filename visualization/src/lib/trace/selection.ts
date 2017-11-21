@@ -4,6 +4,9 @@ export interface TraceSelection
     trace: number;
 }
 
+/**
+ * Represents a range of adresses. The 'to' attribute is exclusive.
+ */
 export interface AddressRange
 {
     from: string;

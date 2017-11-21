@@ -3,7 +3,7 @@ import {Trace} from '../../../lib/profile/trace';
 import {Warp} from '../../../lib/profile/warp';
 import {WarpGrid} from './warp-grid/warp-grid';
 import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
-import {getAccessAddressRange} from '../../../lib/profile/address';
+import {getAccessesAddressRange} from '../../../lib/profile/address';
 import * as _ from 'lodash';
 
 import './warp-list.scss';
@@ -14,6 +14,7 @@ interface Props
     warps: Warp[];
     selectRange: (range: WarpAddressSelection) => void;
     memorySelection: AddressRange;
+    deselect: (warp: Warp) => void;
 }
 
 export class WarpList extends PureComponent<Props>
@@ -32,7 +33,8 @@ export class WarpList extends PureComponent<Props>
                             warp={warp}
                             canvasDimensions={{width: 260, height: 60}}
                             selectRange={this.handleRangeSelect}
-                            memorySelection={this.props.memorySelection} />
+                            memorySelection={this.props.memorySelection}
+                            deselect={this.props.deselect} />
                     )}
                 </div>
             </div>
@@ -43,7 +45,7 @@ export class WarpList extends PureComponent<Props>
     {
         if (range !== null)
         {
-            range.warpRange = getAccessAddressRange(_.flatMap(this.props.warps, warp => warp.accesses),
+            range.warpRange = getAccessesAddressRange(_.flatMap(this.props.warps, warp => warp.accesses),
                 this.props.warps[0].size);
         }
         this.props.selectRange(range);

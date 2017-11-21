@@ -1,15 +1,21 @@
-.trace-wrapper {
-  display: flex;
-  min-height: 450px;
-}
-.memory-block-wrapper {
-  width: 100%;
-}
 .kernel-details {
   display: flex;
   justify-content: space-between;
 
   .kernel-deselect {
     align-self: center;
+  }
+}
+
+.trace-content-wrapper {
+  display: flex;
+
+  .trace-wrapper {
+    display: flex;
+    min-height: 450px;
+
+    .memory-block-wrapper {
+      width: 100%;
+    }
   }
 }
