@@ -15,6 +15,7 @@ interface Props
     access: MemoryAccess;
     memorySelection: AddressRange;
     onSelectChanged: (range: AddressRange | null) => void;
+    selectionEnabled: boolean;
 }
 
 interface State
@@ -63,7 +64,7 @@ export class Thread extends PureComponent<Props, State>
 
     private handleMouseEnter = (event: React.MouseEvent<SVGSVGElement>) =>
     {
-        if (this.props.access !== null)
+        if (this.props.selectionEnabled && this.props.access !== null)
         {
             this.props.onSelectChanged(getAccessesAddressRange([this.props.access], this.props.warp.size));
             this.setState(() => ({

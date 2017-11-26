@@ -34,6 +34,7 @@ export class WarpList extends PureComponent<Props>
                             canvasDimensions={{width: 260, height: 60}}
                             selectRange={this.handleRangeSelect}
                             memorySelection={this.props.memorySelection}
+                            selectionEnabled={false}
                             deselect={this.props.deselect} />
                     )}
                 </div>

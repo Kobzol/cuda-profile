@@ -4,7 +4,7 @@ import {coalesceConflicts, getConflicts, Warp, WarpConflict} from '../../../../l
 import {formatAccessType, formatDim3} from '../../../../lib/util/format';
 import {Trace} from '../../../../lib/profile/trace';
 import {AddressRange} from '../../../../lib/trace/selection';
-import {addressAddStr, addressToNum, getAccessAddressRange, numToAddress} from '../../../../lib/profile/address';
+import {addressAddStr, getAddressRangeSize} from '../../../../lib/profile/address';
 
 interface Props
 {
@@ -64,7 +64,9 @@ export class WarpConflictTable extends PureComponent<Props>
         const getRangeExtent = (range: AddressRange): string => {
             const next = addressAddStr(range.from, 1);
             if (range.to === next) return range.from;
-            return `${range.from}-${addressAddStr(range.to, -1)}`;
+
+            const byteCount = getAddressRangeSize(range);
+            return `${range.from}-${addressAddStr(range.to, -1)} (${byteCount} bytes)`;
         };
 
         return (
