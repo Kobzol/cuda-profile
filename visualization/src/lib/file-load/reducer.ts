@@ -2,7 +2,7 @@ import {createSelector} from 'reselect';
 import {reducerWithInitialState} from 'typescript-fsa-reducers';
 import {getErrorId, Errors} from '../state/errors';
 import {GlobalState} from '../state/reducers';
-import {pushOrReplaceArray, replaceArray} from '../util/immutable';
+import {pushOrReplaceInArray, replaceInArray} from '../util/immutable';
 import {loadFile, resetFiles} from './actions';
 import {FileType, TraceFile} from './file';
 
@@ -20,7 +20,7 @@ const reducer = reducerWithInitialState<FileLoaderState>({
 }))
 .case(loadFile.started, (state, payload) => ({
         ...state,
-        files: pushOrReplaceArray(state.files, ((file) => file.name === payload.name), {
+        files: pushOrReplaceInArray(state.files, ((file) => file.name === payload.name), {
             name: payload.name,
             loading: true,
             content: null,
@@ -30,7 +30,7 @@ const reducer = reducerWithInitialState<FileLoaderState>({
 }))
 .case(loadFile.done, (state, payload) => ({
         ...state,
-        files: replaceArray(state.files, (file) => file.name === payload.params.name, {
+        files: replaceInArray(state.files, (file) => file.name === payload.params.name, {
             loading: false,
             content: payload.result.content,
             type: payload.result.type
@@ -38,7 +38,7 @@ const reducer = reducerWithInitialState<FileLoaderState>({
 }))
 .case(loadFile.failed, (state, payload) => ({
         ...state,
-        files: replaceArray(state.files, (file) => file.name === payload.params.name, {
+        files: replaceInArray(state.files, (file) => file.name === payload.params.name, {
             loading: false,
             type: FileType.Invalid,
             error: getErrorId(payload.error),

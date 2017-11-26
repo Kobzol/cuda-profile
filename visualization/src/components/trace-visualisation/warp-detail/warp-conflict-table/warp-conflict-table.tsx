@@ -66,7 +66,7 @@ export class WarpConflictTable extends PureComponent<Props>
             if (range.to === next) return range.from;
 
             const byteCount = getAddressRangeSize(range);
-            return `${range.from}-${addressAddStr(range.to, -1)} (${byteCount} bytes)`;
+            return `${range.from} - ${addressAddStr(range.to, -1)} (${byteCount} bytes)`;
         };
 
         return (

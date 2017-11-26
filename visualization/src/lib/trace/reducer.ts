@@ -7,7 +7,7 @@ import {Kernel} from '../profile/kernel';
 import {Trace} from '../profile/trace';
 import {ProfileState} from '../profile/reducer';
 import {buildProfile} from '../profile/actions';
-import {removeFromArray} from '../util/immutable';
+import {without} from 'ramda';
 
 export interface TraceState
 {
@@ -31,7 +31,7 @@ const reducer = reducerWithInitialState<TraceState>({
     selectedWarps: payload.map(warp => warp.index)
 })).case(deselectWarp, (state, payload) => ({
     ...state,
-    selectedWarps: removeFromArray(state.selectedWarps, payload.index)
+    selectedWarps: without([payload.index], state.selectedWarps)
 }));
 
 export const selectedKernel = createSelector(

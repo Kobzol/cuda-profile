@@ -105,5 +105,5 @@ export function numToAddress(num: BigInteger): string
 }
 export function addressAddStr(address: string, value: number): string
 {
-    return numToAddress(addressToNum(address).add(value));
+    return numToAddress(addressToNum(address).add(bigInt(value)));
 }
