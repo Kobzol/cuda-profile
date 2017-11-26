@@ -15,6 +15,7 @@ interface Props
     selectRange: (range: WarpAddressSelection) => void;
     memorySelection: AddressRange;
     deselect: (warp: Warp) => void;
+    selectAllWarpAccesses: (warp: Warp) => void;
 }
 
 export class WarpList extends PureComponent<Props>
@@ -35,7 +36,8 @@ export class WarpList extends PureComponent<Props>
                             selectRange={this.handleRangeSelect}
                             memorySelection={this.props.memorySelection}
                             selectionEnabled={false}
-                            deselect={this.props.deselect} />
+                            deselect={this.props.deselect}
+                            selectAllWarpAccesses={this.props.selectAllWarpAccesses} />
                     )}
                 </div>
             </div>

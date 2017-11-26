@@ -3,6 +3,7 @@ import {routerMiddleware, routerReducer} from 'react-router-redux';
 import {applyMiddleware, compose, createStore} from 'redux';
 import {createLogger} from 'redux-logger';
 import {createEpicMiddleware} from 'redux-observable';
+import thunk from 'redux-thunk';
 import {rootEpic} from './epics';
 import {reducers} from './reducers';
 import {persistStore, persistCombineReducers} from 'redux-persist';
@@ -28,6 +29,6 @@ export const store = createStore(
         ...reducers,
         router: routerReducer
     }),
-    composeEnhancers(applyMiddleware(router, epic, logger))
+    composeEnhancers(applyMiddleware(router, epic, thunk, logger))
 );
 export const persistor = persistStore(store);

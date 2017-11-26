@@ -14,14 +14,25 @@ import {WarpList} from './warp-list/warp-list';
 import {WarpAddressSelection} from '../../lib/trace/selection';
 import {Routes} from '../../lib/nav/routes';
 import {push} from 'react-router-redux';
-import {MemoryList} from './memory-list/memory-list';
-
-import './trace-visualisation.scss';
-import {Button, Glyphicon} from 'react-bootstrap';
-import * as moment from 'moment';
-import {WarpPanel} from './warp-panel/warp-panel';
 import {WarpTimeline} from './warp-timeline/warp-timeline';
 import {WarpDetail} from './warp-detail/warp-detail';
+import {Button, Glyphicon} from 'react-bootstrap';
+import * as moment from 'moment';
+import {Action} from 'typescript-fsa';
+import * as _ from 'lodash';
+
+import './trace-visualisation.scss';
+
+export const selectAllWarpAccesses = (warp: Warp) =>
+{
+    return (dispatch: (action: Action<Warp[]>) => void, getState: () => GlobalState) => {
+        const state = getState();
+        const trace = selectedTrace(state);
+        const warps = trace.warps.filter(w => w.id === warp.id && _.isEqual(warp.blockIdx, w.blockIdx));
+
+        dispatch(selectWarps(warps));
+    };
+};
 
 interface StateProps
 {
@@ -38,6 +49,7 @@ interface DispatchProps
     selectWarps: (warps: Warp[]) => {};
     deselectWarp: (warp: Warp) => {};
     goToPage: (page: string) => {};
+    selectAllWarpAccesses: (warp: Warp) => {};
 }
 
 type Props = StateProps & DispatchProps;
@@ -149,7 +161,8 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                             rangeSelections: range === null ? [] : [range]
                         })}
                         memorySelection={this.state.memorySelection}
-                        deselect={this.props.deselectWarp} />
+                        deselect={this.props.deselectWarp}
+                        selectAllWarpAccesses={this.props.selectAllWarpAccesses} />
                     <WarpDetail
                         trace={trace}
                         warps={warps}
@@ -194,5 +207,6 @@ export const TraceVisualisation = connect<StateProps, DispatchProps, {}>((state:
     selectTrace: selectTrace,
     selectWarps: selectWarps,
     deselectWarp: deselectWarp,
+    selectAllWarpAccesses: selectAllWarpAccesses,
     goToPage: push
 })(TraceVisualisationComponent);

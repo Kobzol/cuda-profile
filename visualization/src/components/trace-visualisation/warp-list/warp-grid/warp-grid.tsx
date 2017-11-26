@@ -25,6 +25,7 @@ interface Props
     selectRange: (range: WarpAddressSelection) => void;
     selectionEnabled: boolean;
     deselect: (warp: Warp) => void;
+    selectAllWarpAccesses: (warp: Warp) => void;
 }
 interface State
 {
@@ -69,6 +70,11 @@ export class WarpGrid extends PureComponent<Props, State>
                          viewBox={`0 0 ${width} ${height}`}>
                         <g>{grid}</g>
                     </svg>
+                    <Button onClick={this.selectAllWarpAccesses}
+                            title='Select all accesses of this warp'
+                            className='action'>
+                        <Glyphicon glyph='hourglass' />
+                    </Button>
                     <Button onClick={this.deselect} title='Deselect' className='action'>
                         <Glyphicon glyph='remove' />
                     </Button>
@@ -156,6 +162,11 @@ export class WarpGrid extends PureComponent<Props, State>
             accesses[access.id] = access;
         }
         return accesses;
+    }
+
+    selectAllWarpAccesses = () =>
+    {
+        this.props.selectAllWarpAccesses(this.props.warp);
     }
 
     deselect = () =>
