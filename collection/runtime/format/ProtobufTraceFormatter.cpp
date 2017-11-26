@@ -27,7 +27,7 @@ void cupr::ProtobufTraceFormatter::formatTrace(std::ostream& os, const std::stri
         buffer->set_kind(static_cast<google::protobuf::int32>(access.kind));
         buffer->set_space(static_cast<google::protobuf::int32>(access.addressSpace));
         buffer->set_typeindex(static_cast<google::protobuf::int32>(access.type));
-        buffer->set_timestamp(access.timestamp);
+        buffer->set_timestamp(std::to_string(access.timestamp));
         buffer->mutable_threadidx()->set_x(access.threadIdx.x);
         buffer->mutable_threadidx()->set_y(access.threadIdx.y);
         buffer->mutable_threadidx()->set_z(access.threadIdx.z);

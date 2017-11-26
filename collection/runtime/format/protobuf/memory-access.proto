@@ -14,5 +14,5 @@ message MemoryAccess {
     required int32 kind = 7;
     required int32 space = 8;
     required int32 typeIndex = 9;
-    required int64 timestamp = 10;
+    required string timestamp = 10;
 }
