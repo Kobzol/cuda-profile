@@ -24,5 +24,5 @@ export interface MemoryAccess
     kind: AccessType;
     space: AddressSpace;
     typeIndex: number;
-    timestamp: number;
+    timestamp: string;
 }

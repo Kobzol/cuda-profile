@@ -29,7 +29,7 @@ export interface Warp
     accessType: AccessType;
     space: AddressSpace;
     type: string;
-    timestamp: number;
+    timestamp: string;
     location: DebugLocation | null;
     blockIdx: Dim3;
     accesses: MemoryAccess[];

@@ -18,6 +18,7 @@ import {MissingProfileData} from './errors';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
+import * as bigInt from 'big-integer';
 
 
 function parseMetadata(metadata: MetadataFormat): Metadata
@@ -74,7 +75,9 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
         key: string
     ): Warp => ({
         index: 0,
-        size, timestamp, accessType: kind, space,
+        size,
+        accessType: kind, space,
+        timestamp,
         location: debugId === -1 ? null : metadata.locations[debugId],
         type: metadata.typeMap[typeIndex],
         id: getWarpId(threadIdx, trace.warpSize, trace.blockDim),
@@ -83,7 +86,7 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
         key, accesses: []
     });
 
-    let minTimestamp = accesses[0].timestamp;
+    let minTimestamp = bigInt(accesses[0].timestamp);
     const dict: Dictionary<Warp> = {};
     for (let i = 0; i < accesses.length; i++)
     {
@@ -93,7 +96,12 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
         if (!hasOwnProperty(dict, key))
         {
             dict[key] = createWarp(accesses[i], key);
-            minTimestamp = Math.min(minTimestamp, accesses[i].timestamp);
+
+            const time = bigInt(accesses[i].timestamp);
+            if (time.lt(minTimestamp))
+            {
+                minTimestamp = time;
+            }
         }
         dict[key].accesses.push({
             id: getLaneId(threadIdx, getWarpStart(dict[key].id, trace.warpSize, trace.blockDim), trace.blockDim),
@@ -111,7 +119,7 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
     for (let i = 0; i < warps.length; i++)
     {
         warps[i].index = i;
-        warps[i].timestamp -= minTimestamp;
+        warps[i].timestamp = bigInt(warps[i].timestamp).minus(minTimestamp).toString(10);
     }
 
     return warps;

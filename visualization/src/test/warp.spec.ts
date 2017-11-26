@@ -15,7 +15,7 @@ function createWarp(params: {key?: string,
                     accessType?: AccessType,
                     space?: AddressSpace,
                     type?: string,
-                    timestamp?: number,
+                    timestamp?: string,
                     location?: DebugLocation | null,
                     blockIdx?: Dim3,
                     accesses?: MemoryAccess[]}): Warp
@@ -29,9 +29,9 @@ function createWarp(params: {key?: string,
         accessType: params.accessType || AccessType.Read,
         space: params.space || AddressSpace.Global,
         type: params.type || '',
-        timestamp: params.timestamp || 0,
+        timestamp: params.timestamp || '0',
         location: params.location || null,
-        blockIdx: params.blockIdx || {x: 0, y: 0, z: 0},
+        blockIdx: params.blockIdx || { x: 0, y: 0, z: 0 },
         accesses: params.accesses || []
     };
 }
