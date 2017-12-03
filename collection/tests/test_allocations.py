@@ -10,7 +10,7 @@ def validate_allocations(allocations):
 
 
 @param_all_formats
-def test_global_allocation(profile, format):
+def test_allocation_global(profile, format):
     data = profile("""
     #include <cstdio>
     __global__ void kernel(int* p) {
@@ -40,7 +40,7 @@ def test_global_allocation(profile, format):
 
 
 @param_all_formats
-def test_shared_allocation(profile, format):
+def test_allocation_shared(profile, format):
     data = profile("""
     #include <cstdio>
     __global__ void kernel() {
@@ -64,7 +64,7 @@ def test_shared_allocation(profile, format):
     assert allocations[0]["address"] == data["stdout"].strip()
 
 
-def test_parameters_runtime_tracking_capture(profile):
+def test_allocation_runtime_tracking_capture(profile):
     code = """
     __global__ void kernel(int* p) {
         *p = 5;
@@ -94,7 +94,7 @@ def test_parameters_runtime_tracking_overwrite(profile):
     }
     int main() {
         int* dptr;
-        cudaMalloc((void**) &dptr, sizeof(int));
+        cudaMalloc((void**) &dptr, sizeof(int) * 137); // try to find unique size
         kernel<<<1, 1>>>(dptr);
         cudaFree(dptr);
         return 0;
@@ -110,7 +110,7 @@ def test_parameters_runtime_tracking_overwrite(profile):
     validate_allocations(allocations)
 
     for record in allocations:
-        if record["address"] == alloc["address"]:
+        if record["size"] == alloc["size"]:
             assert record["name"] == "dptr"
             return
 
