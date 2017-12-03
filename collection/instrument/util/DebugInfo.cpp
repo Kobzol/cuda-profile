@@ -8,7 +8,8 @@ DebugInfo::DebugInfo(std::string name, std::string filename, int line)
 
 }
 DebugInfo::DebugInfo(const llvm::DIVariable* debugVariable)
-        : name(debugVariable->getName()), filename(debugVariable->getFilename()), line(debugVariable->getLine()), valid(true)
+        : name(debugVariable->getName()), filename(debugVariable->getFilename()), line(debugVariable->getLine()),
+          valid(true)
 {
 
 }

@@ -28,7 +28,6 @@ def compile(root, lib, dir, code, debug):
 
     with open(os.path.join(dir, inputname), "w") as f:
         f.write(code)
-        f.write("\n")
 
     args = ["clang++"]
 
@@ -165,6 +164,10 @@ def kernel_file(kernel="kernel", index=0, format="json", compress=False):
 
 def run_file():
     return "run.json"
+
+
+def source_file():
+    return INPUT_FILENAME
 
 
 def param_all_formats(fn):

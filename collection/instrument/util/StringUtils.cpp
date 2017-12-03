@@ -11,6 +11,8 @@ std::string StringUtils::trimStart(std::string input, const std::string& trim)
 
 std::string StringUtils::getFullPath(const std::string& path)
 {
+    if (path.empty()) return "";
+
     char* fullPath = realpath(path.c_str(), nullptr);
     std::string resolved(fullPath);
     free(fullPath);

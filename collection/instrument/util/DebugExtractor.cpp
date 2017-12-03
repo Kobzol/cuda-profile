@@ -89,6 +89,16 @@ std::unique_ptr<DebugInfo> DebugExtractor::getGlobalVarDebugInfo(const GlobalVar
 
 std::unique_ptr<DebugInfo> DebugExtractor::getVarDebugInfo(const Value* value)
 {
+    if (auto* fn = dyn_cast<Function>(value))
+    {
+        auto di = fn->getSubprogram();
+        if (di)
+        {
+            return std::make_unique<DebugInfo>(di->getName().str(), di->getFilename().str(), di->getLine());
+        }
+        else return std::make_unique<DebugInfo>();
+    }
+
     if (const auto* global = dyn_cast<GlobalVariable>(value))
     {
         return this->getGlobalVarDebugInfo(global);

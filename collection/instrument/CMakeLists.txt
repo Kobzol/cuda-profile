@@ -16,6 +16,7 @@ set(SOURCE_FILES
         util/DebugExtractor.cpp
         util/FunctionUtils.cpp
         util/TypeMapper.cpp
+        util/FunctionContentLoader.cpp
 )
 
 add_library(instrument MODULE RegisterPass.cpp ${SOURCE_FILES})

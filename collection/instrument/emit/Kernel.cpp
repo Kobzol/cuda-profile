@@ -6,6 +6,7 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/DebugInfoMetadata.h>
 
 #include "MemoryAccess.h"
 #include "../util/DebugExtractor.h"
@@ -15,6 +16,7 @@
 #include "../util/FunctionUtils.h"
 #include "../util/StringUtils.h"
 #include "RuntimeEmitter.h"
+#include "../util/FunctionContentLoader.h"
 
 using namespace llvm;
 
@@ -122,7 +124,7 @@ void Kernel::instrumentLoad(LoadInst* load, int32_t debugIndex)
     handler.handleLoad(load, debugIndex);
 }
 
-void Kernel::emitKernelMetadata(llvm::Function* function, std::vector<DebugInfo> debugRecods, TypeMapper& mapper)
+void Kernel::emitKernelMetadata(Function* function, std::vector<DebugInfo> debugRecods, TypeMapper& mapper)
 {
     Demangler demangler;
     std::string name = demangler.demangle(function->getName().str());
@@ -136,7 +138,6 @@ void Kernel::emitKernelMetadata(llvm::Function* function, std::vector<DebugInfo>
                 {"line", picojson::value((double) info.getLine())}
         }));
     }
-
     std::vector<picojson::value> jsonTypes;
     for (auto& type : mapper.getTypes())
     {
@@ -144,13 +145,21 @@ void Kernel::emitKernelMetadata(llvm::Function* function, std::vector<DebugInfo>
     }
 
     std::string kernelName = name.substr(0, name.find('('));
+    DebugExtractor extractor;
+    auto info = extractor.getDebugInfo(function);
+    FunctionContentLoader loader;
 
     std::fstream metadataFile(kernelName + ".metadata.json", std::fstream::out);
     metadataFile << picojson::value(picojson::object {
             {"type", picojson::value("metadata")},
             {"kernel", picojson::value(kernelName)},
             {"locations", picojson::value(jsonRecords)},
-            {"typeMap", picojson::value(jsonTypes)}
+            {"typeMap", picojson::value(jsonTypes)},
+            {"source", picojson::value(picojson::object {
+                    {"file", picojson::value(info->isValid() ? StringUtils::getFullPath(info->getFilename()) : "")},
+                    {"line", picojson::value((double) (info->isValid() ? info->getLine() : 0))},
+                    {"content", picojson::value(info->isValid() ? loader.loadFunction(*info) : "")}
+            })}
     }).serialize(true);
 }
 
