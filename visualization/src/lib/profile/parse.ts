@@ -25,7 +25,8 @@ function parseMetadata(metadata: MetadataFormat): Metadata
 {
     return {
         typeMap: metadata.typeMap,
-        locations: metadata.locations
+        locations: metadata.locations,
+        source: metadata.source
     };
 }
 

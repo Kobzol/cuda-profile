@@ -14,15 +14,14 @@ import {WarpList} from './warp-list/warp-list';
 import {WarpAddressSelection} from '../../lib/trace/selection';
 import {Routes} from '../../lib/nav/routes';
 import {push} from 'react-router-redux';
-import {WarpTimeline} from './warp-timeline/warp-timeline';
 import {WarpDetail} from './warp-detail/warp-detail';
+import {WarpPanel} from './warp-panel/warp-panel';
 import {Button, Glyphicon} from 'react-bootstrap';
 import * as moment from 'moment';
 import {Action} from 'typescript-fsa';
 import * as _ from 'lodash';
 
 import './trace-visualisation.scss';
-import {WarpPanel} from './warp-panel/warp-panel';
 
 export const selectAllWarpAccesses = (warp: Warp) =>
 {
