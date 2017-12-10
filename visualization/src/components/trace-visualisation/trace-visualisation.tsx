@@ -22,6 +22,7 @@ import {Action} from 'typescript-fsa';
 import * as _ from 'lodash';
 
 import './trace-visualisation.scss';
+import {WarpPanel} from './warp-panel/warp-panel';
 
 export const selectAllWarpAccesses = (warp: Warp) =>
 {
@@ -151,7 +152,11 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         return (
             <div className='trace-content-wrapper'>
                 <div className='warp-panel'>
-                    {this.renderAccessTimeline(kernel, trace)}
+                    <WarpPanel
+                        kernel={kernel}
+                        trace={trace}
+                        selectWarps={this.props.selectWarps}
+                        selectedWarps={warps} />
                 </div>
                 <div className='trace-wrapper'>
                     <WarpList
@@ -170,16 +175,6 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                         onMemorySelect={this.setMemorySelection} />
                 </div>
             </div>
-        );
-    }
-    renderAccessTimeline = (kernel: Kernel, trace: Trace): JSX.Element =>
-    {
-        return (
-            <WarpTimeline
-                kernel={kernel}
-                trace={trace}
-                selectWarps={this.props.selectWarps}
-                selectedWarps={this.props.selectedWarps} />
         );
     }
 

@@ -24,7 +24,7 @@ export class WarpList extends PureComponent<Props>
     {
         return (
             <div className='warp-list'>
-                <h3>Warps</h3>
+                <h3>Selected warps</h3>
                 <div>
                     {this.props.warps.length === 0 && 'No warps selected'}
                     {this.props.warps.map(warp =>
