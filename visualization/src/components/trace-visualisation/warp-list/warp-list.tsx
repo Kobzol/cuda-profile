@@ -13,7 +13,7 @@ interface Props
     trace: Trace;
     warps: Warp[];
     selectRange: (range: WarpAddressSelection) => void;
-    memorySelection: AddressRange;
+    memorySelection: AddressRange[];
     deselect: (warp: Warp) => void;
     selectAllWarpAccesses: (warp: Warp) => void;
 }

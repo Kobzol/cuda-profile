@@ -4,6 +4,7 @@ import {MemoryAccess} from '../../../../lib/profile/memory-access';
 import {getAccessesAddressRange, checkIntersectionRange} from '../../../../lib/profile/address';
 import {AddressRange} from '../../../../lib/trace/selection';
 import {formatDim3} from '../../../../lib/util/format';
+import * as _ from 'lodash';
 
 interface Props
 {
@@ -13,7 +14,7 @@ interface Props
     height: number;
     warp: Warp;
     access: MemoryAccess;
-    memorySelection: AddressRange;
+    memorySelection: AddressRange[];
     onSelectChanged: (range: AddressRange | null) => void;
     selectionEnabled: boolean;
 }
@@ -92,7 +93,8 @@ export class Thread extends PureComponent<Props, State>
             return 'rgb(255, 0, 0)';
         }
         else if (this.props.memorySelection !== null &&
-            checkIntersectionRange(this.props.memorySelection, access.address, warp.size))
+            _.some(this.props.memorySelection, selection =>
+                checkIntersectionRange(selection, access.address, warp.size)))
         {
             return 'rgb(0, 255, 0)';
         }

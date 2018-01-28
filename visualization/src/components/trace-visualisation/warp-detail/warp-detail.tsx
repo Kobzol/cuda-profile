@@ -3,7 +3,7 @@ import {Trace} from '../../../lib/profile/trace';
 import {Warp} from '../../../lib/profile/warp';
 import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
 import {Tab, Tabs} from 'react-bootstrap';
-import {WarpConflictTable} from './warp-conflict-table/warp-conflict-table';
+import {MemoryConflictTable} from './memory-conflict-table/memory-conflict-table';
 import {BankConflictTable} from './bank-conflict-table/bank-conflict-table';
 
 interface Props
@@ -11,7 +11,7 @@ interface Props
     trace: Trace;
     warps: Warp[];
     rangeSelections: WarpAddressSelection[];
-    onMemorySelect: (selection: AddressRange) => void;
+    onMemorySelect: (selection: AddressRange[]) => void;
 }
 
 interface State
@@ -40,7 +40,7 @@ export class WarpDetail extends PureComponent<Props, State>
                       onSelect={this.handleSelect}
                       id='warp-detail'>
                     <Tab eventKey={0} title='Memory conflicts'>
-                        <WarpConflictTable
+                        <MemoryConflictTable
                             trace={this.props.trace}
                             warps={this.props.warps}
                             onMemorySelect={this.props.onMemorySelect} />

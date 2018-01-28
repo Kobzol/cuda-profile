@@ -10,19 +10,17 @@ interface Props
 {
     trace: Trace;
     warps: Warp[];
-    onMemorySelect: (selection: AddressRange) => void;
+    onMemorySelect: (selection: AddressRange[]) => void;
 }
 
-export class WarpConflictTable extends PureComponent<Props>
+export class MemoryConflictTable extends PureComponent<Props>
 {
     render()
     {
         const conflicts = this.calculateConflicts(this.props.warps);
         if (conflicts.length === 0)
         {
-            return (
-                <div>No conflicts detected in selected warps</div>
-            );
+            return <div>No memory conflicts detected in selected warps.</div>;
         }
 
         return (
@@ -86,6 +84,6 @@ export class WarpConflictTable extends PureComponent<Props>
 
     selectConflict = (conflict: WarpConflict | null) =>
     {
-        this.props.onMemorySelect(conflict === null ? null : conflict.address);
+        this.props.onMemorySelect(conflict === null ? [] : [conflict.address]);
     }
 }

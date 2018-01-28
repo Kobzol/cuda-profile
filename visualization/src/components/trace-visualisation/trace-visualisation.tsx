@@ -57,7 +57,7 @@ type Props = StateProps & DispatchProps;
 interface State
 {
     rangeSelections: WarpAddressSelection[];
-    memorySelection: AddressRange | null;
+    memorySelection: AddressRange[];
 }
 
 class TraceVisualisationComponent extends PureComponent<Props, State>
@@ -68,7 +68,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
 
         this.state = {
             rangeSelections: [],
-            memorySelection: null
+            memorySelection: []
         };
     }
 
@@ -175,7 +175,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         );
     }
 
-    setMemorySelection = (memorySelection: AddressRange) =>
+    setMemorySelection = (memorySelection: AddressRange[]) =>
     {
         this.setState({
             memorySelection

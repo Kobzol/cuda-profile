@@ -20,7 +20,7 @@ interface Props
 {
     trace: Trace;
     warp: Warp;
-    memorySelection: AddressRange;
+    memorySelection: AddressRange[];
     canvasDimensions: { width: number, height: number };
     selectRange: (range: WarpAddressSelection) => void;
     selectionEnabled: boolean;
