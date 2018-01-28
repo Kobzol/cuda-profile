@@ -13,7 +13,7 @@ interface Props
     selectTrace: (selection: TraceSelection) => void;
 }
 
-export class TraceTimeline extends PureComponent<Props>
+export class KernelTimeline extends PureComponent<Props>
 {
 
     render()
@@ -41,7 +41,7 @@ export class TraceTimeline extends PureComponent<Props>
             [this.makeId(this.props.selection.kernel, this.props.selection.trace)];
 
         return (
-            <Panel header={'Trace timeline'} bsStyle='info'>
+            <Panel header='Kernel timeline' bsStyle='info'>
                 <Timeline
                     options={options}
                     items={this.createTimelineItems(this.props.profile)}

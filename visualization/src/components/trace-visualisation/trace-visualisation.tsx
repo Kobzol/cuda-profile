@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 import {TraceFile} from '../../lib/file-load/file';
 import {selectWarps, selectTrace, deselectWarp} from '../../lib/trace/actions';
 import {GlobalState} from '../../lib/state/reducers';
-import {TraceTimeline} from './trace-timeline/trace-timeline';
+import {KernelTimeline} from './kernel-timeline/kernel-timeline';
 import {Profile} from '../../lib/profile/profile';
 import {AddressRange, TraceSelection} from '../../lib/trace/selection';
 import {Kernel} from '../../lib/profile/kernel';
@@ -107,12 +107,12 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         }
         return (
             <div>
-                {this.renderTraceTimeline()}
+                {this.renderKernelTimeline()}
                 {content}
             </div>
         );
     }
-    renderTraceTimeline = (): JSX.Element =>
+    renderKernelTimeline = (): JSX.Element =>
     {
         if (this.props.selectedKernel !== null)
         {
@@ -122,14 +122,17 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
             return (
                 <div className={style.kernelDetails}>
                     <div>
-                        <h3>Selected trace</h3>
-                        <div>{`${this.props.selectedKernel.name} from ${start} to ${end}`}</div>
+                        <h3>Selected kernel</h3>
+                        <div>
+                            <span className={style.kernelName}>{this.props.selectedKernel.name}</span>
+                            <span>{` from ${start} to ${end}`}</span>
+                        </div>
                     </div>
                     <Button
                         className={style.kernelDeselect}
                         onClick={this.deselectTrace}
                         bsStyle='primary'>
-                        <Glyphicon glyph='list' /> Select another trace
+                        <Glyphicon glyph='list' /> Select another kernel
                     </Button>
                 </div>
             );
@@ -137,7 +140,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
         else
         {
             return (
-                <TraceTimeline
+                <KernelTimeline
                     selectTrace={this.props.selectTrace}
                     profile={this.props.profile}
                     selection={this.props.traceSelection} />
@@ -148,14 +151,14 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
     {
         return (
             <div className={style.traceContentWrapper}>
-                <div>
+                <div className={style.warpPanelWrapper}>
                     <WarpPanel
                         kernel={kernel}
                         trace={trace}
                         selectWarps={this.props.selectWarps}
                         selectedWarps={warps} />
                 </div>
-                <div className={style.traceWrapper}>
+                <div className={style.warpListWrapper}>
                     <WarpList
                         trace={trace}
                         warps={warps}
@@ -165,6 +168,8 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                         memorySelection={this.state.memorySelection}
                         deselect={this.props.deselectWarp}
                         selectAllWarpAccesses={this.props.selectAllWarpAccesses} />
+                </div>
+                <div className={style.warpDetailWrapper}>
                     <WarpDetail
                         trace={trace}
                         warps={warps}

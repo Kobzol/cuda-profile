@@ -6,14 +6,20 @@
 .kernel-deselect {
   align-self: center;
 }
+.kernel-name {
+  font-weight: bold;
+}
 
+.warp-panel-wrapper, .warp-list-wrapper {
+  margin-right: 10px;
+  border-right: 1px solid #000000;
+}
 .trace-content-wrapper {
   display: flex;
 }
 
-.trace-wrapper {
-  display: flex;
-  min-height: 450px;
+.warp-detail-wrapper {
+  align-self: right;
 }
 
 .memory-block-wrapper {
