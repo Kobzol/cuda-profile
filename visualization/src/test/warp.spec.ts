@@ -158,23 +158,35 @@ test('Conflict in one warp is calculated correctly', () => {
 
     const conflicts = getConflicts([warp]);
     expect(conflicts.length).toEqual(4);
-    expect(conflicts[0].address).toEqual('0xAA05');
+    expect(conflicts[0].address).toEqual({
+        from: '0xAA05',
+        to: '0xAA06'
+    });
     expect(conflicts[0].accesses.length).toEqual(2);
     expect(conflicts[0].accesses).toContainEqual({ warp, access: warp.accesses[0] });
     expect(conflicts[0].accesses).toContainEqual({ warp, access: warp.accesses[2] });
 
-    expect(conflicts[1].address).toEqual('0xAA06');
+    expect(conflicts[1].address).toEqual({
+        from: '0xAA06',
+        to: '0xAA07'
+    });
     expect(conflicts[1].accesses.length).toEqual(2);
     expect(conflicts[1].accesses).toContainEqual({ warp, access: warp.accesses[0] });
     expect(conflicts[1].accesses).toContainEqual({ warp, access: warp.accesses[2] });
 
-    expect(conflicts[2].address).toEqual('0xAA07');
+    expect(conflicts[2].address).toEqual({
+        from: '0xAA07',
+        to: '0xAA08'
+    });
     expect(conflicts[2].accesses.length).toEqual(3);
     expect(conflicts[2].accesses).toContainEqual({ warp, access: warp.accesses[0] });
     expect(conflicts[2].accesses).toContainEqual({ warp, access: warp.accesses[1] });
     expect(conflicts[2].accesses).toContainEqual({ warp, access: warp.accesses[2] });
 
-    expect(conflicts[3].address).toEqual('0xAA08');
+    expect(conflicts[3].address).toEqual({
+        from: '0xAA08',
+        to: '0xAA09'
+    });
     expect(conflicts[3].accesses.length).toEqual(2);
     expect(conflicts[3].accesses).toContainEqual({ warp, access: warp.accesses[1] });
     expect(conflicts[3].accesses).toContainEqual({ warp, access: warp.accesses[2] });
