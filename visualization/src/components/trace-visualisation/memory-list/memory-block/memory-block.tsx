@@ -2,8 +2,7 @@ import * as React from 'react';
 import {PureComponent} from 'react';
 import {MemoryAllocation} from '../../../../lib/profile/memory-allocation';
 import {
-    addressToNum,
-    checkIntersection, getIntersection, getAddressRangeSize,
+    addressToNum, checkIntersection, getAddressRangeSize,
     getAllocationAddressRange, numToAddress, getSelectionRange
 } from '../../../../lib/profile/address';
 import {AddressRange, WarpAddressSelection} from '../../../../lib/trace/selection';
@@ -15,7 +14,7 @@ import * as d3 from 'd3';
 import {formatAddressSpace, formatByteSize} from '../../../../lib/util/format';
 import {Panel} from 'react-bootstrap';
 
-import './memory-block.scss';
+import style from './memory-block.scss';
 
 
 interface Props
@@ -153,7 +152,7 @@ export class MemoryBlock extends PureComponent<Props>
     render()
     {
         return (
-            <Panel className='memory-block' id='memory-block'
+            <Panel className={style.memoryBlock} id='memory-block'
                    header={this.createLabel(this.props.allocation)}
                    bsStyle='primary'>
                 <div className='block-wrapper' ref={(wrapper) => this.blockWrapper = wrapper}>

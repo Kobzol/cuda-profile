@@ -21,7 +21,7 @@ import * as moment from 'moment';
 import {Action} from 'typescript-fsa';
 import * as _ from 'lodash';
 
-import './trace-visualisation.scss';
+import style from './trace-visualisation.scss';
 
 export const selectAllWarpAccesses = (warp: Warp) =>
 {
@@ -106,7 +106,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
             );
         }
         return (
-            <div className='trace-visualisation'>
+            <div>
                 {this.renderTraceTimeline()}
                 {content}
             </div>
@@ -120,15 +120,13 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
             const end = moment(this.props.selectedTrace.end).format('HH:mm:ss.SSS');
 
             return (
-                <div className='kernel-details'>
+                <div className={style.kernelDetails}>
                     <div>
-                        <h3>
-                            Selected trace
-                        </h3>
+                        <h3>Selected trace</h3>
                         <div>{`${this.props.selectedKernel.name} from ${start} to ${end}`}</div>
                     </div>
                     <Button
-                        className='kernel-deselect'
+                        className={style.kernelDeselect}
                         onClick={this.deselectTrace}
                         bsStyle='primary'>
                         <Glyphicon glyph='list' /> Select another trace
@@ -149,15 +147,15 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
     renderTraceContent = (kernel: Kernel, trace: Trace, warps: Warp[]): JSX.Element =>
     {
         return (
-            <div className='trace-content-wrapper'>
-                <div className='warp-panel'>
+            <div className={style.traceContentWrapper}>
+                <div>
                     <WarpPanel
                         kernel={kernel}
                         trace={trace}
                         selectWarps={this.props.selectWarps}
                         selectedWarps={warps} />
                 </div>
-                <div className='trace-wrapper'>
+                <div className={style.traceWrapper}>
                     <WarpList
                         trace={trace}
                         warps={warps}

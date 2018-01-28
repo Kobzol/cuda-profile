@@ -1,7 +1,7 @@
 import React, {ChangeEvent, PureComponent} from 'react';
 import {Dim3} from '../../../../lib/profile/dim3';
 
-import './warp-filter.scss';
+import style from './warp-filter.scss';
 
 interface Props
 {
@@ -15,7 +15,7 @@ export class WarpFilter extends PureComponent<Props>
     render()
     {
         return (
-            <div className='warp-filter'>
+            <div className={style.warpFilter}>
                 <label>{this.props.label}:</label>
                 {this.renderDimension('z')}
                 {this.renderDimension('y')}
@@ -36,7 +36,7 @@ export class WarpFilter extends PureComponent<Props>
     renderDimension = (dim: string) =>
     {
         return (
-            <div className='dimension'>
+            <div className={style.dimension}>
                 <span>{dim}</span>
                 <input type='number' name={dim}
                        min='0' value={this.props.filter[dim] === null ? '' : this.props.filter[dim]}

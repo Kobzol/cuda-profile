@@ -8,7 +8,7 @@ import * as _ from 'lodash';
 import {SourceLocation} from '../../../lib/profile/metadata';
 import {Button, Glyphicon, Panel} from 'react-bootstrap';
 
-import './source-view.scss';
+import style from './source-view.scss';
 
 interface Props
 {
@@ -38,7 +38,7 @@ export class SourceView extends PureComponent<Props>
     render()
     {
         return (
-            <Panel header={this.renderHeader()} className='source-wrapper'>
+            <Panel header={this.renderHeader()} className={style.sourceWrapper}>
                 <AceEditor
                     mode='c_cpp'
                     theme='chrome'
@@ -52,7 +52,7 @@ export class SourceView extends PureComponent<Props>
     renderHeader = (): JSX.Element =>
     {
         return (
-            <div className='source-header'>
+            <div className={style.sourceHeader}>
                 <div>{this.props.file}</div>
                 <Button onClick={this.props.onClose} title='Close'>
                     <Glyphicon glyph='remove' />
@@ -65,8 +65,13 @@ export class SourceView extends PureComponent<Props>
     {
         this.ace = ace;
 
+        interface Event
+        {
+            getDocumentPosition(): { row: number };
+        }
+
         const lineMap = _.groupBy(this.props.warps, (warp: Warp) => warp.location.line);
-        this.ace.on('guttermousedown', (event: any) => {
+        this.ace.on('guttermousedown', (event: Event) => {
             const line = event.getDocumentPosition().row + 1;
             if (lineMap.hasOwnProperty(line))
             {
@@ -80,7 +85,7 @@ export class SourceView extends PureComponent<Props>
 
     setGutterDecorations = () =>
     {
-        const gutterClass = 'gutter-selected-line';
+        const gutterClass = style.gutterSelectedLine;
         this.props.warps.map(warp => warp.location.line).forEach(line => {
             this.ace.session.removeGutterDecoration(line - 1, gutterClass);
         });

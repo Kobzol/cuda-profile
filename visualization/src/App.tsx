@@ -9,7 +9,7 @@ import {history, persistor, store} from './lib/state/store';
 import {Routes} from './lib/nav/routes';
 import {PersistGate} from 'redux-persist/es/integration/react';
 
-import './App.scss';
+import style from './App.scss';
 
 export class App extends React.Component
 {
@@ -21,11 +21,11 @@ export class App extends React.Component
                     persistor={persistor}
                     loading={'Loading...'}>
                     <ConnectedRouter history={history}>
-                        <div className='app'>
-                            <ul className='nav nav-pills'>
+                        <div className={style.root}>
+                            <ul className={`${style.nav} nav nav-pills`}>
                                 <li><Link to={'/'}>Home</Link></li>
                             </ul>
-                            <div className='content'>
+                            <div className='asd'>
                                 <Route path={Routes.Root} exact component={TraceLoader} />
                                 <Route path={Routes.TraceVisualisation} component={TraceVisualisation} />
                             </div>

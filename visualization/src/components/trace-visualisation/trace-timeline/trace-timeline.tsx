@@ -6,8 +6,6 @@ import * as moment from 'moment';
 import {flatMap} from 'lodash';
 import {TraceSelection} from '../../../lib/trace/selection';
 
-import './trace-timeline.scss';
-
 interface Props
 {
     profile: Profile;
@@ -43,7 +41,7 @@ export class TraceTimeline extends PureComponent<Props>
             [this.makeId(this.props.selection.kernel, this.props.selection.trace)];
 
         return (
-            <Panel className='kernel' header={'Trace timeline'} bsStyle='info'>
+            <Panel header={'Trace timeline'} bsStyle='info'>
                 <Timeline
                     options={options}
                     items={this.createTimelineItems(this.props.profile)}

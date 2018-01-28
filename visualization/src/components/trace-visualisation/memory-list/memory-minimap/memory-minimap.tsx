@@ -2,9 +2,9 @@ import * as React from 'react';
 import {PureComponent} from 'react';
 import {MemoryAllocation} from '../../../../lib/profile/memory-allocation';
 import {AddressRange, WarpAddressSelection} from '../../../../lib/trace/selection';
-
-import './memory-minimap.scss';
 import {getAllocationAddressRange, getSelectionRange} from '../../../../lib/profile/address';
+
+import style from './memory-minimap.scss';
 
 
 interface Props
@@ -36,7 +36,7 @@ export class MemoryMinimap extends PureComponent<Props>
     {
         return (
             <canvas
-                className='memory-minimap'
+                className={style.memoryMinimap}
                 width={this.props.width}
                 height={this.props.height}
                 ref={canvas => this.canvasRef = canvas} />

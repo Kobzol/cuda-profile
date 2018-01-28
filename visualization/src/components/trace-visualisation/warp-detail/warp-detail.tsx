@@ -4,6 +4,7 @@ import {Warp} from '../../../lib/profile/warp';
 import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
 import {Tab, Tabs} from 'react-bootstrap';
 import {WarpConflictTable} from './warp-conflict-table/warp-conflict-table';
+import {BankConflictTable} from './bank-conflict-table/bank-conflict-table';
 
 interface Props
 {
@@ -38,13 +39,19 @@ export class WarpDetail extends PureComponent<Props, State>
                       animation={false}
                       onSelect={this.handleSelect}
                       id='warp-detail'>
-                    <Tab eventKey={0} title='Conflicts'>
+                    <Tab eventKey={0} title='Memory conflicts'>
                         <WarpConflictTable
                             trace={this.props.trace}
                             warps={this.props.warps}
                             onMemorySelect={this.props.onMemorySelect} />
                     </Tab>
-                    <Tab eventKey={1} title='Contiguity'>Contiguity</Tab>
+                    <Tab eventKey={1} title='Bank conflicts'>
+                        <BankConflictTable
+                            trace={this.props.trace}
+                            warps={this.props.warps}
+                            onMemorySelect={this.props.onMemorySelect} />
+                    </Tab>
+                    <Tab eventKey={2} title='Contiguity'>Contiguity</Tab>
                 </Tabs>
             </div>
         );
@@ -53,7 +60,7 @@ export class WarpDetail extends PureComponent<Props, State>
     handleSelect = (e: React.MouseEvent<{}>) =>
     {
         this.setState(() => ({
-            activeTab: e as {}
+            activeTab: e as {} as number
         }));
     }
 }

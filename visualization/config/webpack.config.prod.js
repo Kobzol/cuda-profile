@@ -179,7 +179,7 @@ module.exports = {
           // use the "style" loader inside the async code so CSS from them won't be
           // in the main CSS file.
           {
-            test: /\.(css|scss)$/,
+            test: /\.css$/,
             loader: ExtractTextPlugin.extract(
               Object.assign(
                 {
@@ -188,7 +188,7 @@ module.exports = {
                     {
                       loader: require.resolve('css-loader'),
                       options: {
-                        importLoaders: 2,
+                        importLoaders: 1,
                         minimize: true,
                         sourceMap: shouldUseSourceMap,
                       },
@@ -212,10 +212,7 @@ module.exports = {
                           }),
                         ],
                       },
-                    },
-                      {
-                          loader: require.resolve('sass-loader') // compiles Sass to CSS
-                      }
+                    }
                   ],
                 },
                 extractTextPluginOptions
@@ -223,6 +220,44 @@ module.exports = {
             ),
             // Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
           },
+            {
+                test: /\.scss$/,
+                use: [
+                    require.resolve('style-loader'),
+                    {
+                        loader: 'typings-for-css-modules-loader',
+                        options: {
+                            importLoaders: 2,
+                            modules: true,
+                            minimize: true,
+                            camelCase: true,
+                            namedExport: true,
+                            sourceMap: shouldUseSourceMap
+                        }
+                    },
+                    {
+                        loader: require.resolve('postcss-loader'),
+                        options: {
+                            // Necessary for external CSS imports to work
+                            // https://github.com/facebookincubator/create-react-app/issues/2677
+                            ident: 'postcss',
+                            plugins: () => [
+                                require('postcss-flexbugs-fixes'),
+                                autoprefixer({
+                                    browsers: [
+                                        '>1%',
+                                        'last 4 versions',
+                                        'Firefox ESR',
+                                        'not ie < 9', // React doesn't support IE8 anyway
+                                    ],
+                                    flexbox: 'no-2009',
+                                }),
+                            ],
+                        },
+                    },
+                    require.resolve('sass-loader')
+                ],
+            },
           // "file" loader makes sure assets end up in the `build` folder.
           // When you `import` an asset, you get its filename.
           // This loader don't uses a "test" so it will catch all modules
@@ -233,7 +268,7 @@ module.exports = {
             // it's runtime that would otherwise processed through "file" loader.
             // Also exclude `html` and `json` extensions so they get processed
             // by webpacks internal loaders.
-            exclude: [/\.js$/, /\.html$/, /\.json$/],
+            exclude: [/\.js$/, /\.html$/, /\.json$/, /\.scss$/],
             options: {
               name: 'static/media/[name].[hash:8].[ext]',
             },
@@ -336,7 +371,7 @@ module.exports = {
     // solution that requires the user to opt into importing specific locales.
     // https://github.com/jmblog/how-to-optimize-momentjs-with-webpack
     // You can remove this if you don't use Moment.js:
-    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/, /scss\.d\.ts$/),
   ],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.

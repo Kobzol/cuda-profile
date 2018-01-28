@@ -8,9 +8,9 @@ import {WarpOverview} from './warp-overview/warp-overview';
 import {Button, Panel} from 'react-bootstrap';
 import {SourceView} from '../source-view/source-view';
 import {SourceLocation} from '../../../lib/profile/metadata';
-
-import './warp-panel.scss';
 import * as _ from 'lodash';
+
+import style from './warp-panel.scss';
 
 interface Props
 {
@@ -44,7 +44,7 @@ export class WarpPanel extends PureComponent<Props, State>
     {
         const warps = this.getFilteredWarps();
         return (
-            <div className='warps-wrapper'>
+            <div className={style.warpsWrapper}>
                 {this.state.sourcePanelOpened &&
                 <SourceView content={this.props.kernel.metadata.source.content}
                             file={this.props.kernel.metadata.source.file}

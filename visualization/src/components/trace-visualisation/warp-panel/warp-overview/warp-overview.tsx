@@ -8,7 +8,7 @@ import {formatDim3} from '../../../../lib/util/format';
 import * as _ from 'lodash';
 import * as d3 from 'd3';
 
-import './warp-overview.scss';
+import style from './warp-overview.scss';
 
 interface Props
 {
@@ -116,7 +116,7 @@ export class WarpOverview extends PureComponent<Props, State>
         const increaseLimit = this.state.limit < this.props.warps.length;
 
         return (
-            <div ref={ref => this.blockWrapper = ref} className='warp-overview'>
+            <div ref={ref => this.blockWrapper = ref} className={style.warpOverview}>
                 <svg width={'100%'}>
                     <g className='blocks' />
                 </svg>

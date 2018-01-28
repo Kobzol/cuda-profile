@@ -7,17 +7,18 @@ $width: 510px;
   top: 0;
   z-index: 999;
   background-color: #FFFFFF;
-
-  .source-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .panel-body {
-    padding: 0;
-  }
 }
+
+.source-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-body {
+  padding: 0;
+}
+
 .gutter-selected-line {
   background-color: cornflowerblue;
 }

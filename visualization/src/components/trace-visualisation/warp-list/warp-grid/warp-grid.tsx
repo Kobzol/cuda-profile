@@ -3,7 +3,7 @@ import {MemoryAccess} from '../../../../lib/profile/memory-access';
 import {Trace} from '../../../../lib/profile/trace';
 import {createBlockSelector} from './grid-data';
 import {AddressRange} from '../../../../lib/trace/selection';
-import {getBlockId, getWarpId, Warp} from '../../../../lib/profile/warp';
+import {getWarpId, Warp} from '../../../../lib/profile/warp';
 import {Thread} from './thread';
 import {WarpAddressSelection} from '../../../../lib/trace/selection';
 import {getAccessesAddressRange} from '../../../../lib/profile/address';
@@ -11,10 +11,10 @@ import {Selector} from 'reselect';
 import {Dictionary} from 'lodash';
 import GridLayout from 'd3-v4-grid';
 import * as _ from 'lodash';
-
-import './warp-grid.scss';
 import {Button, Glyphicon, Panel} from 'react-bootstrap';
 import {formatAccessType, formatDim3} from '../../../../lib/util/format';
+
+import style from './warp-grid.scss';
 
 interface Props
 {
@@ -63,8 +63,8 @@ export class WarpGrid extends PureComponent<Props, State>
         const grid = this.renderGrid(layout.nodes(), nodeSize);
 
         return (
-            <Panel className='warp-grid' header={this.renderLabel(this.props.warp, this.props.trace)}>
-                <div className='content'>
+            <Panel className={style.warpGrid} header={this.renderLabel(this.props.warp, this.props.trace)}>
+                <div className={style.content}>
                     <svg width={width}
                          height={height}
                          viewBox={`0 0 ${width} ${height}`}>
@@ -72,10 +72,10 @@ export class WarpGrid extends PureComponent<Props, State>
                     </svg>
                     <Button onClick={this.selectAllWarpAccesses}
                             title='Select all accesses of this warp'
-                            className='action'>
+                            className={style.action}>
                         <Glyphicon glyph='hourglass' />
                     </Button>
-                    <Button onClick={this.deselect} title='Deselect' className='action'>
+                    <Button onClick={this.deselect} title='Deselect' className={style.action}>
                         <Glyphicon glyph='remove' />
                     </Button>
                 </div>

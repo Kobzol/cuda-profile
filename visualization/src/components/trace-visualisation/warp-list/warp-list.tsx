@@ -6,7 +6,7 @@ import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
 import {getAccessesAddressRange} from '../../../lib/profile/address';
 import * as _ from 'lodash';
 
-import './warp-list.scss';
+import style from './warp-list.scss';
 
 interface Props
 {
@@ -23,7 +23,7 @@ export class WarpList extends PureComponent<Props>
     render()
     {
         return (
-            <div className='warp-list'>
+            <div className={style.warpList}>
                 <h3>Selected warps</h3>
                 <div>
                     {this.props.warps.length === 0 && 'No warps selected'}

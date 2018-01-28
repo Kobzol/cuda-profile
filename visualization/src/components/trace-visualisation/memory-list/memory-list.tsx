@@ -4,6 +4,8 @@ import {MemoryBlock} from './memory-block/memory-block';
 import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
 import {MemoryMinimap} from './memory-minimap/memory-minimap';
 
+import style from './memory-list.scss';
+
 interface Props
 {
     allocations: MemoryAllocation[];
@@ -16,13 +18,13 @@ export class MemoryList extends PureComponent<Props>
     render()
     {
         return (
-            <div className='memory-block-wrapper'>
+            <div>
                 <h3>Memory allocations</h3>
                 <div>
                     {this.props.allocations.map(alloc =>
                         <div
                             key={alloc.address}
-                            className='block-row'>
+                            className={style.blockRow}>
                             <MemoryBlock
                                 allocation={alloc}
                                 rangeSelections={this.props.rangeSelections}
