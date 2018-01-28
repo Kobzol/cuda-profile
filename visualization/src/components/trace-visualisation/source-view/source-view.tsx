@@ -16,7 +16,7 @@ interface Props
     file: string;
     warps: Warp[];
     locationFilter: SourceLocation[];
-    setLocationFilter: (line: SourceLocation) => void;
+    setLocationFilter: (line: SourceLocation[]) => void;
     onClose: () => void;
 }
 
@@ -42,7 +42,7 @@ export class SourceView extends PureComponent<Props>
                 <AceEditor
                     mode='c_cpp'
                     theme='chrome'
-                    width='500px'
+                    width='490px'
                     readOnly={true}
                     onLoad={this.onLoad}
                     value={this.props.content} />
@@ -75,10 +75,17 @@ export class SourceView extends PureComponent<Props>
             const line = event.getDocumentPosition().row + 1;
             if (lineMap.hasOwnProperty(line))
             {
-                this.props.setLocationFilter({
+                const location = {
                     line,
                     file: this.props.file
-                });
+                };
+
+                const sameLoc = this.props.locationFilter.find(filter => _.isEqual(filter, location));
+                if (sameLoc !== undefined)
+                {
+                    this.props.setLocationFilter(_.without(this.props.locationFilter, sameLoc));
+                }
+                else this.props.setLocationFilter(this.props.locationFilter.concat([location]));
             }
         });
     }

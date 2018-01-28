@@ -124,11 +124,9 @@ export class WarpPanel extends PureComponent<Props, State>
         }));
     }
 
-    setLocationFilter = (location: SourceLocation) =>
+    setLocationFilter = (locationFilter: SourceLocation[]) =>
     {
-        this.setState(() => ({
-            locationFilter: [location]
-        }));
+        this.setState(() => ({ locationFilter }));
     }
     testLocationFilter = (warp: Warp): boolean =>
     {
