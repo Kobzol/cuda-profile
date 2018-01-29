@@ -10,7 +10,7 @@ import {zoom} from 'd3-zoom';
 import GridLayout from 'd3-v4-grid';
 import {select} from 'd3-selection';
 import {range} from 'd3-array';
-import d3 from 'd3';
+import * as d3 from 'd3';
 import {formatAddressSpace, formatByteSize} from '../../../../lib/util/format';
 import {Panel} from 'react-bootstrap';
 
@@ -21,7 +21,7 @@ interface Props
 {
     allocation: MemoryAllocation;
     rangeSelections: WarpAddressSelection[];
-    onMemorySelect: (memorySelection: AddressRange) => void;
+    onMemorySelect: (memorySelection: AddressRange[]) => void;
 }
 
 const selectedBlock = 'rgb(220, 0, 0)';
@@ -115,10 +115,10 @@ export class MemoryBlock extends PureComponent<Props>
             .on('mouseenter', (data: {index: number}) => {
                 const blockFrom = start.add(data.index * blockSize);
                 const blockTo = blockFrom.add(blockSize);
-                this.props.onMemorySelect({
+                this.props.onMemorySelect([{
                     from: numToAddress(blockFrom),
                     to: numToAddress(blockTo)
-                });
+                }]);
             })
             .on('mouseleave', () => {
                 this.props.onMemorySelect(null);

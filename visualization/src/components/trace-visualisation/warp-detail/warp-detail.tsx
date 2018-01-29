@@ -7,6 +7,7 @@ import {MemoryConflictTable} from './memory-conflict-table/memory-conflict-table
 import {BankConflictTable} from './bank-conflict-table/bank-conflict-table';
 
 import style from './warp-detail.scss';
+import {MemoryList} from '../memory-list/memory-list';
 
 interface Props
 {
@@ -52,7 +53,12 @@ export class WarpDetail extends PureComponent<Props, State>
                             warps={this.props.warps}
                             onMemorySelect={this.props.onMemorySelect} />
                     </Tab>
-                    <Tab eventKey={2} title='Contiguity'>Contiguity</Tab>
+                    <Tab eventKey={2} title='Memory map'>
+                        <MemoryList
+                            allocations={this.props.trace.allocations}
+                            rangeSelections={this.props.rangeSelections}
+                            onMemorySelect={this.props.onMemorySelect} />
+                    </Tab>
                 </Tabs>
             </Panel>
         );

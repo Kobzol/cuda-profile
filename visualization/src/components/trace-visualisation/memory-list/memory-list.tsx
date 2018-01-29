@@ -10,7 +10,7 @@ interface Props
 {
     allocations: MemoryAllocation[];
     rangeSelections: WarpAddressSelection[];
-    onMemorySelect: (memorySelection: AddressRange) => void;
+    onMemorySelect: (memorySelection: AddressRange[]) => void;
 }
 
 export class MemoryList extends PureComponent<Props>
