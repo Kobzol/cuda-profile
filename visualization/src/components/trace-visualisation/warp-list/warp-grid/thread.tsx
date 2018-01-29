@@ -4,7 +4,7 @@ import {MemoryAccess} from '../../../../lib/profile/memory-access';
 import {getAccessesAddressRange, checkIntersectionRange} from '../../../../lib/profile/address';
 import {AddressRange} from '../../../../lib/trace/selection';
 import {formatDim3} from '../../../../lib/util/format';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 interface Props
 {

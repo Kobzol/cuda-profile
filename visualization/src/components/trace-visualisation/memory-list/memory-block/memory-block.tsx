@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import {PureComponent} from 'react';
 import {MemoryAllocation} from '../../../../lib/profile/memory-allocation';
 import {
@@ -10,7 +10,7 @@ import {zoom} from 'd3-zoom';
 import GridLayout from 'd3-v4-grid';
 import {select} from 'd3-selection';
 import {range} from 'd3-array';
-import * as d3 from 'd3';
+import d3 from 'd3';
 import {formatAddressSpace, formatByteSize} from '../../../../lib/util/format';
 import {Panel} from 'react-bootstrap';
 

@@ -4,7 +4,7 @@ import Timeline from 'react-visjs-timeline';
 import {Kernel} from '../../../lib/profile/kernel';
 import {Trace} from '../../../lib/profile/trace';
 import {AccessType, Warp} from '../../../lib/profile/warp';
-import * as bigInt from 'big-integer';
+import bigInt from 'big-integer';
 
 interface Props
 {

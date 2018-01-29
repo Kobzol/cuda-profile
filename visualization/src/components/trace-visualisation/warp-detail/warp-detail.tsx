@@ -2,9 +2,11 @@ import React, {PureComponent} from 'react';
 import {Trace} from '../../../lib/profile/trace';
 import {Warp} from '../../../lib/profile/warp';
 import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
-import {Tab, Tabs} from 'react-bootstrap';
+import {Panel, Tab, Tabs} from 'react-bootstrap';
 import {MemoryConflictTable} from './memory-conflict-table/memory-conflict-table';
 import {BankConflictTable} from './bank-conflict-table/bank-conflict-table';
+
+import style from './warp-detail.scss';
 
 interface Props
 {
@@ -33,8 +35,7 @@ export class WarpDetail extends PureComponent<Props, State>
     render()
     {
         return (
-            <div>
-                <h3>Detail</h3>
+            <Panel header='Detail'  bsStyle='primary'>
                 <Tabs activeKey={this.state.activeTab}
                       animation={false}
                       onSelect={this.handleSelect}
@@ -53,7 +54,7 @@ export class WarpDetail extends PureComponent<Props, State>
                     </Tab>
                     <Tab eventKey={2} title='Contiguity'>Contiguity</Tab>
                 </Tabs>
-            </div>
+            </Panel>
         );
     }
 

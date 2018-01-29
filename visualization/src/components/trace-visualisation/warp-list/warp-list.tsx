@@ -4,9 +4,10 @@ import {Warp} from '../../../lib/profile/warp';
 import {WarpGrid} from './warp-grid/warp-grid';
 import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
 import {getAccessesAddressRange} from '../../../lib/profile/address';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import style from './warp-list.scss';
+import {ListGroup, Panel} from 'react-bootstrap';
 
 interface Props
 {
@@ -23,13 +24,13 @@ export class WarpList extends PureComponent<Props>
     render()
     {
         return (
-            <div className={style.warpList}>
-                <h3>Selected warps</h3>
-                <div>
+            <Panel header='Selected warps' className={style.warpList} bsStyle='primary'>
+                <ListGroup>
                     {this.props.warps.length === 0 && 'No warps selected'}
-                    {this.props.warps.map(warp =>
+                    {this.props.warps.map((warp, index) =>
                         <WarpGrid
                             key={warp.key}
+                            index={index}
                             trace={this.props.trace}
                             warp={warp}
                             canvasDimensions={{width: 260, height: 60}}
@@ -39,8 +40,8 @@ export class WarpList extends PureComponent<Props>
                             deselect={this.props.deselect}
                             selectAllWarpAccesses={this.props.selectAllWarpAccesses} />
                     )}
-                </div>
-            </div>
+                </ListGroup>
+            </Panel>
         );
     }
 

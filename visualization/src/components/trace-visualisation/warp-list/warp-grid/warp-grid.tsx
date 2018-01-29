@@ -3,16 +3,17 @@ import {MemoryAccess} from '../../../../lib/profile/memory-access';
 import {Trace} from '../../../../lib/profile/trace';
 import {createBlockSelector} from './grid-data';
 import {AddressRange} from '../../../../lib/trace/selection';
-import {getWarpId, Warp} from '../../../../lib/profile/warp';
+import {getWarpId, Warp, AccessType} from '../../../../lib/profile/warp';
 import {Thread} from './thread';
 import {WarpAddressSelection} from '../../../../lib/trace/selection';
 import {getAccessesAddressRange} from '../../../../lib/profile/address';
 import {Selector} from 'reselect';
 import {Dictionary} from 'lodash';
 import GridLayout from 'd3-v4-grid';
-import * as _ from 'lodash';
-import {Button, Glyphicon, Panel} from 'react-bootstrap';
-import {formatAccessType, formatDim3} from '../../../../lib/util/format';
+import _ from 'lodash';
+import {Badge, Button, ButtonGroup, Glyphicon, Label, ListGroupItem, Well} from 'react-bootstrap';
+import {formatAccessType, formatAddressSpace, formatDim3} from '../../../../lib/util/format';
+import classNames from 'classnames';
 
 import style from './warp-grid.scss';
 
@@ -20,6 +21,7 @@ interface Props
 {
     trace: Trace;
     warp: Warp;
+    index: number;
     memorySelection: AddressRange[];
     canvasDimensions: { width: number, height: number };
     selectRange: (range: WarpAddressSelection) => void;
@@ -61,33 +63,61 @@ export class WarpGrid extends PureComponent<Props, State>
         };
 
         const grid = this.renderGrid(layout.nodes(), nodeSize);
-
         return (
-            <Panel className={style.warpGrid} header={this.renderLabel(this.props.warp, this.props.trace)}>
+            <ListGroupItem header={this.renderLabel(this.props.warp, this.props.trace)}>
                 <div className={style.content}>
                     <svg width={width}
                          height={height}
                          viewBox={`0 0 ${width} ${height}`}>
                         <g>{grid}</g>
                     </svg>
-                    <Button onClick={this.selectAllWarpAccesses}
-                            title='Select all accesses of this warp'
-                            className={style.action}>
-                        <Glyphicon glyph='hourglass' />
-                    </Button>
-                    <Button onClick={this.deselect} title='Deselect' className={style.action}>
-                        <Glyphicon glyph='remove' />
-                    </Button>
+                    <ButtonGroup className={style.controls}>
+                        <Button onClick={this.selectAllWarpAccesses}
+                                bsSize='small'
+                                title='Select all accesses of this warp'
+                                className={style.action}>
+                            <Glyphicon glyph='hourglass' />
+                        </Button>
+                        <Button onClick={this.deselect}
+                                bsSize='small'
+                                title='Deselect'
+                                className={style.action}>
+                            <Glyphicon glyph='remove' />
+                        </Button>
+                    </ButtonGroup>
                 </div>
-            </Panel>
+            </ListGroupItem>
         );
     }
 
-    renderLabel = (warp: Warp, trace: Trace): string =>
+    renderLabel = (warp: Warp, trace: Trace): JSX.Element =>
     {
-        return `Warp id ${getWarpId(warp.accesses[0].threadIdx, trace.warpSize, trace.blockDimension)},
-                block ${formatDim3(warp.blockIdx)}, ${warp.size} bytes ${formatAccessType(warp.accessType)}, at
-                ${warp.timestamp}`;
+        const title = `Warp id ${getWarpId(warp.accesses[0].threadIdx, trace.warpSize, trace.blockDimension)}, ` +
+        `block ${formatDim3(warp.blockIdx)}, ${warp.size} bytes ${formatAccessType(warp.accessType)}, at ` +
+        `${warp.timestamp}`;
+
+        return (
+            <div title={title} className={style.warpTitle}>
+                <Label className={style.badge} bsStyle='primary'>
+                    Warp #{this.props.index}
+                </Label>
+                <Badge className={classNames(style.badge, style.badgeBlock)}>
+                    {formatDim3(warp.blockIdx)}
+                    </Badge>
+                <Badge className={classNames(style.badge, {
+                    [style.badgeRead]: warp.accessType === AccessType.Read,
+                    [style.badgeWrite]: warp.accessType === AccessType.Write
+                })}>
+                    {formatAccessType(warp.accessType)}
+                    </Badge>
+                <Badge className={classNames(style.badge, style.badgeSize)}>
+                    {warp.size} b
+                </Badge>
+                <Badge className={style.badge}>
+                    {formatAddressSpace(warp.space)} memory
+                </Badge>
+            </div>
+        );
     }
     renderGrid = (nodes: Array<{x: number, y: number}>,
                   nodeSize: {width: number, height: number}): JSX.Element[] =>

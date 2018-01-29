@@ -1,4 +1,9 @@
 .warps-wrapper {
   position: relative;
-  width: 300px;
+}
+.panel {
+  :global(.panel-heading):hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
 }

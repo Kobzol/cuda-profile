@@ -5,7 +5,7 @@ import GridLayout from 'd3-v4-grid';
 import {range} from 'd3-array';
 import {select} from 'd3-selection';
 import {formatDim3} from '../../../../lib/util/format';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import * as d3 from 'd3';
 
 import style from './warp-overview.scss';
@@ -114,13 +114,13 @@ export class WarpOverview extends PureComponent<Props, State>
     render()
     {
         const increaseLimit = this.state.limit < this.props.warps.length;
-
         return (
             <div ref={ref => this.blockWrapper = ref} className={style.warpOverview}>
+                {this.props.warps.length === 0 ? 'No warps match the active filters' :
                 <svg width={'100%'}>
                     <g className='blocks' />
-                </svg>
-                {increaseLimit && <Button onClick={this.increaseLimit}>Load more</Button>}
+                </svg>}
+                {increaseLimit && <Button onClick={this.increaseLimit} bsStyle='primary'>Show more warps</Button>}
             </div>
         );
     }

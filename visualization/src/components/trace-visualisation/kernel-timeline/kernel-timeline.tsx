@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 import {Panel} from 'react-bootstrap';
 import Timeline from 'react-visjs-timeline';
 import {Profile} from '../../../lib/profile/profile';
-import * as moment from 'moment';
+import moment from 'moment';
 import {flatMap} from 'lodash';
 import {TraceSelection} from '../../../lib/trace/selection';
 
@@ -41,13 +41,12 @@ export class KernelTimeline extends PureComponent<Props>
             [this.makeId(this.props.selection.kernel, this.props.selection.trace)];
 
         return (
-            <Panel header='Kernel timeline' bsStyle='info'>
+            <Panel header='Select kernel to examine' bsStyle='primary'>
                 <Timeline
                     options={options}
                     items={this.createTimelineItems(this.props.profile)}
                     selectHandler={this.handleTraceSelect}
-                    selection={selection}
-                />
+                    selection={selection} />
             </Panel>
         );
     }

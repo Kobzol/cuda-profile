@@ -2,11 +2,11 @@ import React, {PureComponent} from 'react';
 import {AddressSpace, Warp} from '../../../../lib/profile/warp';
 import {Trace} from '../../../../lib/profile/trace';
 import {AddressRange} from '../../../../lib/trace/selection';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import {MemoryAccess} from '../../../../lib/profile/memory-access';
 import {addressToNum, getAccessAddressRange} from '../../../../lib/profile/address';
 import {formatDim3} from '../../../../lib/util/format';
-import {Table} from 'react-bootstrap';
+import {Alert, Badge, Glyphicon, Table} from 'react-bootstrap';
 import {createSelector, Selector} from 'reselect';
 import classNames from 'classnames';
 
@@ -41,18 +41,20 @@ export class BankConflictTable extends PureComponent<Props, State>
 
     render()
     {
-        if (this.getSharedWarps(this.props.warps).length === 0)
+        const sharedWarps = this.getSharedWarps(this.props.warps);
+        if (sharedWarps.length === 0)
         {
             return <div>No accesses to shared memory in selected warps.</div>;
         }
 
         const accessMap = this.state.getAccessMap(this.props.warps);
         return (
-            <Table striped bordered condensed hover>
-                <thead>
+            <div>
+                <Table striped bordered condensed hover>
+                    <thead>
                     <tr>
                         {Object.keys(accessMap).map(bank => {
-                            const conflict = accessMap[bank].length > 1;
+                            const conflict = (accessMap[bank] || []).length > 1;
                             const title = `Bank #${bank} ${conflict ? '(conflict)' : ''}`;
 
                             return (
@@ -68,9 +70,15 @@ export class BankConflictTable extends PureComponent<Props, State>
                             );
                         })}
                     </tr>
-                </thead>
-                {this.renderRows(accessMap)}
-            </Table>
+                    </thead>
+                    {this.renderRows(accessMap)}
+                </Table>
+                {sharedWarps.length > 1 &&
+                <Alert bsStyle='warning'>
+                    <Glyphicon glyph='alert' /> More than one warp with shared memory access selected,
+                    bank conflicts happen only within the context of a single warp.
+                </Alert>}
+            </div>
         );
     }
     renderRows = (accessMap: AccessMap): JSX.Element =>
@@ -89,7 +97,8 @@ export class BankConflictTable extends PureComponent<Props, State>
                     {columns.map((col, i) =>
                         <td onMouseEnter={() => this.selectBank(parseInt(validColumns[i], 10))}
                             onMouseLeave={() => this.selectBank(null)}
-                            key={i}>
+                            key={i}
+                            className={style.access}>
                             {col !== null && this.renderAccess(col.warp, col.access)}
                         </td>
                     )}
@@ -118,9 +127,9 @@ export class BankConflictTable extends PureComponent<Props, State>
     renderAccess = (warp: Warp, access: MemoryAccess): JSX.Element =>
     {
         return (
-            <div key={access.id}
-                 title={`${formatDim3(warp.blockIdx)}.${formatDim3(access.threadIdx)} at ${access.address}`}
-                 className={classNames(style.access, style.conflicted)} />
+            <Glyphicon key={access.id}
+                       glyph='alert'
+                       title={`${formatDim3(warp.blockIdx)}.${formatDim3(access.threadIdx)} at ${access.address}`} />
         );
     }
 

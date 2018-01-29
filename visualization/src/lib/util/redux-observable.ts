@@ -1,6 +1,6 @@
 import {ActionsObservable as ObservableOriginal} from 'redux-observable';
 import {Action, ActionCreator, isType} from 'typescript-fsa';
-import * as Redux from 'redux';
+import Redux from 'redux';
 import 'rxjs/add/operator/filter';
 
 declare module 'redux-observable' {

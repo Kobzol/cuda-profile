@@ -2,9 +2,9 @@ import {Dim3} from './dim3';
 import {InvalidWarpData} from './errors';
 import {MemoryAccess} from './memory-access';
 import {DebugLocation} from './metadata';
-import {addressAddStr, addressToNum, numToAddress} from './address';
+import {addressAddStr} from './address';
 import {AddressRange} from '../trace/selection';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 export enum AccessType
 {

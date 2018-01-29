@@ -16,10 +16,11 @@ import {Routes} from '../../lib/nav/routes';
 import {push} from 'react-router-redux';
 import {WarpDetail} from './warp-detail/warp-detail';
 import {WarpPanel} from './warp-panel/warp-panel';
-import {Button, Glyphicon} from 'react-bootstrap';
-import * as moment from 'moment';
+import {Button, Glyphicon, Panel} from 'react-bootstrap';
+import moment from 'moment';
 import {Action} from 'typescript-fsa';
-import * as _ from 'lodash';
+import _ from 'lodash';
+import {withRouter} from 'react-router';
 
 import style from './trace-visualisation.scss';
 
@@ -45,11 +46,11 @@ interface StateProps
 }
 interface DispatchProps
 {
-    selectTrace: (selection: TraceSelection) => {};
-    selectWarps: (warps: Warp[]) => {};
-    deselectWarp: (warp: Warp) => {};
-    goToPage: (page: string) => {};
-    selectAllWarpAccesses: (warp: Warp) => {};
+    selectTrace: (selection: TraceSelection) => void;
+    selectWarps: (warps: Warp[]) => void;
+    deselectWarp: (warp: Warp) => void;
+    goToPage: (page: string) => void;
+    selectAllWarpAccesses: (warp: Warp) => void;
 }
 
 type Props = StateProps & DispatchProps;
@@ -120,13 +121,10 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
             const end = moment(this.props.selectedTrace.end).format('HH:mm:ss.SSS');
 
             return (
-                <div className={style.kernelDetails}>
+                <Panel header='Selected kernel' bsStyle='primary'>
                     <div>
-                        <h3>Selected kernel</h3>
-                        <div>
-                            <span className={style.kernelName}>{this.props.selectedKernel.name}</span>
-                            <span>{` from ${start} to ${end}`}</span>
-                        </div>
+                        <span className={style.kernelName}>{this.props.selectedKernel.name}</span>
+                        <span>{` from ${start} to ${end}`}</span>
                     </div>
                     <Button
                         className={style.kernelDeselect}
@@ -134,7 +132,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                         bsStyle='primary'>
                         <Glyphicon glyph='list' /> Select another kernel
                     </Button>
-                </div>
+                </Panel>
             );
         }
         else
@@ -193,7 +191,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
     }
 }
 
-export const TraceVisualisation = connect<StateProps, DispatchProps, {}>((state: GlobalState) => ({
+export const TraceVisualisation = withRouter(connect<StateProps, DispatchProps>((state: GlobalState) => ({
     files: state.fileLoader.files,
     profile: state.profile.profile,
     selectedKernel: selectedKernel(state),
@@ -206,4 +204,4 @@ export const TraceVisualisation = connect<StateProps, DispatchProps, {}>((state:
     deselectWarp: deselectWarp,
     selectAllWarpAccesses: selectAllWarpAccesses,
     goToPage: push
-})(TraceVisualisationComponent);
+})(TraceVisualisationComponent));

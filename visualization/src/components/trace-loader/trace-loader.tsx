@@ -1,11 +1,15 @@
 import React, {ChangeEvent, DragEvent, PureComponent} from 'react';
 import {connect} from 'react-redux';
 import {loadFile} from '../../lib/file-load/actions';
-import {TraceFile} from '../../lib/file-load/file';
+import {FileType, TraceFile} from '../../lib/file-load/file';
 import {loadingFiles, validTraceFiles} from '../../lib/file-load/reducer';
 import {GlobalState} from '../../lib/state/reducers';
-import {Button, Glyphicon} from 'react-bootstrap';
+import {Button, Glyphicon, Label, ListGroup, ListGroupItem, Panel, ProgressBar} from 'react-bootstrap';
 import {buildProfile} from '../../lib/profile/actions';
+import {Errors} from '../../lib/state/errors';
+import {withRouter} from 'react-router';
+
+import style from './trace-loader.scss';
 
 interface StateProps
 {
@@ -17,8 +21,8 @@ interface StateProps
 
 interface DispatchProps
 {
-    loadFile: (file: File) => {};
-    buildProfile: (files: TraceFile[]) => {};
+    loadFile: (file: File) => void;
+    buildProfile: (files: TraceFile[]) => void;
 }
 
 class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
@@ -27,17 +31,22 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
     {
         return (
             <div>
-                <input type='file' multiple={true} onChange={this.handleTraceChange} onDrop={this.handleTraceDrop} />
-                <ul>
-                    {this.props.files.map(this.renderFile)}
-                </ul>
-                <Button
-                    disabled={!this.canBuildProfile()}
-                    onClick={this.buildProfile}
-                    bsStyle='primary'>
-                    <Glyphicon glyph='flash' /> Load trace
-                </Button>
-                {this.props.buildError && <div className='error'>{this.props.buildError}</div>}
+                <Panel header='Select recorded trace files' bsStyle='primary'>
+                    <input className={style.fileInput}
+                           type='file' multiple
+                           onChange={this.handleTraceChange}
+                           onDrop={this.handleTraceDrop} />
+                    <ListGroup>
+                        {this.props.files.map(this.renderFile)}
+                    </ListGroup>
+                    <Button
+                        disabled={!this.canBuildProfile()}
+                        onClick={this.buildProfile}
+                        bsStyle='primary'>
+                        <Glyphicon glyph='flash' /> Show trace
+                    </Button>
+                    {this.props.buildError && <div className='error'>{this.props.buildError}</div>}
+                </Panel>
             </div>
         );
     }
@@ -45,9 +54,36 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
     renderFile = (file: TraceFile): JSX.Element =>
     {
         return (
-            <li key={file.name}>
-                <span>{file.name}, loading: {file.loading ? 'true' : 'false'}, error: {file.error}</span>
-            </li>
+            <ListGroupItem key={file.name} className={style.file}>
+                <span className={style.fileLabel}>{this.renderFileLabel(file)}</span>
+                <span className={style.fileName}>{file.name}</span>
+            </ListGroupItem>
+        );
+    }
+    renderFileLabel = (file: TraceFile): JSX.Element =>
+    {
+        if (file.loading) return this.renderFileProgress();
+        if (file.error === Errors.None) return this.renderFileSuccess(file);
+        return this.renderFileError(file);
+    }
+    renderFileProgress = (): JSX.Element =>
+    {
+        return <ProgressBar striped active now={100} className={style.fileProgress} />;
+    }
+    renderFileError = (file: TraceFile): JSX.Element =>
+    {
+        return (
+            <Label bsStyle='danger' className={style.label}>
+                {this.formatError(file.error)}
+            </Label>
+        );
+    }
+    renderFileSuccess = (file: TraceFile): JSX.Element =>
+    {
+        return (
+            <Label bsStyle='success' className={style.label}>
+                Loaded ({this.formatFileType(file.type)})
+            </Label>
         );
     }
 
@@ -75,9 +111,29 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
     {
         this.props.buildProfile(this.props.validTraceFiles);
     }
+
+    formatError = (error: number): string =>
+    {
+        switch (error)
+        {
+            case Errors.InvalidFileContent: return 'Invalid file content';
+            case Errors.InvalidFileFormat: return 'Invalid file format';
+            default: return 'Unknown error';
+        }
+    }
+    formatFileType = (type: FileType): string =>
+    {
+        switch (type)
+        {
+            case FileType.Metadata: return 'metadata file';
+            case FileType.Run: return 'run file';
+            case FileType.Trace: return 'trace file';
+            default: return 'unknown file';
+        }
+    }
 }
 
-export const TraceLoader = connect<StateProps, DispatchProps, {}>((state: GlobalState) => ({
+export const TraceLoader = withRouter(connect<StateProps, DispatchProps>((state: GlobalState) => ({
     files: state.fileLoader.files,
     buildError: state.profile.buildError,
     validTraceFiles: validTraceFiles(state),
@@ -85,4 +141,4 @@ export const TraceLoader = connect<StateProps, DispatchProps, {}>((state: Global
 }), ({
     loadFile: loadFile.started,
     buildProfile: buildProfile.started
-}))(TraceLoaderComponent);
+}))(TraceLoaderComponent));

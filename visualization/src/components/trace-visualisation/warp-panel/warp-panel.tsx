@@ -5,10 +5,10 @@ import {Warp} from '../../../lib/profile/warp';
 import {WarpFilter} from './warp-filter/warp-filter';
 import {Dim3} from '../../../lib/profile/dim3';
 import {WarpOverview} from './warp-overview/warp-overview';
-import {Button, Panel} from 'react-bootstrap';
+import {Button, ListGroup, ListGroupItem, Panel, PanelGroup} from 'react-bootstrap';
 import {SourceView} from '../source-view/source-view';
 import {SourceLocation} from '../../../lib/profile/metadata';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import style from './warp-panel.scss';
 
@@ -25,6 +25,7 @@ interface State
     blockFilter: Dim3;
     locationFilter: SourceLocation[];
     sourcePanelOpened: boolean;
+    activePanels: number[];
 }
 
 export class WarpPanel extends PureComponent<Props, State>
@@ -36,7 +37,8 @@ export class WarpPanel extends PureComponent<Props, State>
         this.state = {
             blockFilter: { x: null, y: null, z: null },
             locationFilter: [],
-            sourcePanelOpened: false
+            sourcePanelOpened: false,
+            activePanels: []
         };
     }
 
@@ -44,7 +46,7 @@ export class WarpPanel extends PureComponent<Props, State>
     {
         const warps = this.getFilteredWarps();
         return (
-            <div className={style.warpsWrapper}>
+            <Panel header='Warps' className={style.warpsWrapper} bsStyle='primary'>
                 {this.state.sourcePanelOpened &&
                 <SourceView content={this.props.kernel.metadata.source.content}
                             file={this.props.kernel.metadata.source.file}
@@ -53,36 +55,54 @@ export class WarpPanel extends PureComponent<Props, State>
                             setLocationFilter={this.setLocationFilter}
                             onClose={() => this.changeSourcePanelVisibility(false)} />
                 }
-                <h3>Warps</h3>
-                {this.isFilterActive() ? this.renderFilter(warps) :
-                    `${this.props.trace.warps.length} total`}
-                <WarpFilter
-                    label='Block'
-                    filter={this.state.blockFilter}
-                    onFilterChange={this.changeBlockFilter} />
-                <Button onClick={() => this.changeSourcePanelVisibility(true)}>Filter by source code</Button>
-                <WarpOverview
-                    warps={warps}
-                    selectedWarps={this.props.selectedWarps}
-                    onWarpSelect={this.props.selectWarps} />
-            </div>
+                <PanelGroup>
+                    <Panel collapsible header='Active filters' className={style.panel}>
+                            {this.isFilterActive() ? this.renderFilter(warps) :
+                                `No filters (${this.props.trace.warps.length} total warps)`}
+                    </Panel>
+                    <Panel collapsible header='Filter by block index' className={style.panel}>
+                        <WarpFilter
+                            filter={this.state.blockFilter}
+                            onFilterChange={this.changeBlockFilter} />
+                    </Panel>
+                    <Panel collapsible={false}
+                           onClick={() => this.changeSourcePanelVisibility(!this.state.sourcePanelOpened)}
+                           header={<h4>Filter by source code</h4>}
+                           className={style.panel} />
+                </PanelGroup>
+                <div>
+                    <h5>Warp map</h5>
+                    <WarpOverview
+                        warps={warps}
+                        selectedWarps={this.props.selectedWarps}
+                        onWarpSelect={this.props.selectWarps} />
+                </div>
+            </Panel>
         );
     }
     renderFilter = (warps: Warp[]): JSX.Element =>
     {
-        const label = `${warps.length} filtered (${this.props.trace.warps.length} total)`;
+        const label = `${warps.length} selected by filter (${this.props.trace.warps.length} total)`;
 
         const {x, y, z} = this.state.blockFilter;
-        const dim = `${z === null ? 'z' : z}.${y === null ? 'y' : y}.${x === null ? 'x' : x}`;
-        const location = this.state.locationFilter.map(loc => `${loc.file}:${loc.line}`).join(', ');
+        const dim = `${z || 'z'}.${y || 'y'}.${x || 'x'}`;
+        const location = this.state.locationFilter.map(loc =>
+            <ListGroupItem>
+                {loc.file}:{loc.line}
+            </ListGroupItem>
+        );
 
         return (
-            <Panel header={'Active filters'}>
+            <div>
                 <div>Block index: {dim}</div>
-                {this.state.locationFilter.length > 0 && <div>Source locations: {location}</div>}
+                {this.state.locationFilter.length > 0 &&
+                <div>
+                    Source locations:
+                    <ListGroup>{location}</ListGroup>
+                </div>}
                 <div>{label}</div>
-                <Button onClick={this.resetFilters}>Reset filter</Button>
-            </Panel>
+                <Button onClick={this.resetFilters} bsStyle='danger'>Reset filter</Button>
+            </div>
         );
     }
 

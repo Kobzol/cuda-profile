@@ -5,7 +5,6 @@ import style from './warp-filter.scss';
 
 interface Props
 {
-    label: string;
     filter: Dim3;
     onFilterChange: (filter: Dim3) => void;
 }
@@ -16,7 +15,6 @@ export class WarpFilter extends PureComponent<Props>
     {
         return (
             <div className={style.warpFilter}>
-                <label>{this.props.label}:</label>
                 {this.renderDimension('z')}
                 {this.renderDimension('y')}
                 {this.renderDimension('x')}

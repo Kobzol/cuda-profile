@@ -7,6 +7,10 @@ $width: 510px;
   top: 0;
   z-index: 999;
   background-color: #FFFFFF;
+
+  :global(.panel-body) {
+    padding: 0;
+  }
 }
 
 .source-header {

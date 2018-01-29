@@ -1,6 +1,5 @@
 .kernel-details {
-  display: flex;
-  justify-content: space-between;
+
 }
 
 .kernel-deselect {
@@ -12,16 +11,12 @@
 
 .warp-panel-wrapper, .warp-list-wrapper {
   margin-right: 10px;
-  border-right: 1px solid #000000;
 }
 .trace-content-wrapper {
   display: flex;
 }
 
 .warp-detail-wrapper {
+  flex-grow: 1;
   align-self: right;
-}
-
-.memory-block-wrapper {
-  width: 100%;
 }

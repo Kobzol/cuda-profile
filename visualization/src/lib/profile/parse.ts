@@ -18,7 +18,7 @@ import {MissingProfileData} from './errors';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
-import * as bigInt from 'big-integer';
+import bigInt from 'big-integer';
 
 
 function parseMetadata(metadata: MetadataFormat): Metadata

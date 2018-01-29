@@ -1,10 +1,10 @@
 import React, {PureComponent} from 'react';
 import {Warp} from '../../../lib/profile/warp';
-import * as brace from 'brace';
+import brace from 'brace';
 import AceEditor from 'react-ace';
 import 'brace/mode/c_cpp';
 import 'brace/theme/chrome';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import {SourceLocation} from '../../../lib/profile/metadata';
 import {Button, Glyphicon, Panel} from 'react-bootstrap';
 
@@ -38,12 +38,14 @@ export class SourceView extends PureComponent<Props>
     render()
     {
         return (
-            <Panel header={this.renderHeader()} className={style.sourceWrapper}>
+            <Panel header={this.renderHeader()}
+                   bsStyle='primary'
+                   className={style.sourceWrapper}>
                 <AceEditor
                     mode='c_cpp'
                     theme='chrome'
                     width='490px'
-                    readOnly={true}
+                    readOnly
                     onLoad={this.onLoad}
                     value={this.props.content} />
             </Panel>
