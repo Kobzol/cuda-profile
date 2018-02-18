@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.8)
-
 set(SOURCE_FILES
         Context.cpp
         Pass.cpp

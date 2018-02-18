@@ -8,13 +8,19 @@ import shutil
 import subprocess
 import tempfile
 
-from google.protobuf import json_format
-from generated.kernel_trace_pb2 import KernelTrace
+try:
+    from google.protobuf import json_format
+    from generated.kernel_trace_pb2 import KernelTrace
 
+    HAS_PROTOBUF = True
+except ImportError:
+    HAS_PROTOBUF = False
+
+BUILD_DIR = os.environ.get("BUILD_DIR", "cmake-build-debug")
 PROJECT_DIR = os.path.dirname(os.path.dirname(__file__))
-INSTRUMENT_LIB = "cmake-build-debug/instrument/libinstrument.so"
-RUNTIME_LIB_DIR = "cmake-build-debug/runtime"
-RUNTIME_TRACKING_LIB_DIR = "cmake-build-debug/runtimetracker"
+INSTRUMENT_LIB = "{0}/instrument/libinstrument.so".format(BUILD_DIR)
+RUNTIME_LIB_DIR = "{0}/runtime".format(BUILD_DIR)
+RUNTIME_TRACKING_LIB_DIR = "{0}/runtimetracker".format(BUILD_DIR)
 INPUT_FILENAME = "input.cu"
 
 
@@ -78,12 +84,13 @@ def run(root, dir, exe, env, compress):
     mappings = {}
     cuprdir = find_cupr_dir(dir)
 
-    for protobuf_file in glob.glob("{}/*.protobuf".format(cuprdir)):
-        with (gzip.open(protobuf_file) if compress else open(protobuf_file)) as f:
-            kernel = KernelTrace()
-            kernel.ParseFromString(f.read())
-            mappings[os.path.basename(protobuf_file)] = json_format.MessageToDict(kernel,
-                                                                                  preserving_proto_field_name=True)
+    if HAS_PROTOBUF:
+        for protobuf_file in glob.glob("{}/*.protobuf".format(cuprdir)):
+            with (gzip.open(protobuf_file) if compress else open(protobuf_file)) as f:
+                kernel = KernelTrace()
+                kernel.ParseFromString(f.read())
+                mappings[os.path.basename(protobuf_file)] = json_format.MessageToDict(kernel,
+                                                                                      preserving_proto_field_name=True)
     for json_file in glob.glob("{}/*.json".format(cuprdir)):
         with (gzip.open(json_file) if (compress and json_file.endswith(".gzip.json")) else open(json_file)) as f:
             mappings[os.path.basename(json_file)] = json.load(f)
@@ -171,10 +178,14 @@ def source_file():
 
 
 def param_all_formats(fn):
-    @pytest.mark.parametrize("format", [
-        "json",
-        "protobuf"
-    ])
+    formats = ["json"]
+    if HAS_PROTOBUF:
+        formats.append("protobuf")
+
+    @pytest.mark.parametrize("format", formats)
     def inner_fn(profile, format):
         return fn(profile, format)
     return inner_fn
+
+
+requires_protobuf = pytest.mark.skipif(not HAS_PROTOBUF, reason="Protobuf is required")

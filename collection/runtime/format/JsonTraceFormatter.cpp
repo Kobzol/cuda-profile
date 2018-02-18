@@ -1,6 +1,8 @@
 #include "JsonTraceFormatter.h"
 
-#include "zlib/zstr.hpp"
+#ifdef CUPR_USE_ZLIB
+    #include "zlib/zstr.hpp"
+#endif
 
 picojson::value cupr::JsonTraceFormatter::jsonify(const cupr::AccessRecord& record)
 {
@@ -78,12 +80,16 @@ void cupr::JsonTraceFormatter::formatTrace(std::ostream& os,
             {"warpSize", picojson::value((double) dimensions.warpSize)}
     });
 
+#ifdef CUPR_USE_ZLIB
     if (compress)
     {
         zstr::ostream compressed(os);
         compressed << value.serialize(prettify);
     }
     else os << value.serialize(prettify);
+#else
+    os << value.serialize(prettify);
+#endif
 }
 
 std::string cupr::JsonTraceFormatter::getSuffix()

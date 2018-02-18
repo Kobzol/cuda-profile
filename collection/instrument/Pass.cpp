@@ -2,7 +2,6 @@
 
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
-#include <Target/NVPTX/NVPTXUtilities.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <iostream>
 
@@ -17,6 +16,7 @@ using namespace llvm;
 
 namespace llvm {
     FunctionPass* createNVPTXInferAddressSpacesPass();
+    bool isKernelFunction(const Function& fn);
 }
 
 char CudaPass::ID = 0;

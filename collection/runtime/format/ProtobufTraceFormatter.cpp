@@ -5,10 +5,10 @@
     #include "protobuf/generated/kernel-trace.pb.h"
     #include <google/protobuf/io/gzip_stream.h>
     #include <google/protobuf/io/zero_copy_stream_impl.h>
-#endif
 
-using namespace google::protobuf::io;
-using namespace cupr::proto;
+    using namespace google::protobuf::io;
+    using namespace cupr::proto;
+#endif
 
 void cupr::ProtobufTraceFormatter::formatTrace(std::ostream& os, const std::string& kernel, DeviceDimensions dimensions,
                                                const std::vector<cupr::AccessRecord>& accesses,

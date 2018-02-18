@@ -7,9 +7,10 @@ SRC_FILES=${1-"../main.cpp ../kernel.cu"} # ../kernel2.cu
 PROTOBUF=${2-0}
 COMPRESS=${3-0}
 RUNTIME_TRACKING=${4-0}
+BUILD_DIR=${BUILD_DIR-"cmake-build-debug"}
 INSTRUMENTED_KERNEL_BC="kernel-instrumented.bc"
 
-pushd cmake-build-debug
+pushd ${BUILD_DIR}
     # remove existing files
     # rm -rf *.bc *.ll *.o
     # rm -rf cupr-*
@@ -17,7 +18,7 @@ pushd cmake-build-debug
     # build pass
     make
 
-    ${CLANG} -I/usr/local/cuda/samples/common/inc -O0 -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
+    # ${CLANG} -I/usr/local/cuda/samples/common/inc -O0 -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
 
     # run pass and compile
     ${CLANG} -g -O0 -std=c++14 --cuda-gpu-arch=sm_30 \

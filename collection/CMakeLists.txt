@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.4)
 project(cuda)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -25,14 +25,32 @@ endif (ZLIB_FOUND)
 set(CMAKE_CXX_COMPILER "${LLVM_TOOLS_BINARY_DIR}/clang++")
 set(CUDA_HOST_COMPILER "g++")
 
+# Compile protobuf definitions
+if (PROTOBUF_FOUND)
+    FILE(GLOB PROTOBUF_PROTO_FILES runtime/format/protobuf/*.proto)
+
+    execute_process(COMMAND mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/runtime/format/protobuf/generated)
+    execute_process(COMMAND
+            protoc
+            --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/runtime/format/protobuf
+            --cpp_out=${CMAKE_CURRENT_SOURCE_DIR}/runtime/format/protobuf/generated
+            ${PROTOBUF_PROTO_FILES}
+    )
+    execute_process(COMMAND mkdir -p ${CMAKE_CURRENT_SOURCE_DIR}/tests/generated)
+    execute_process(COMMAND
+            protoc
+            --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/runtime/format/protobuf
+            --python_out=${CMAKE_CURRENT_SOURCE_DIR}/tests/generated
+            ${PROTOBUF_PROTO_FILES}
+    )
+    message("Generated Protobuf definitions")
+endif (PROTOBUF_FOUND)
+
 # Instrumentation
 add_subdirectory("instrument")
 
 # Runtime
 add_subdirectory("runtime")
-
-# Device runtime
-add_subdirectory("device")
 
 # Memtracker
 add_subdirectory("runtimetracker")
@@ -40,18 +58,3 @@ add_subdirectory("runtimetracker")
 # Tests
 add_custom_target(tests COMMAND py.test ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 add_dependencies(tests instrument)
-
-# Compile protobuf definitions
-FILE(GLOB PROTOBUF_PROTO_FILES runtime/format/protobuf/*.proto)
-execute_process(COMMAND
-        ${Protobuf_PROTOC_EXECUTABLE}
-        --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/runtime/format/protobuf
-        --cpp_out=${CMAKE_CURRENT_SOURCE_DIR}/runtime/format/protobuf/generated
-        ${PROTOBUF_PROTO_FILES}
-)
-execute_process(COMMAND
-        ${Protobuf_PROTOC_EXECUTABLE}
-        --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/runtime/format/protobuf
-        --python_out=${CMAKE_CURRENT_SOURCE_DIR}/tests/generated
-        ${PROTOBUF_PROTO_FILES}
-)

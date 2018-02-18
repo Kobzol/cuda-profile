@@ -1,4 +1,4 @@
-from conftest import param_all_formats, kernel_file, run_file
+from conftest import param_all_formats, kernel_file, run_file, requires_protobuf
 
 
 def test_parameters_buffer_size(profile):
@@ -25,6 +25,7 @@ def test_parameters_buffer_size(profile):
     assert data["stdout"].strip() == ""
 
 
+@requires_protobuf
 def test_parameters_protobuf(profile):
     data = profile("""
     __global__ void kernel(int* p) {

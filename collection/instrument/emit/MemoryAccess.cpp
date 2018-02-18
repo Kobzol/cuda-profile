@@ -1,7 +1,6 @@
 #include "MemoryAccess.h"
 
 #include <llvm/IR/Module.h>
-#include <IR/ConstantsContext.h>
 
 #include "RuntimeEmitter.h"
 #include "../util/AddressSpaceResolver.h"
