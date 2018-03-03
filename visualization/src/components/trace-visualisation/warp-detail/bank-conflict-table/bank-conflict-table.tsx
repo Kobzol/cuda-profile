@@ -6,9 +6,10 @@ import _ from 'lodash';
 import {MemoryAccess} from '../../../../lib/profile/memory-access';
 import {addressToNum, getAccessAddressRange} from '../../../../lib/profile/address';
 import {formatDim3} from '../../../../lib/util/format';
-import {Alert, Badge, Glyphicon, Table} from 'react-bootstrap';
+import {Alert, Table} from 'reactstrap';
 import {createSelector, Selector} from 'reselect';
 import classNames from 'classnames';
+import MdWarning from 'react-icons/lib/md/warning';
 
 import style from './bank-conflict-table.scss';
 
@@ -50,32 +51,32 @@ export class BankConflictTable extends PureComponent<Props, State>
         const accessMap = this.state.getAccessMap(this.props.warps);
         return (
             <div>
-                <Table striped bordered condensed hover>
+                <Table striped bordered hover className={style.table}>
                     <thead>
-                    <tr>
-                        {Object.keys(accessMap).map(bank => {
-                            const conflict = (accessMap[bank] || []).length > 1;
-                            const title = `Bank #${bank} ${conflict ? '(conflict)' : ''}`;
+                        <tr>
+                            {Object.keys(accessMap).map(bank => {
+                                const conflict = (accessMap[bank] || []).length > 1;
+                                const title = `Bank #${bank} ${conflict ? '(conflict)' : ''}`;
 
-                            return (
-                                <th onMouseEnter={() => this.selectBank(parseInt(bank, 10))}
-                                    onMouseLeave={() => this.selectBank(null)}
-                                    key={bank}
-                                    title={title}
-                                    className={classNames(style.bankHeader, {
-                                        [style.conflicted] : conflict
-                                    })}>
-                                    {bank}
-                                </th>
-                            );
-                        })}
-                    </tr>
+                                return (
+                                    <th onMouseEnter={() => this.selectBank(parseInt(bank, 10))}
+                                        onMouseLeave={() => this.selectBank(null)}
+                                        key={bank}
+                                        title={title}
+                                        className={classNames(style.bankHeader, {
+                                            [style.conflicted] : conflict
+                                        })}>
+                                        {bank}
+                                    </th>
+                                );
+                            })}
+                        </tr>
                     </thead>
                     {this.renderRows(accessMap)}
                 </Table>
                 {sharedWarps.length > 1 &&
-                <Alert bsStyle='warning'>
-                    <Glyphicon glyph='alert' /> More than one warp with shared memory access selected,
+                <Alert color='warning'>
+                    <MdWarning /> More than one warp with shared memory access selected,
                     bank conflicts happen only within the context of a single warp.
                 </Alert>}
             </div>
@@ -98,7 +99,9 @@ export class BankConflictTable extends PureComponent<Props, State>
                         <td onMouseEnter={() => this.selectBank(parseInt(validColumns[i], 10))}
                             onMouseLeave={() => this.selectBank(null)}
                             key={i}
-                            className={style.access}>
+                            className={style.access}
+                            title={`${formatDim3(col.warp.blockIdx)}.${formatDim3(col.access.threadIdx)} ` +
+                            `at ${col.access.address}`}>
                             {col !== null && this.renderAccess(col.warp, col.access)}
                         </td>
                     )}
@@ -111,25 +114,12 @@ export class BankConflictTable extends PureComponent<Props, State>
         return <tbody>{rows}</tbody>;
     }
 
-    renderBank = (accessMap: AccessMap, bank: number): JSX.Element =>
-    {
-        const accesses = accessMap[bank];
-
-        return (
-            <div key={bank}>
-                <div>Bank #{bank}</div>
-                <div>
-                    {accesses !== undefined && accesses.map(pair => this.renderAccess(pair.warp, pair.access))}
-                </div>
-            </div>
-        );
-    }
     renderAccess = (warp: Warp, access: MemoryAccess): JSX.Element =>
     {
         return (
-            <Glyphicon key={access.id}
-                       glyph='alert'
-                       title={`${formatDim3(warp.blockIdx)}.${formatDim3(access.threadIdx)} at ${access.address}`} />
+            <span>
+                <MdWarning key={access.id} />
+            </span>
         );
     }
 

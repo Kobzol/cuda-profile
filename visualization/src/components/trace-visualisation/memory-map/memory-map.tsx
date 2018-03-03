@@ -50,8 +50,6 @@ export class MemoryMap extends PureComponent<Props>
             const loc = y;
             y += regionHeight + padding;
 
-            console.log(rows, leftover, additionalRegion, regionHeight, loc);
-
             return (
                 <MemoryRegion
                     key={allocation.address}

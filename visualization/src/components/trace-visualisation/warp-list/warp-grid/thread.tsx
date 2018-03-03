@@ -5,6 +5,8 @@ import {getAccessesAddressRange, checkIntersectionRange} from '../../../../lib/p
 import {AddressRange} from '../../../../lib/trace/selection';
 import {formatDim3} from '../../../../lib/util/format';
 import _ from 'lodash';
+import {Color} from 'chroma-js';
+import * as chroma from 'chroma-js';
 
 interface Props
 {
@@ -55,54 +57,58 @@ export class Thread extends PureComponent<Props, State>
                     y={this.props.y}
                     width={this.props.width}
                     height={this.props.height}
-                    fill={this.getAccessColor(warp, access, this.state.hovered)}
-                    stroke='rgb(0, 0, 0)'
-                    strokeWidth={0.5} />
+                    fill={this.getAccessColor(warp, access, this.state.hovered).hex()}
+                    stroke='rgb(40, 40, 40)'
+                    strokeWidth={this.state.hovered ? 0.75 : 0.35} />
                 <title>{label}</title>
             </g>
         );
     }
 
-    private handleMouseEnter = (event: React.MouseEvent<SVGSVGElement>) =>
+    handleMouseEnter = () =>
     {
         if (this.props.selectionEnabled && this.props.access !== null)
         {
             this.props.onSelectChanged(getAccessesAddressRange([this.props.access], this.props.warp.size));
-            this.setState(() => ({
-                hovered: true
-            }));
         }
+        this.setState(() => ({
+            hovered: true
+        }));
     }
-    private handleMouseLeave = (event: React.MouseEvent<SVGSVGElement>) =>
+    handleMouseLeave = () =>
     {
         if (this.props.access !== null)
         {
             this.props.onSelectChanged(null);
-            this.setState(() => ({
-                hovered: false
-            }));
         }
+        this.setState(() => ({
+            hovered: false
+        }));
     }
 
-    private getAccessColor = (warp: Warp, access: MemoryAccess, hovered: boolean): string =>
+    getColorForAccessType = (warp: Warp, access: MemoryAccess): Color =>
     {
-        if (access === null) return 'rgb(255, 255, 255)';
+        if (access === null) return chroma(240, 240, 240);
+        if (warp.accessType === AccessType.Read) return chroma(20, 180, 20);
+        return chroma(180, 20, 0);
+    }
+
+    getAccessColor = (warp: Warp, access: MemoryAccess, hovered: boolean): Color =>
+    {
+        const color = this.getColorForAccessType(warp, access);
 
         if (hovered)
         {
-            return 'rgb(255, 0, 0)';
+            return color.darken(1.25);
         }
         else if (this.props.memorySelection !== null &&
+                access !== null &&
             _.some(this.props.memorySelection, selection =>
                 checkIntersectionRange(selection, access.address, warp.size)))
         {
-            return 'rgb(0, 255, 0)';
+            return color.darken(1.15);
         }
 
-        if (warp.accessType === AccessType.Read)
-        {
-            return 'rgb(225, 105, 65)';
-        }
-        else return 'rgb(65, 105, 225)';
+        return color;
     }
 }

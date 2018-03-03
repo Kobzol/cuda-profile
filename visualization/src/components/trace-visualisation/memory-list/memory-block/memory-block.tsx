@@ -12,9 +12,10 @@ import {select} from 'd3-selection';
 import {range} from 'd3-array';
 import * as d3 from 'd3';
 import {formatAddressSpace, formatByteSize} from '../../../../lib/util/format';
-import {Panel} from 'react-bootstrap';
+import {Card, CardBody} from 'reactstrap';
 
 import style from './memory-block.scss';
+import CardHeader from 'reactstrap/lib/CardHeader';
 
 
 interface Props
@@ -152,16 +153,18 @@ export class MemoryBlock extends PureComponent<Props>
     render()
     {
         return (
-            <Panel className={style.memoryBlock} id='memory-block'
-                   header={this.createLabel(this.props.allocation)}
-                   bsStyle='primary'>
-                <div className='block-wrapper' ref={(wrapper) => this.blockWrapper = wrapper}>
-                    <div className='block-label' />
-                    <svg width={'100%'}>
-                        <g className='blocks' />
-                    </svg>
-                </div>
-            </Panel>
+            <Card className={style.memoryBlock} id='memory-block'
+                   color='primary'>
+                <CardHeader>{this.createLabel(this.props.allocation)}</CardHeader>
+                <CardBody>
+                    <div className='block-wrapper' ref={(wrapper) => this.blockWrapper = wrapper}>
+                        <div className='block-label' />
+                        <svg width={'100%'}>
+                            <g className='blocks' />
+                        </svg>
+                    </div>
+                </CardBody>
+            </Card>
         );
     }
 

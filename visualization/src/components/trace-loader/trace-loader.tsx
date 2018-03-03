@@ -4,12 +4,12 @@ import {loadFile} from '../../lib/file-load/actions';
 import {FileType, TraceFile} from '../../lib/file-load/file';
 import {loadingFiles, validTraceFiles} from '../../lib/file-load/reducer';
 import {GlobalState} from '../../lib/state/reducers';
-import {Button, Glyphicon, Label, ListGroup, ListGroupItem, Panel, ProgressBar} from 'react-bootstrap';
+import {Button, ListGroup, ListGroupItem, CardHeader, CardBody, Card, Progress, Badge, Input} from 'reactstrap';
 import {buildProfile} from '../../lib/profile/actions';
 import {Errors} from '../../lib/state/errors';
 import {withRouter} from 'react-router';
-
-import style from './trace-loader.scss';
+import styled from 'styled-components';
+import Alert from 'reactstrap/lib/Alert';
 
 interface StateProps
 {
@@ -25,28 +25,42 @@ interface DispatchProps
     buildProfile: (files: TraceFile[]) => void;
 }
 
+const FileInput = styled(Input)`
+  margin-bottom: 20px;
+`;
+const FileList = styled(ListGroup)`
+  margin-bottom: 20px;
+`;
+const BuildError = styled(Alert)`
+  margin-top: 10px;
+`;
+
 class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
 {
     render()
     {
         return (
             <div>
-                <Panel header='Select recorded trace files' bsStyle='primary'>
-                    <input className={style.fileInput}
-                           type='file' multiple
-                           onChange={this.handleTraceChange}
-                           onDrop={this.handleTraceDrop} />
-                    <ListGroup>
-                        {this.props.files.map(this.renderFile)}
-                    </ListGroup>
-                    <Button
-                        disabled={!this.canBuildProfile()}
-                        onClick={this.buildProfile}
-                        bsStyle='primary'>
-                        <Glyphicon glyph='flash' /> Show trace
-                    </Button>
-                    {this.props.buildError && <div className='error'>{this.props.buildError}</div>}
-                </Panel>
+                <Card>
+                    <CardHeader>Select recorded trace files</CardHeader>
+                    <CardBody>
+                        <div>
+                            <FileInput
+                                   type='file' multiple
+                                   onChange={this.handleTraceChange}
+                                   onDrop={this.handleTraceDrop} />
+                        </div>
+                        <FileList>
+                            {this.props.files.map(this.renderFile)}
+                        </FileList>
+                        <Button
+                            disabled={!this.canBuildProfile()}
+                            onClick={this.buildProfile}
+                            title='Show trace'
+                            color='primary'>Show trace</Button>
+                        {this.props.buildError && <BuildError color='danger'>{this.props.buildError}</BuildError>}
+                    </CardBody>
+                </Card>
             </div>
         );
     }
@@ -54,9 +68,8 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
     renderFile = (file: TraceFile): JSX.Element =>
     {
         return (
-            <ListGroupItem key={file.name} className={style.file}>
-                <span className={style.fileLabel}>{this.renderFileLabel(file)}</span>
-                <span className={style.fileName}>{file.name}</span>
+            <ListGroupItem key={file.name}>
+                {file.name} {this.renderFileLabel(file)}
             </ListGroupItem>
         );
     }
@@ -68,23 +81,15 @@ class TraceLoaderComponent extends PureComponent<StateProps & DispatchProps>
     }
     renderFileProgress = (): JSX.Element =>
     {
-        return <ProgressBar striped active now={100} className={style.fileProgress} />;
+        return <Progress striped value={100} />;
     }
     renderFileError = (file: TraceFile): JSX.Element =>
     {
-        return (
-            <Label bsStyle='danger' className={style.label}>
-                {this.formatError(file.error)}
-            </Label>
-        );
+        return <Badge color='danger'>{this.formatError(file.error)}</Badge>;
     }
     renderFileSuccess = (file: TraceFile): JSX.Element =>
     {
-        return (
-            <Label bsStyle='success' className={style.label}>
-                Loaded ({this.formatFileType(file.type)})
-            </Label>
-        );
+        return <Badge color='success'>Loaded ({this.formatFileType(file.type)})</Badge>;
     }
 
     handleTraceChange = (event: ChangeEvent<HTMLInputElement>) =>

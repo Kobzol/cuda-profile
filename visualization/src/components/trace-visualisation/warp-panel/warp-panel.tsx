@@ -5,28 +5,51 @@ import {Warp} from '../../../lib/profile/warp';
 import {WarpFilter} from './warp-filter/warp-filter';
 import {Dim3} from '../../../lib/profile/dim3';
 import {WarpOverview} from './warp-overview/warp-overview';
-import {Button, ListGroup, ListGroupItem, Panel, PanelGroup} from 'react-bootstrap';
-import {SourceView} from '../source-view/source-view';
+import {Button, ListGroup, ListGroupItem, Card, CardHeader, CardBody} from 'reactstrap';
 import {SourceLocation} from '../../../lib/profile/metadata';
 import _ from 'lodash';
-
-import style from './warp-panel.scss';
+import {SourceModal} from './source-modal/source-modal';
+import styled from 'styled-components';
+import {TraceHeader} from '../trace-header';
+import {TraceSelection} from '../../../lib/trace/selection';
 
 interface Props
 {
     kernel: Kernel;
     trace: Trace;
     selectedWarps: Warp[];
-    selectWarps: (warps: Warp[]) => void;
+    selectWarps(warps: Warp[]): void;
+    selectTrace(selection: TraceSelection): void;
 }
 
 interface State
 {
     blockFilter: Dim3;
     locationFilter: SourceLocation[];
-    sourcePanelOpened: boolean;
+    sourceModalOpened: boolean;
     activePanels: number[];
 }
+
+const Wrapper = styled(Card)`
+  
+`;
+const BodyWrapper = styled(CardBody)`
+  padding: 10px;
+`;
+const SourceLocationEntry = styled(ListGroupItem)`
+  padding: 5px;
+  font-size: 14px;
+`;
+const Section = styled.div`
+  margin-top: 10px;
+  :first-child {
+    margin-top: 0;
+  }
+  
+  h4 {
+    margin: 0;
+  }
+`;
 
 export class WarpPanel extends PureComponent<Props, State>
 {
@@ -37,7 +60,7 @@ export class WarpPanel extends PureComponent<Props, State>
         this.state = {
             blockFilter: { x: null, y: null, z: null },
             locationFilter: [],
-            sourcePanelOpened: false,
+            sourceModalOpened: false,
             activePanels: []
         };
     }
@@ -46,50 +69,59 @@ export class WarpPanel extends PureComponent<Props, State>
     {
         const warps = this.getFilteredWarps();
         return (
-            <Panel header='Warps' className={style.warpsWrapper} bsStyle='primary'>
-                {this.state.sourcePanelOpened &&
-                <SourceView content={this.props.kernel.metadata.source.content}
-                            file={this.props.kernel.metadata.source.file}
-                            warps={this.props.trace.warps}
+            <Wrapper>
+                <CardHeader>Selected kernel</CardHeader>
+                <BodyWrapper>
+                    <TraceHeader
+                        kernel={this.props.kernel}
+                        trace={this.props.trace}
+                        selectTrace={this.props.selectTrace} />
+                    {this.props.kernel.metadata.source &&
+                        <SourceModal
+                            opened={this.state.sourceModalOpened}
+                            kernel={this.props.kernel}
+                            trace={this.props.trace}
                             locationFilter={this.state.locationFilter}
                             setLocationFilter={this.setLocationFilter}
-                            onClose={() => this.changeSourcePanelVisibility(false)} />
-                }
-                <PanelGroup>
-                    <Panel collapsible header='Active filters' className={style.panel}>
-                            {this.isFilterActive() ? this.renderFilter(warps) :
-                                `No filters (${this.props.trace.warps.length} total warps)`}
-                    </Panel>
-                    <Panel collapsible header='Filter by block index' className={style.panel}>
+                            onClose={this.closeSourceModal}/>
+                    }
+                    <Section>
+                        <h4>Active filters</h4>
+                        {this.isFilterActive() ? this.renderFilter(warps) :
+                            `No filters (${this.props.trace.warps.length} warps total)`}
+                    </Section>
+                    <Section>
+                        <h4>Filter by block index</h4>
                         <WarpFilter
                             filter={this.state.blockFilter}
                             onFilterChange={this.changeBlockFilter} />
-                    </Panel>
-                    <Panel collapsible={false}
-                           onClick={() => this.changeSourcePanelVisibility(!this.state.sourcePanelOpened)}
-                           header={<h4>Filter by source code</h4>}
-                           className={style.panel} />
-                </PanelGroup>
-                <div>
-                    <h5>Warp map</h5>
-                    <WarpOverview
-                        warps={warps}
-                        selectedWarps={this.props.selectedWarps}
-                        onWarpSelect={this.props.selectWarps} />
-                </div>
-            </Panel>
+                    </Section>
+                    {this.props.kernel.metadata.source &&
+                        <Section>
+                            <Button onClick={this.openSourceModal}>Filter by source location</Button>
+                        </Section>
+                    }
+                    <Section>
+                        <h4>Filtered warp minimap</h4>
+                        <WarpOverview
+                            warps={warps}
+                            selectedWarps={this.props.selectedWarps}
+                            onWarpSelect={this.props.selectWarps} />
+                    </Section>
+                </BodyWrapper>
+            </Wrapper>
         );
     }
     renderFilter = (warps: Warp[]): JSX.Element =>
     {
-        const label = `${warps.length} selected by filter (${this.props.trace.warps.length} total)`;
+        const label = `${warps.length} warps selected by filter (${this.props.trace.warps.length} total)`;
 
         const {x, y, z} = this.state.blockFilter;
         const dim = `${z || 'z'}.${y || 'y'}.${x || 'x'}`;
         const location = this.state.locationFilter.map(loc =>
-            <ListGroupItem>
+            <SourceLocationEntry key={`${loc.file}:${loc.line}`}>
                 {loc.file}:{loc.line}
-            </ListGroupItem>
+            </SourceLocationEntry>
         );
 
         return (
@@ -101,7 +133,7 @@ export class WarpPanel extends PureComponent<Props, State>
                     <ListGroup>{location}</ListGroup>
                 </div>}
                 <div>{label}</div>
-                <Button onClick={this.resetFilters} bsStyle='danger'>Reset filter</Button>
+                <Button onClick={this.resetFilters} color='danger'>Reset filter</Button>
             </div>
         );
     }
@@ -154,10 +186,16 @@ export class WarpPanel extends PureComponent<Props, State>
         return _.some(this.state.locationFilter, location);
     }
 
-    changeSourcePanelVisibility = (show: boolean) =>
+    changeSourcePanelVisibility = (sourceModalOpened: boolean) =>
     {
-        this.setState(() => ({
-            sourcePanelOpened: show
-        }));
+        this.setState(() => ({ sourceModalOpened }));
+    }
+    closeSourceModal = () =>
+    {
+        this.changeSourcePanelVisibility(false);
+    }
+    openSourceModal = () =>
+    {
+        this.changeSourcePanelVisibility(true);
     }
 }

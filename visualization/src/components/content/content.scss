@@ -1,5 +1,3 @@
-@import "../global";
-
 /* Global overrides */
 :global(.vis-timeline) {
   overflow: visible;
@@ -10,28 +8,4 @@ html, body {
 }
 :global(#root) {
   height: 100%;
-}
-
-.root {
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-  word-wrap: break-word;
-  background-color: #E0E0E0;
-}
-.header {
-  display: flex;
-  align-items: center;
-  background-color: $dark-background;
-  padding: 5px;
-}
-.app-name {
-  color: #FFFFFF;
-  margin-right: 20px;
-  padding-right: 10px;
-  border-right: 1px solid #FFFFFF;
-}
-.content {
-  padding: 10px;
-  box-shadow: 0 3px 1px 0 rgba(0, 0, 0, 0.75) inset;
 }

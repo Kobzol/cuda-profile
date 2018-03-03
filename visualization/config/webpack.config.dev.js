@@ -158,11 +158,24 @@ module.exports = {
                 ]
             },
           // Compile .tsx?
-          {
-            test: /\.(ts|tsx)$/,
-            include: paths.appSrc,
-            loader: require.resolve('ts-loader'),
-          },
+            {
+                test: /\.(ts|tsx)$/,
+                include: paths.appSrc,
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            babelrc: false,
+                            plugins: ['react-hot-loader/babel'],
+                        },
+                    }, {
+                        loader: require.resolve('ts-loader'),
+                        options: {
+                            configFile: paths.appTsConfigDev
+                        }
+                    }
+                ]
+            },
           // "postcss" loader applies autoprefixer to our CSS.
           // "css" loader resolves paths in CSS and adds assets as dependencies.
           // "style" loader turns CSS into JS modules that inject <style> tags.

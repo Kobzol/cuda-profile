@@ -15,9 +15,6 @@ interface Props
     rangeSelections: WarpAddressSelection[];
 }
 
-const background = 'rgb(0, 0, 200)';
-const selected = 'rgb(200, 0, 0)';
-
 export class MemoryMinimap extends PureComponent<Props>
 {
     private canvasRef: HTMLCanvasElement;

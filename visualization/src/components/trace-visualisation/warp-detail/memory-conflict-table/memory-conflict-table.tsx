@@ -1,5 +1,5 @@
 import React, {PureComponent} from 'react';
-import {Table} from 'react-bootstrap';
+import {Table} from 'reactstrap';
 import {coalesceConflicts, getConflicts, Warp, WarpConflict} from '../../../../lib/profile/warp';
 import {formatAccessType, formatDim3} from '../../../../lib/util/format';
 import {Trace} from '../../../../lib/profile/trace';
@@ -24,7 +24,7 @@ export class MemoryConflictTable extends PureComponent<Props>
         }
 
         return (
-            <Table striped bordered condensed hover>
+            <Table striped bordered hover>
                 <thead>
                     <tr>
                         <th>Address</th>

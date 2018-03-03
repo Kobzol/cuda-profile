@@ -1,5 +1,6 @@
+/*
 import React, {PureComponent} from 'react';
-import {Panel} from 'react-bootstrap';
+import {Panel} from 'reactstrap';
 import Timeline from 'react-visjs-timeline';
 import {Kernel} from '../../../lib/profile/kernel';
 import {Trace} from '../../../lib/profile/trace';
@@ -41,7 +42,7 @@ export class WarpTimeline extends PureComponent<Props>
         };
 
         return (
-            <Panel className='trace' header={`Access timeline (select access)`} bsStyle='success'>
+            <Panel className='trace' header={`Access timeline (select access)`} color='success'>
                 <Timeline
                     options={options}
                     items={this.createTimelineItems(this.props.kernel, this.props.trace)}
@@ -91,3 +92,4 @@ export class WarpTimeline extends PureComponent<Props>
         return trace.start + (trace.end - trace.start) * fraction.toJSNumber();
     }
 }
+*/

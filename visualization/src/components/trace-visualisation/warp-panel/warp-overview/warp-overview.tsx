@@ -1,14 +1,11 @@
 import React, {PureComponent} from 'react';
 import {Warp} from '../../../../lib/profile/warp';
-import {Button} from 'react-bootstrap';
+import {Button} from 'reactstrap';
 import GridLayout from 'd3-v4-grid';
-import {range} from 'd3-array';
-import {select} from 'd3-selection';
-import {formatDim3} from '../../../../lib/util/format';
 import _ from 'lodash';
-import * as d3 from 'd3';
-
-import style from './warp-overview.scss';
+import {WarpMiniature} from './warp-miniature';
+import {SVGGrid} from '../../svg-grid/svg-grid';
+import styled from 'styled-components';
 
 interface Props
 {
@@ -22,10 +19,13 @@ interface State
     limit: number;
 }
 
+const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
 export class WarpOverview extends PureComponent<Props, State>
 {
-    private blockWrapper: HTMLDivElement;
-
     constructor(props: Props)
     {
         super(props);
@@ -35,94 +35,53 @@ export class WarpOverview extends PureComponent<Props, State>
         };
     }
 
-    componentDidMount()
-    {
-        this.renderd3();
-    }
-
-    componentDidUpdate()
-    {
-        this.renderd3();
-    }
-
-    renderd3()
-    {
-        const svg = select(this.blockWrapper).select('svg');
-        const size = Math.min(this.props.warps.length, this.state.limit);
-        const grid = GridLayout()
-            .data(range(size).map((index: number) => ({ index })))
-            .nodeSize([20, 20])
-            .cols(10)
-            .padding([4, 4])
-            .bands(true);
-        grid.layout();
-
-        const nodeSize = grid.nodeSize();
-        const group = svg.select('.blocks');
-
-        let blocks = group
-            .selectAll('rect')
-            .data(grid.nodes());
-
-        const props = (selection: typeof blocks) => {
-            selection
-                .attr('x', (d: {x: number}) => d.x)
-                .attr('y', (d: {y: number}) => d.y)
-                .attr('width', nodeSize[0])
-                .attr('height', nodeSize[1])
-                .attr('fill', ({index}: {index: number}) => {
-                    const warp = this.props.warps[index];
-                    if (_.includes(this.props.selectedWarps, warp))
-                    {
-                        return 'rgb(0, 0, 255)';
-                    }
-                    else return 'rgb(255, 255, 255)';
-                });
-        };
-        const textProps = (selection: typeof blocks) => {
-            selection.text(({index}: {index: number}) => {
-                const warp = this.props.warps[index];
-
-                return `${formatDim3(warp.blockIdx)}`;
-            });
-        };
-
-        blocks.call(props);
-        blocks.select('title').call(textProps);
-        blocks
-            .enter()
-            .append('rect')
-            .call(props)
-            .attr('stroke', 'rgb(0, 0, 0)')
-            .attr('stroke-width', '1')
-            .on('click', ({index}: {index: number}) => {
-                const warp = this.props.warps[index];
-                if (d3.event.ctrlKey)
-                {
-                    this.handleSelectAdd(warp);
-                }
-                else this.handleSelect(warp);
-            })
-            .append('title')
-            .call(textProps);
-
-        blocks
-            .exit()
-            .remove();
-    }
-
     render()
     {
+        const width = 320;
+        const height = 200;
         const increaseLimit = this.state.limit < this.props.warps.length;
         return (
-            <div ref={ref => this.blockWrapper = ref} className={style.warpOverview}>
+            <Wrapper>
                 {this.props.warps.length === 0 ? 'No warps match the active filters' :
-                <svg width={'100%'}>
-                    <g className='blocks' />
-                </svg>}
-                {increaseLimit && <Button onClick={this.increaseLimit} bsStyle='primary'>Show more warps</Button>}
-            </div>
+                    <SVGGrid width={width}
+                             height={height}
+                             rows={16}
+                             cols={16}
+                             renderItem={this.renderWarpMiniature}
+                             {...{
+                                 selectedWarps: this.props.selectedWarps,
+                                 limit: this.state.limit
+                             }} />
+                }
+                {increaseLimit && <Button onClick={this.increaseLimit} color='primary'>Show more warps</Button>}
+            </Wrapper>
         );
+    }
+    renderWarpMiniature = (index: number, x: number, y: number, width: number, height: number): JSX.Element =>
+    {
+        if (index >= this.props.warps.length || index >= this.state.limit) return null;
+        const warp = this.props.warps[index];
+        const selected = _.includes(this.props.selectedWarps, warp);
+
+        return (
+            <WarpMiniature
+                x={x}
+                y={y}
+                width={width}
+                height={height}
+                warp={warp}
+                selected={selected}
+                onClick={this.handleMiniatureClick} />
+        );
+    }
+
+    handleMiniatureClick = (warp: Warp, ctrlPressed: boolean) =>
+    {
+        if (ctrlPressed)
+        {
+            this.handleSelectAdd(warp);
+        }
+        else this.handleSelect(warp);
     }
 
     increaseLimit = () =>
@@ -131,6 +90,20 @@ export class WarpOverview extends PureComponent<Props, State>
             ...state,
             limit: state.limit + 100
         }));
+    }
+
+    calculateLayout = (gridSize: {rows: number, cols: number},
+                       canvasSize: {width: number, height: number}) =>
+    {
+        const layout = GridLayout()
+            .data(_.range(gridSize.rows * gridSize.cols))
+            .bands(true)
+            .rows(gridSize.rows)
+            .cols(gridSize.cols)
+            .size([canvasSize.width, canvasSize.height]);
+        layout.layout();
+
+        return layout;
     }
 
     handleSelect = (warp: Warp) =>

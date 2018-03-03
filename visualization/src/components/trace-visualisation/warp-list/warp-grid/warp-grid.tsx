@@ -9,13 +9,13 @@ import {WarpAddressSelection} from '../../../../lib/trace/selection';
 import {getAccessesAddressRange} from '../../../../lib/profile/address';
 import {Selector} from 'reselect';
 import {Dictionary} from 'lodash';
-import GridLayout from 'd3-v4-grid';
 import _ from 'lodash';
-import {Badge, Button, ButtonGroup, Glyphicon, Label, ListGroupItem, Well} from 'react-bootstrap';
+import {Badge as BsBadge, Button, ButtonGroup} from 'reactstrap';
 import {formatAccessType, formatAddressSpace, formatDim3} from '../../../../lib/util/format';
-import classNames from 'classnames';
-
-import style from './warp-grid.scss';
+import MdHourglassEmpty from 'react-icons/lib/md/hourglass-empty';
+import MdClose from 'react-icons/lib/md/close';
+import styled from 'styled-components';
+import {SVGGrid} from '../../svg-grid/svg-grid';
 
 interface Props
 {
@@ -34,10 +34,44 @@ interface State
     blockMapSelector: Selector<Warp, Dictionary<MemoryAccess>>;
 }
 
-const dims = {
-    rows: 4,
-    cols: 8
-};
+const WarpWrapper = styled.div`
+  padding: 4px;
+  background-color: #DDDDDD;
+  border: 1px solid #888888;
+  border-radius: 5px;
+  margin: 0 5px 5px 0;
+`;
+const WarpTitle = styled.div`
+  display: flex;
+  margin-bottom: 3px;
+`;
+const Content = styled.div`
+  display: flex;
+`;
+const Buttons = styled(ButtonGroup)`
+  flex-grow: 1;
+  justify-content: flex-end;
+`;
+const WarpButton = styled(Button)`
+  padding: 0;
+  line-height: 1;
+`;
+const Badge = styled(BsBadge)`
+  margin-right: 5px;
+  font-size: 12px;
+`;
+const BadgeBlock = Badge.extend`
+  background-color: #337AB7;
+`;
+const BadgeSize = Badge.extend`
+  background-color: #800080;
+`;
+const BadgeRead = Badge.extend`
+  background-color: #006400;
+`;
+const BadgeWrite = Badge.extend`
+  background-color: #8B0000;
+`;
 
 export class WarpGrid extends PureComponent<Props, State>
 {
@@ -53,40 +87,34 @@ export class WarpGrid extends PureComponent<Props, State>
     render()
     {
         const {width, height} = this.props.canvasDimensions;
-        const layout = this.calculateLayout(
-            { rows: dims.rows, cols: dims.cols },
-            { width, height }
-        );
-        const nodeSize = {
-            width: layout.nodeSize()[0],
-            height: layout.nodeSize()[1]
-        };
-
-        const grid = this.renderGrid(layout.nodes(), nodeSize);
         return (
-            <ListGroupItem header={this.renderLabel(this.props.warp, this.props.trace)}>
-                <div className={style.content}>
-                    <svg width={width}
-                         height={height}
-                         viewBox={`0 0 ${width} ${height}`}>
-                        <g>{grid}</g>
-                    </svg>
-                    <ButtonGroup className={style.controls}>
-                        <Button onClick={this.selectAllWarpAccesses}
-                                bsSize='small'
-                                title='Select all accesses of this warp'
-                                className={style.action}>
-                            <Glyphicon glyph='hourglass' />
-                        </Button>
-                        <Button onClick={this.deselect}
-                                bsSize='small'
-                                title='Deselect'
-                                className={style.action}>
-                            <Glyphicon glyph='remove' />
-                        </Button>
-                    </ButtonGroup>
-                </div>
-            </ListGroupItem>
+            <WarpWrapper>
+                {this.renderLabel(this.props.warp, this.props.trace)}
+                <Content>
+                    <SVGGrid width={width}
+                             height={height}
+                             rows={4}
+                             cols={8}
+                             renderItem={this.renderThread} />
+                </Content>
+            </WarpWrapper>
+        );
+    }
+    renderThread = (index: number, x: number, y: number, width: number, height: number): JSX.Element =>
+    {
+        const warp = this.props.warp;
+        const accesses = this.createWarpAccesses(this.props.trace, warp);
+        return (
+            <Thread
+                x={x}
+                y={y}
+                width={width}
+                height={height}
+                warp={warp}
+                access={accesses[index]}
+                memorySelection={this.props.memorySelection}
+                onSelectChanged={this.handleRangeSelectChange}
+                selectionEnabled={this.props.selectionEnabled} />
         );
     }
 
@@ -96,62 +124,35 @@ export class WarpGrid extends PureComponent<Props, State>
         `block ${formatDim3(warp.blockIdx)}, ${warp.size} bytes ${formatAccessType(warp.accessType)}, at ` +
         `${warp.timestamp}`;
 
+        const AccessBadge = warp.accessType === AccessType.Read ? BadgeRead : BadgeWrite;
         return (
-            <div title={title} className={style.warpTitle}>
-                <Label className={style.badge} bsStyle='primary'>
-                    Warp #{this.props.index}
-                </Label>
-                <Badge className={classNames(style.badge, style.badgeBlock)}>
+            <WarpTitle title={title}>
+                <BadgeBlock>
                     {formatDim3(warp.blockIdx)}
-                    </Badge>
-                <Badge className={classNames(style.badge, {
-                    [style.badgeRead]: warp.accessType === AccessType.Read,
-                    [style.badgeWrite]: warp.accessType === AccessType.Write
-                })}>
+                </BadgeBlock>
+                <AccessBadge>
                     {formatAccessType(warp.accessType)}
-                    </Badge>
-                <Badge className={classNames(style.badge, style.badgeSize)}>
+                </AccessBadge>
+                <BadgeSize>
                     {warp.size} b
+                </BadgeSize>
+                <Badge>
+                    {formatAddressSpace(warp.space)}
                 </Badge>
-                <Badge className={style.badge}>
-                    {formatAddressSpace(warp.space)} memory
-                </Badge>
-            </div>
+                <Buttons>
+                    <WarpButton onClick={this.selectAllWarpAccesses}
+                                size='small'
+                                title='Select all accesses of this warp'>
+                        <MdHourglassEmpty />
+                    </WarpButton>
+                    <WarpButton onClick={this.deselect}
+                                size='small'
+                                title='Deselect'>
+                        <MdClose />
+                    </WarpButton>
+                </Buttons>
+            </WarpTitle>
         );
-    }
-    renderGrid = (nodes: Array<{x: number, y: number}>,
-                  nodeSize: {width: number, height: number}): JSX.Element[] =>
-    {
-        const grid: JSX.Element[] = [];
-        const width = dims.cols;
-        const height = dims.rows;
-
-        const warp = this.props.warp;
-        const accesses = this.createWarpAccesses(this.props.trace, warp);
-        for (let y = 0; y < height; y++)
-        {
-            for (let x = 0; x < width; x++)
-            {
-                const index = y * (width) + x;
-                const access = accesses[index];
-
-                grid.push(
-                    <Thread
-                        key={index}
-                        x={nodes[index].x}
-                        y={nodes[index].y}
-                        width={nodeSize.width}
-                        height={nodeSize.height}
-                        warp={warp}
-                        access={access}
-                        memorySelection={this.props.memorySelection}
-                        onSelectChanged={this.handleRangeSelectChange}
-                        selectionEnabled={this.props.selectionEnabled} />
-                );
-            }
-        }
-
-        return grid;
     }
 
     handleRangeSelectChange = (range: AddressRange) =>
@@ -167,20 +168,6 @@ export class WarpGrid extends PureComponent<Props, State>
             }
             else this.props.selectRange(null);
         }
-    }
-
-    calculateLayout = (gridSize: {rows: number, cols: number},
-                       canvasSize: {width: number, height: number}) =>
-    {
-        const layout = GridLayout()
-            .data(_.range(gridSize.rows * gridSize.cols))
-            .bands(true)
-            .rows(gridSize.rows)
-            .cols(gridSize.cols)
-            .size([canvasSize.width, canvasSize.height]);
-        layout.layout();
-
-        return layout;
     }
 
     createWarpAccesses = (trace: Trace, warp: Warp)

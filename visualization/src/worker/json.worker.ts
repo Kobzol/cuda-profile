@@ -1,4 +1,4 @@
-const ctx: Worker = self as any;
+const ctx: Worker = self as {} as Worker;
 
 ctx.onmessage = message =>
 {

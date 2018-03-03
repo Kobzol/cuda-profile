@@ -4,8 +4,9 @@ import {ConnectedRouter} from 'react-router-redux';
 import {history, persistor, store} from './lib/state/store';
 import {PersistGate} from 'redux-persist/es/integration/react';
 import {Content} from './components/content/content';
+import {hot} from 'react-hot-loader';
 
-export class App extends PureComponent
+class AppComponent extends PureComponent
 {
     render()
     {
@@ -22,3 +23,5 @@ export class App extends PureComponent
         );
     }
 }
+
+export const App = hot(module)(AppComponent);

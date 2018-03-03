@@ -1,12 +1,11 @@
 import React, {PureComponent} from 'react';
-import {Warp} from '../../../lib/profile/warp';
+import {Warp} from '../../../../../lib/profile/warp';
 import brace from 'brace';
 import AceEditor from 'react-ace';
 import 'brace/mode/c_cpp';
 import 'brace/theme/chrome';
 import _ from 'lodash';
-import {SourceLocation} from '../../../lib/profile/metadata';
-import {Button, Glyphicon, Panel} from 'react-bootstrap';
+import {SourceLocation} from '../../../../../lib/profile/metadata';
 
 import style from './source-view.scss';
 
@@ -16,8 +15,7 @@ interface Props
     file: string;
     warps: Warp[];
     locationFilter: SourceLocation[];
-    setLocationFilter: (line: SourceLocation[]) => void;
-    onClose: () => void;
+    setLocationFilter: (lines: SourceLocation[]) => void;
 }
 
 export class SourceView extends PureComponent<Props>
@@ -37,30 +35,13 @@ export class SourceView extends PureComponent<Props>
 
     render()
     {
-        return (
-            <Panel header={this.renderHeader()}
-                   bsStyle='primary'
-                   className={style.sourceWrapper}>
-                <AceEditor
+        return <AceEditor
                     mode='c_cpp'
                     theme='chrome'
                     width='490px'
                     readOnly
                     onLoad={this.onLoad}
-                    value={this.props.content} />
-            </Panel>
-        );
-    }
-    renderHeader = (): JSX.Element =>
-    {
-        return (
-            <div className={style.sourceHeader}>
-                <div>{this.props.file}</div>
-                <Button onClick={this.props.onClose} title='Close'>
-                    <Glyphicon glyph='remove' />
-                </Button>
-            </div>
-        );
+                    value={this.props.content} />;
     }
 
     onLoad = (ace: brace.Editor) =>
