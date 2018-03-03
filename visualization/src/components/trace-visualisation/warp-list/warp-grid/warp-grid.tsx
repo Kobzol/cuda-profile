@@ -75,14 +75,9 @@ const BadgeWrite = Badge.extend`
 
 export class WarpGrid extends PureComponent<Props, State>
 {
-    constructor(props: Props)
-    {
-        super(props);
-
-        this.state = {
-            blockMapSelector: createBlockSelector()
-        };
-    }
+    state: State = {
+        blockMapSelector: createBlockSelector()
+    };
 
     render()
     {

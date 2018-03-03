@@ -28,14 +28,9 @@ interface State
 
 export class Thread extends PureComponent<Props, State>
 {
-    constructor(props: Props)
-    {
-        super(props);
-
-        this.state = {
-            hovered: false
-        };
-    }
+    state: State = {
+        hovered: false
+    };
 
     render()
     {

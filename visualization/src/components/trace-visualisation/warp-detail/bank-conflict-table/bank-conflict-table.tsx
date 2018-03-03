@@ -31,14 +31,9 @@ interface AccessMap
 
 export class BankConflictTable extends PureComponent<Props, State>
 {
-    constructor(props: Props)
-    {
-        super(props);
-
-        this.state = {
-            getAccessMap: createSelector(warps => warps, warps => this.createAccessMap(this.getSharedWarps(warps)))
-        };
-    }
+    state: State = {
+        getAccessMap: createSelector(warps => warps, warps => this.createAccessMap(this.getSharedWarps(warps)))
+    };
 
     render()
     {

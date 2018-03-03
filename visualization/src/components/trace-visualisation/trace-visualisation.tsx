@@ -80,15 +80,10 @@ const RightColumn = Column.extend`
 
 class TraceVisualisationComponent extends PureComponent<Props, State>
 {
-    constructor(props: Props)
-    {
-        super(props);
-
-        this.state = {
-            rangeSelections: [],
-            memorySelection: []
-        };
-    }
+    state: State = {
+        rangeSelections: [],
+        memorySelection: []
+    };
 
     componentWillMount()
     {

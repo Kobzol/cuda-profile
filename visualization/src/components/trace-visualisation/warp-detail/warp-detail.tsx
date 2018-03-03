@@ -34,14 +34,9 @@ const TabLink = styled(NavLink)`
 
 export class WarpDetail extends PureComponent<Props, State>
 {
-    constructor(props: Props)
-    {
-        super(props);
-
-        this.state = {
-            activeTab: 0
-        };
-    }
+    state: State = {
+        activeTab: 0
+    };
 
     render()
     {

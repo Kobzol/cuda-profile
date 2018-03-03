@@ -26,14 +26,9 @@ const Wrapper = styled.div`
 
 export class WarpOverview extends PureComponent<Props, State>
 {
-    constructor(props: Props)
-    {
-        super(props);
-
-        this.state = {
-            limit: 100
-        };
-    }
+    state: State = {
+        limit: 100
+    };
 
     render()
     {

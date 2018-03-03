@@ -53,17 +53,12 @@ const Section = styled.div`
 
 export class WarpPanel extends PureComponent<Props, State>
 {
-    constructor(props: Props)
-    {
-        super(props);
-
-        this.state = {
-            blockFilter: { x: null, y: null, z: null },
-            locationFilter: [],
-            sourceModalOpened: false,
-            activePanels: []
-        };
-    }
+    state: State = {
+        blockFilter: { x: null, y: null, z: null },
+        locationFilter: [],
+        sourceModalOpened: false,
+        activePanels: []
+    };
 
     render()
     {
