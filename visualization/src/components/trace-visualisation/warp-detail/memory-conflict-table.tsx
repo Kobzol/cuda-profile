@@ -20,7 +20,7 @@ export class MemoryConflictTable extends PureComponent<Props>
         const conflicts = this.calculateConflicts(this.props.warps);
         if (conflicts.length === 0)
         {
-            return <div>No memory conflicts detected in selected warps.</div>;
+            return <div>No memory conflicts detected in selected accesses.</div>;
         }
 
         return (

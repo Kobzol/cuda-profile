@@ -12,11 +12,10 @@ import {select} from 'd3-selection';
 import {range} from 'd3-array';
 import * as d3 from 'd3';
 import {formatAddressSpace, formatByteSize} from '../../../../../lib/util/format';
-import {Card, CardBody} from 'reactstrap';
-
-import style from './memory-block.scss';
+import {Badge, Card, CardBody} from 'reactstrap';
 import CardHeader from 'reactstrap/lib/CardHeader';
-
+import {getFilename} from '../../../../../lib/util/string';
+import styled from 'styled-components';
 
 interface Props
 {
@@ -27,6 +26,28 @@ interface Props
 
 const selectedBlock = 'rgb(220, 0, 0)';
 const activeBlock = 'rgb(65, 105, 225)';
+
+const Wrapper = styled(Card)`
+  width: 100%;
+`;
+const Header = styled(CardHeader)`
+  padding: 10px;
+`;
+const Body = styled(CardBody)`
+  padding: 10px;
+`;
+const MemoryBadge = styled(Badge)`
+  margin-right: 5px;
+`;
+const BadgeAddress = MemoryBadge.extend`
+  background-color: #337AB7;
+`;
+const BadgeDecl = MemoryBadge.extend`
+  background-color: #B353B7;
+`;
+const BadgeSource = MemoryBadge.extend`
+  background-color: #1AB717;
+`;
 
 export class MemoryBlock extends PureComponent<Props>
 {
@@ -153,35 +174,41 @@ export class MemoryBlock extends PureComponent<Props>
     render()
     {
         return (
-            <Card className={style.memoryBlock} id='memory-block'
-                   color='primary'>
-                <CardHeader>{this.createLabel(this.props.allocation)}</CardHeader>
-                <CardBody>
-                    <div className='block-wrapper' ref={(wrapper) => this.blockWrapper = wrapper}>
+            <Wrapper>
+                <Header>
+                    {this.createLabel(this.props.allocation)}
+                </Header>
+                <Body>
+                    <div ref={(wrapper) => this.blockWrapper = wrapper}>
                         <div className='block-label' />
                         <svg width={'100%'}>
                             <g className='blocks' />
                         </svg>
                     </div>
-                </CardBody>
-            </Card>
+                </Body>
+            </Wrapper>
         );
     }
 
-    createLabel = (allocation: MemoryAllocation): string =>
+    createLabel = (allocation: MemoryAllocation): JSX.Element =>
     {
-        const {size, address, space, type, name, location} = allocation;
-        let label = `${formatByteSize(size)} of ${type} allocated at ${address} (${formatAddressSpace(space)} space)`;
-        if (name !== '')
+        return (
+            <>
+                <BadgeDecl>{this.createVarDecl(allocation)}</BadgeDecl>
+                <BadgeAddress>{allocation.address}</BadgeAddress>
+                <MemoryBadge>{formatAddressSpace(allocation.space)}</MemoryBadge>
+                <BadgeSource>{getFilename(allocation.location)}</BadgeSource>
+            </>
+        );
+    }
+    createVarDecl = (allocation: MemoryAllocation): JSX.Element =>
+    {
+        const {size, elementSize, type, name} = allocation;
+        if (size && elementSize && type && name)
         {
-            label += `, variable ${name}`;
+            return <>{type} {name}[{size / elementSize}]</>;
         }
-        if (location !== '')
-        {
-            label += `, at ${location}`;
-        }
-
-        return label;
+        return <>{formatByteSize(size)} of {type}</>;
     }
 
     calculateRange = (): AddressRange =>

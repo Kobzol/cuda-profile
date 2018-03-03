@@ -67,6 +67,7 @@ export class WarpDetail extends PureComponent<Props, State>
                             <MemoryList
                                 allocations={this.props.trace.allocations}
                                 rangeSelections={this.props.rangeSelections}
+                                selectedWarps={this.props.warps}
                                 onMemorySelect={this.props.onMemorySelect} />
                         </TabPane>
                     </TabContent>

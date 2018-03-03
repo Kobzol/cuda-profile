@@ -55,7 +55,7 @@ export class BankConflictTable extends PureComponent<Props, State>
         const sharedWarps = this.getSharedWarps(this.props.warps);
         if (sharedWarps.length === 0)
         {
-            return <div>No accesses to shared memory in selected warps.</div>;
+            return <div>No accesses to shared memory in selected accesses.</div>;
         }
 
         const accessMap = this.state.getAccessMap(this.props.warps);

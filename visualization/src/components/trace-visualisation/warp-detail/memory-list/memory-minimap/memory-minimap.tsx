@@ -4,9 +4,6 @@ import {MemoryAllocation} from '../../../../../lib/profile/memory-allocation';
 import {AddressRange, WarpAddressSelection} from '../../../../../lib/trace/selection';
 import {getAllocationAddressRange, getSelectionRange} from '../../../../../lib/profile/address';
 
-import style from './memory-minimap.scss';
-
-
 interface Props
 {
     width: number;
@@ -33,7 +30,6 @@ export class MemoryMinimap extends PureComponent<Props>
     {
         return (
             <canvas
-                className={style.memoryMinimap}
                 width={this.props.width}
                 height={this.props.height}
                 ref={canvas => this.canvasRef = canvas} />

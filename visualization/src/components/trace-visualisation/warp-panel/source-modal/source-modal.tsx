@@ -7,6 +7,7 @@ import {Trace} from '../../../../lib/profile/trace';
 import {Kernel} from '../../../../lib/profile/kernel';
 import {SourceLocation} from '../../../../lib/profile/metadata';
 import styled from 'styled-components';
+import {getFilename} from '../../../../lib/util/string';
 
 interface Props
 {
@@ -30,7 +31,7 @@ export class SourceModal extends PureComponent<Props>
             <Modal isOpen={this.props.opened}
                    toggle={this.props.onClose}>
                 <ModalHeader toggle={this.props.onClose}>
-                    {this.getFilename(this.props.kernel.metadata.source.file)}
+                    {getFilename(this.props.kernel.metadata.source.file)}
                 </ModalHeader>
                 <Body>
                     <SourceView content={this.props.kernel.metadata.source.content}
@@ -41,12 +42,5 @@ export class SourceModal extends PureComponent<Props>
                 </Body>
             </Modal>
         );
-    }
-
-    getFilename = (file: string): string =>
-    {
-        const slash = file.lastIndexOf('/');
-        if (slash === -1) return file;
-        return file.substr(slash + 1);
     }
 }

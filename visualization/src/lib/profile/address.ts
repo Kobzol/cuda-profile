@@ -48,6 +48,11 @@ export function getIntersection(bound: AddressRange, range: AddressRange): Addre
     return createRange(from, to);
 }
 
+export function intersects(a: AddressRange, b: AddressRange): boolean
+{
+    return getIntersection(a, b) !== a;
+}
+
 export function getSelectionRange(bound: AddressRange, selections: WarpAddressSelection[]): AddressRange
 {
     return getIntersection(bound, selections.length > 0 ?

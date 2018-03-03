@@ -83,7 +83,7 @@ export class WarpPanel extends PureComponent<Props, State>
                     <Section>
                         <h4>Active filters</h4>
                         {this.isFilterActive() ? this.renderFilter(warps) :
-                            `No filters (${this.props.trace.warps.length} warps total)`}
+                            `No filters (${this.props.trace.warps.length} accesses total)`}
                     </Section>
                     <Section>
                         <h4>Filter by block index</h4>
@@ -97,7 +97,7 @@ export class WarpPanel extends PureComponent<Props, State>
                         </Section>
                     }
                     <Section>
-                        <h4>Filtered warp minimap</h4>
+                        <h4>Filtered access minimap</h4>
                         <WarpOverview
                             warps={warps}
                             selectedWarps={this.props.selectedWarps}
@@ -109,7 +109,7 @@ export class WarpPanel extends PureComponent<Props, State>
     }
     renderFilter = (warps: Warp[]): JSX.Element =>
     {
-        const label = `${warps.length} warps selected by filter (${this.props.trace.warps.length} total)`;
+        const label = `${warps.length} accesses selected by filter (${this.props.trace.warps.length} total)`;
 
         const {x, y, z} = this.state.blockFilter;
         const dim = `${z || 'z'}.${y || 'y'}.${x || 'x'}`;

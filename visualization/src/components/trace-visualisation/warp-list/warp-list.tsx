@@ -40,7 +40,7 @@ export class WarpList extends PureComponent<Props>
         return (
             <Wrapper>
                 <Header>
-                    Selected warps
+                    Selected accesses
                     {this.props.warps.length > 0 &&
                         <Button title='Clear selection'
                                 size='small'

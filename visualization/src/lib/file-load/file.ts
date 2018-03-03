@@ -3,12 +3,12 @@ import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/throw';
-import {Metadata} from '../format/metadata';
+import {Metadata} from '../serialization/metadata';
 import {readFile} from '../util/fs';
 import {createWorkerJob} from '../util/worker';
 import {InvalidFileContent, InvalidFileFormat} from './errors';
-import {Run} from '../format/run';
-import {Trace} from '../format/trace';
+import {Run} from '../serialization/run';
+import {Trace} from '../serialization/trace';
 
 import JsonWorker from '../../worker/json.worker';
 import ProtobufWorker from '../../worker/protobuf.worker';
