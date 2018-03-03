@@ -4,10 +4,9 @@ import brace from 'brace';
 import AceEditor from 'react-ace';
 import 'brace/mode/c_cpp';
 import 'brace/theme/chrome';
-import _ from 'lodash';
 import {SourceLocation} from '../../../../../lib/profile/metadata';
-
 import style from './source-view.scss';
+import {groupBy, equals, without} from 'ramda';
 
 interface Props
 {
@@ -53,7 +52,7 @@ export class SourceView extends PureComponent<Props>
             getDocumentPosition(): { row: number };
         }
 
-        const lineMap = _.groupBy(this.props.warps, (warp: Warp) => warp.location.line);
+        const lineMap = groupBy((warp: Warp) => warp.location.line.toString(), this.props.warps);
         this.ace.on('guttermousedown', (event: Event) => {
             const line = event.getDocumentPosition().row + 1;
             if (lineMap.hasOwnProperty(line))
@@ -63,10 +62,10 @@ export class SourceView extends PureComponent<Props>
                     file: this.props.file
                 };
 
-                const sameLoc = this.props.locationFilter.find(filter => _.isEqual(filter, location));
-                if (sameLoc !== undefined)
+                const existingLocation = this.props.locationFilter.find(filter => equals(filter, location));
+                if (existingLocation !== undefined)
                 {
-                    this.props.setLocationFilter(_.without(this.props.locationFilter, sameLoc));
+                    this.props.setLocationFilter(without([existingLocation], this.props.locationFilter));
                 }
                 else this.props.setLocationFilter(this.props.locationFilter.concat([location]));
             }
@@ -88,7 +87,7 @@ export class SourceView extends PureComponent<Props>
     }
     setLineAnnotations = () =>
     {
-        const lineMap = _.groupBy(this.props.warps, (warp: Warp) => warp.location.line);
+        const lineMap = groupBy((warp: Warp) => warp.location.line.toString(), this.props.warps);
         this.ace.session.setAnnotations(Object.keys(lineMap).map(line => ({
             row: parseInt(line) - 1,
             column: 0,

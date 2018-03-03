@@ -7,11 +7,11 @@ import {Dim3} from '../../../lib/profile/dim3';
 import {WarpOverview} from './warp-overview/warp-overview';
 import {Button, ListGroup, ListGroupItem, Card, CardHeader, CardBody} from 'reactstrap';
 import {SourceLocation} from '../../../lib/profile/metadata';
-import _ from 'lodash';
 import {SourceModal} from './source-modal/source-modal';
 import styled from 'styled-components';
 import {TraceHeader} from './trace-header';
 import {TraceSelection} from '../../../lib/trace/selection';
+import {contains} from 'ramda';
 
 interface Props
 {
@@ -178,7 +178,7 @@ export class WarpPanel extends PureComponent<Props, State>
     testLocationFilter = (warp: Warp): boolean =>
     {
         const location: SourceLocation = { file: warp.location.file, line: warp.location.line };
-        return _.some(this.state.locationFilter, location);
+        return contains(location, this.state.locationFilter);
     }
 
     changeSourcePanelVisibility = (sourceModalOpened: boolean) =>

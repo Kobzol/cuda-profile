@@ -4,9 +4,9 @@ import {Warp} from '../../../lib/profile/warp';
 import {WarpGrid} from './warp-grid/warp-grid';
 import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
 import {getAccessesAddressRange} from '../../../lib/profile/address';
-import _ from 'lodash';
 import {Button, Card, CardHeader, CardBody} from 'reactstrap';
 import styled from 'styled-components';
+import {chain} from 'ramda';
 
 interface Props
 {
@@ -73,7 +73,7 @@ export class WarpList extends PureComponent<Props>
     {
         if (range !== null)
         {
-            range.warpRange = getAccessesAddressRange(_.flatMap(this.props.warps, warp => warp.accesses),
+            range.warpRange = getAccessesAddressRange(chain(warp => warp.accesses, this.props.warps),
                 this.props.warps[0].size);
         }
         this.props.selectRange(range);

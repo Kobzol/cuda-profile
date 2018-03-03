@@ -17,16 +17,16 @@ import {push} from 'react-router-redux';
 import {WarpDetail} from './warp-detail/warp-detail';
 import {WarpPanel} from './warp-panel/warp-panel';
 import {Action} from 'typescript-fsa';
-import _ from 'lodash';
 import {withRouter} from 'react-router';
 import styled from 'styled-components';
+import {equals} from 'ramda';
 
 export const selectAllWarpAccesses = (warp: Warp) =>
 {
     return (dispatch: (action: Action<Warp[]>) => void, getState: () => GlobalState) => {
         const state = getState();
         const trace = selectedTrace(state);
-        const warps = trace.warps.filter(w => w.id === warp.id && _.isEqual(warp.blockIdx, w.blockIdx));
+        const warps = trace.warps.filter(w => w.id === warp.id && equals(warp.blockIdx, w.blockIdx));
 
         dispatch(selectWarps(warps));
     };
@@ -170,9 +170,7 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
 
     setMemorySelection = (memorySelection: AddressRange[]) =>
     {
-        this.setState({
-            memorySelection
-        });
+        this.setState({ memorySelection });
     }
 }
 

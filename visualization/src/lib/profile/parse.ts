@@ -12,13 +12,13 @@ import {MemoryAccess as MemoryAccessFormat} from '../serialization/memory-access
 import {MemoryAllocation as MemoryAllocationFormat} from '../serialization/memory-allocation';
 import {MemoryAllocation} from './memory-allocation';
 import {hasOwnProperty} from 'tslint/lib/utils';
-import {Dictionary} from 'lodash';
 import {getLaneId, getWarpId, getWarpStart} from './warp';
 import {MissingProfileData} from './errors';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
 import bigInt from 'big-integer';
+import {Dictionary} from 'ramda';
 
 
 function parseMetadata(metadata: MetadataFormat): Metadata

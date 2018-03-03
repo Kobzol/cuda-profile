@@ -1,8 +1,6 @@
 import React, {PureComponent} from 'react';
 import {Warp} from '../../../../lib/profile/warp';
 import {Button} from 'reactstrap';
-import GridLayout from 'd3-v4-grid';
-import _ from 'lodash';
 import {WarpMiniature} from './warp-miniature';
 import {SVGGrid} from '../../svg-grid/svg-grid';
 import styled from 'styled-components';
@@ -56,7 +54,7 @@ export class WarpOverview extends PureComponent<Props, State>
     {
         if (index >= this.props.warps.length || index >= this.state.limit) return null;
         const warp = this.props.warps[index];
-        const selected = _.includes(this.props.selectedWarps, warp);
+        const selected = this.props.selectedWarps.includes(warp);
 
         return (
             <WarpMiniature
@@ -87,23 +85,9 @@ export class WarpOverview extends PureComponent<Props, State>
         }));
     }
 
-    calculateLayout = (gridSize: {rows: number, cols: number},
-                       canvasSize: {width: number, height: number}) =>
-    {
-        const layout = GridLayout()
-            .data(_.range(gridSize.rows * gridSize.cols))
-            .bands(true)
-            .rows(gridSize.rows)
-            .cols(gridSize.cols)
-            .size([canvasSize.width, canvasSize.height]);
-        layout.layout();
-
-        return layout;
-    }
-
     handleSelect = (warp: Warp) =>
     {
-        if (_.includes(this.props.selectedWarps, warp))
+        if (this.props.selectedWarps.includes(warp))
         {
             this.props.onWarpSelect(this.props.selectedWarps.filter(w => w !== warp));
         }
@@ -111,7 +95,7 @@ export class WarpOverview extends PureComponent<Props, State>
     }
     handleSelectAdd = (warp: Warp) =>
     {
-        if (_.includes(this.props.selectedWarps, warp))
+        if (this.props.selectedWarps.includes(warp))
         {
             this.props.onWarpSelect(this.props.selectedWarps.filter(w => w !== warp));
         }

@@ -8,14 +8,13 @@ import {Thread} from './thread';
 import {WarpAddressSelection} from '../../../../lib/trace/selection';
 import {getAccessesAddressRange} from '../../../../lib/profile/address';
 import {Selector} from 'reselect';
-import {Dictionary} from 'lodash';
-import _ from 'lodash';
 import {Badge as BsBadge, Button, ButtonGroup} from 'reactstrap';
 import {formatAccessType, formatAddressSpace, formatDim3} from '../../../../lib/util/format';
 import MdHourglassEmpty from 'react-icons/lib/md/hourglass-empty';
 import MdClose from 'react-icons/lib/md/close';
 import styled from 'styled-components';
 import {SVGGrid} from '../../svg-grid/svg-grid';
+import {Dictionary, range} from 'ramda';
 
 interface Props
 {
@@ -154,15 +153,15 @@ export class WarpGrid extends PureComponent<Props, State>
         );
     }
 
-    handleRangeSelectChange = (range: AddressRange) =>
+    handleRangeSelectChange = (addressRange: AddressRange) =>
     {
         if (this.props.selectionEnabled)
         {
-            if (range !== null)
+            if (addressRange !== null)
             {
                 this.props.selectRange({
                     warpRange: getAccessesAddressRange(this.props.warp.accesses, this.props.warp.size),
-                    threadRange: range
+                    threadRange: addressRange
                 });
             }
             else this.props.selectRange(null);
@@ -172,7 +171,7 @@ export class WarpGrid extends PureComponent<Props, State>
     createWarpAccesses = (trace: Trace, warp: Warp)
         : Array<MemoryAccess | null> =>
     {
-        const accesses = _.range(trace.warpSize).map(() => null);
+        const accesses = range(0, trace.warpSize).map(() => null);
         for (const access of warp.accesses)
         {
             accesses[access.id] = access;

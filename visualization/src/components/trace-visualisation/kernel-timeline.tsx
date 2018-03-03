@@ -3,9 +3,10 @@ import {Card, CardBody} from 'reactstrap';
 import Timeline from 'react-visjs-timeline';
 import {Profile} from '../../lib/profile/profile';
 import moment from 'moment';
-import {flatMap} from 'lodash';
 import {TraceSelection} from '../../lib/trace/selection';
 import CardHeader from 'reactstrap/lib/CardHeader';
+import {chain, addIndex} from 'ramda';
+import {Kernel} from '../../lib/profile/kernel';
 
 interface Props
 {
@@ -57,7 +58,9 @@ export class KernelTimeline extends PureComponent<Props>
 
     createTimelineItems = (profile: Profile) =>
     {
-        return flatMap(profile.kernels, (kernel, kernelIndex) => {
+        const indexedChain = addIndex(chain);
+
+        return indexedChain((kernel: Kernel, kernelIndex: number) => {
             return kernel.traces.map((trace, index) => {
                 const start = new Date(trace.start);
                 const end = new Date(trace.end);
@@ -71,7 +74,7 @@ export class KernelTimeline extends PureComponent<Props>
                     title: `${label}: ${moment(start).format('HH:mm:ss.SSS')} - ${moment(end).format('HH:mm:ss.SSS')}`
                 };
             });
-        });
+        }, profile.kernels);
     }
 
     makeId = (kernelIndex: number, traceIndex: number): string =>

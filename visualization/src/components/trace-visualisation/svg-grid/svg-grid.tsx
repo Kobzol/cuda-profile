@@ -1,7 +1,7 @@
 import React, {PureComponent, Fragment} from 'react';
-import _ from 'lodash';
 import GridLayout from 'd3-v4-grid';
 import styled from 'styled-components';
+import {range} from 'ramda';
 
 interface Props
 {
@@ -65,7 +65,7 @@ export class SVGGrid extends PureComponent<Props>
                        canvasSize: {width: number, height: number}) =>
     {
         const layout = GridLayout()
-            .data(_.range(gridSize.rows * gridSize.cols))
+            .data(range(0, gridSize.rows * gridSize.cols))
             .bands(true)
             .rows(gridSize.rows)
             .cols(gridSize.cols)

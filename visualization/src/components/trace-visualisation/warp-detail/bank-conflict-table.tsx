@@ -2,7 +2,6 @@ import React, {PureComponent} from 'react';
 import {AddressSpace, Warp} from '../../../lib/profile/warp';
 import {Trace} from '../../../lib/profile/trace';
 import {AddressRange} from '../../../lib/trace/selection';
-import _ from 'lodash';
 import {MemoryAccess} from '../../../lib/profile/memory-access';
 import {addressToNum, getAccessAddressRange} from '../../../lib/profile/address';
 import {formatDim3} from '../../../lib/util/format';
@@ -10,6 +9,7 @@ import {Alert, Table} from 'reactstrap';
 import {createSelector, Selector} from 'reselect';
 import MdWarning from 'react-icons/lib/md/warning';
 import styled from 'styled-components';
+import {all, chain, groupBy} from 'ramda';
 
 interface State
 {
@@ -99,7 +99,7 @@ export class BankConflictTable extends PureComponent<Props, State>
         while (true)
         {
             const columns = validColumns.map(col => index < accessMap[col].length ? accessMap[col][index] : null);
-            if (_.every(columns, col => col === null)) break;
+            if (all(col => col === null, columns)) break;
 
             rows.push(
                 <tr key={index}>
@@ -150,13 +150,13 @@ export class BankConflictTable extends PureComponent<Props, State>
     }
     createAccessMap = (warps: Warp[]): AccessMap =>
     {
-        const accessesWithWarp = _.flatMap(warps, warp => warp.accesses.map(access => ({
+        const accessesWithWarp = chain(warp => warp.accesses.map(access => ({
             warp,
             access
-        })));
+        })), warps);
 
-        return _.groupBy(accessesWithWarp, (pair: {warp: Warp, access: MemoryAccess}) =>
-            addressToNum(pair.access.address).divide(4).mod(32).toJSNumber()
-        );
+        return groupBy((pair: {warp: Warp, access: MemoryAccess}) =>
+                addressToNum(pair.access.address).divide(4).mod(32).toJSNumber().toString(),
+            accessesWithWarp);
     }
 }

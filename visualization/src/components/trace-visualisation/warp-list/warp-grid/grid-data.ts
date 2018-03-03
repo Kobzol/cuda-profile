@@ -1,7 +1,7 @@
 import {MemoryAccess} from '../../../../lib/profile/memory-access';
 import {createSelector} from 'reselect';
-import {Dictionary} from 'lodash';
 import {Warp} from '../../../../lib/profile/warp';
+import {Dictionary} from 'ramda';
 
 export function createBlockSelector()
 {

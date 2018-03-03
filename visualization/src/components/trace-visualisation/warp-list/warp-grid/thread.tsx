@@ -4,9 +4,8 @@ import {MemoryAccess} from '../../../../lib/profile/memory-access';
 import {getAccessesAddressRange, checkIntersectionRange} from '../../../../lib/profile/address';
 import {AddressRange} from '../../../../lib/trace/selection';
 import {formatDim3} from '../../../../lib/util/format';
-import _ from 'lodash';
-import {Color} from 'chroma-js';
-import * as chroma from 'chroma-js';
+import {Color, default as chroma} from 'chroma-js';
+import {any} from 'ramda';
 
 interface Props
 {
@@ -98,8 +97,8 @@ export class Thread extends PureComponent<Props, State>
         }
         else if (this.props.memorySelection !== null &&
                 access !== null &&
-            _.some(this.props.memorySelection, selection =>
-                checkIntersectionRange(selection, access.address, warp.size)))
+                any(selection => checkIntersectionRange(selection, access.address, warp.size),
+                    this.props.memorySelection))
         {
             return color.darken(1.15);
         }

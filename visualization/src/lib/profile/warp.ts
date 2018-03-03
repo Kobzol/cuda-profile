@@ -4,7 +4,7 @@ import {MemoryAccess} from './memory-access';
 import {DebugLocation} from './metadata';
 import {addressAddStr} from './address';
 import {AddressRange} from '../trace/selection';
-import _ from 'lodash';
+import {equals} from 'ramda';
 
 export enum AccessType
 {
@@ -94,7 +94,7 @@ export function coalesceConflicts(conflicts: WarpConflict[]): WarpConflict[]
         const conflict = conflicts[i];
         let start = i + 1;
 
-        while (start < conflicts.length && _.isEqual(conflicts[start].accesses, conflict.accesses))
+        while (start < conflicts.length && equals(conflicts[start].accesses, conflict.accesses))
         {
             start++;
         }
