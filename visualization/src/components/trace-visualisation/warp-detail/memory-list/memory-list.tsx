@@ -1,7 +1,7 @@
 import React, {PureComponent} from 'react';
-import {MemoryAllocation} from '../../../lib/profile/memory-allocation';
+import {MemoryAllocation} from '../../../../lib/profile/memory-allocation';
 import {MemoryBlock} from './memory-block/memory-block';
-import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
+import {AddressRange, WarpAddressSelection} from '../../../../lib/trace/selection';
 import {MemoryMinimap} from './memory-minimap/memory-minimap';
 
 import style from './memory-list.scss';

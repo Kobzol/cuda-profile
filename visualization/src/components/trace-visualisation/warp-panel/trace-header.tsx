@@ -1,10 +1,10 @@
 import React, {PureComponent} from 'react';
 import moment from 'moment';
-import {Kernel} from '../../lib/profile/kernel';
-import {Trace} from '../../lib/profile/trace';
+import {Kernel} from '../../../lib/profile/kernel';
+import {Trace} from '../../../lib/profile/trace';
 import {Button} from 'reactstrap';
 import styled from 'styled-components';
-import {TraceSelection} from '../../lib/trace/selection';
+import {TraceSelection} from '../../../lib/trace/selection';
 
 interface Props
 {

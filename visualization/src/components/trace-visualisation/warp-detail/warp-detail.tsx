@@ -3,9 +3,9 @@ import {Trace} from '../../../lib/profile/trace';
 import {Warp} from '../../../lib/profile/warp';
 import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
 import {Card, CardHeader, CardBody} from 'reactstrap';
-import {MemoryConflictTable} from './memory-conflict-table/memory-conflict-table';
-import {BankConflictTable} from './bank-conflict-table/bank-conflict-table';
-import {MemoryList} from '../memory-list/memory-list';
+import {MemoryConflictTable} from './memory-conflict-table';
+import {BankConflictTable} from './bank-conflict-table';
+import {MemoryList} from './memory-list/memory-list';
 import {Nav, NavItem, NavLink, TabContent, TabPane} from 'reactstrap';
 import styled from 'styled-components';
 

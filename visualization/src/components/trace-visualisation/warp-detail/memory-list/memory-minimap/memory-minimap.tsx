@@ -1,8 +1,8 @@
 import React from 'react';
 import {PureComponent} from 'react';
-import {MemoryAllocation} from '../../../../lib/profile/memory-allocation';
-import {AddressRange, WarpAddressSelection} from '../../../../lib/trace/selection';
-import {getAllocationAddressRange, getSelectionRange} from '../../../../lib/profile/address';
+import {MemoryAllocation} from '../../../../../lib/profile/memory-allocation';
+import {AddressRange, WarpAddressSelection} from '../../../../../lib/trace/selection';
+import {getAllocationAddressRange, getSelectionRange} from '../../../../../lib/profile/address';
 
 import style from './memory-minimap.scss';
 

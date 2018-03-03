@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 import {Kernel} from '../../../lib/profile/kernel';
 import {Trace} from '../../../lib/profile/trace';
 import {Warp} from '../../../lib/profile/warp';
-import {WarpFilter} from './warp-filter/warp-filter';
+import {WarpFilter} from './warp-filter';
 import {Dim3} from '../../../lib/profile/dim3';
 import {WarpOverview} from './warp-overview/warp-overview';
 import {Button, ListGroup, ListGroupItem, Card, CardHeader, CardBody} from 'reactstrap';
@@ -10,7 +10,7 @@ import {SourceLocation} from '../../../lib/profile/metadata';
 import _ from 'lodash';
 import {SourceModal} from './source-modal/source-modal';
 import styled from 'styled-components';
-import {TraceHeader} from '../trace-header';
+import {TraceHeader} from './trace-header';
 import {TraceSelection} from '../../../lib/trace/selection';
 
 interface Props

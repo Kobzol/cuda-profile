@@ -1,5 +1,5 @@
 import React, {ChangeEvent, PureComponent} from 'react';
-import {Dim3} from '../../../../lib/profile/dim3';
+import {Dim3} from '../../../lib/profile/dim3';
 import styled from 'styled-components';
 import Input from 'reactstrap/lib/Input';
 

@@ -90,7 +90,11 @@ export class WarpGrid extends PureComponent<Props, State>
                              height={height}
                              rows={4}
                              cols={8}
-                             renderItem={this.renderThread} />
+                             renderItem={this.renderThread}
+                             {...{
+                                 memorySelection: this.props.memorySelection,
+                                 selectionEnabled: this.props.selectionEnabled
+                             }} />
                 </Content>
             </WarpWrapper>
         );

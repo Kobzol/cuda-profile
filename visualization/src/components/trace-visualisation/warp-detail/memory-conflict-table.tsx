@@ -1,10 +1,10 @@
 import React, {PureComponent} from 'react';
 import {Table} from 'reactstrap';
-import {coalesceConflicts, getConflicts, Warp, WarpConflict} from '../../../../lib/profile/warp';
-import {formatAccessType, formatDim3} from '../../../../lib/util/format';
-import {Trace} from '../../../../lib/profile/trace';
-import {AddressRange} from '../../../../lib/trace/selection';
-import {addressAddStr, getAddressRangeSize} from '../../../../lib/profile/address';
+import {coalesceConflicts, getConflicts, Warp, WarpConflict} from '../../../lib/profile/warp';
+import {formatAccessType, formatDim3} from '../../../lib/util/format';
+import {Trace} from '../../../lib/profile/trace';
+import {AddressRange} from '../../../lib/trace/selection';
+import {addressAddStr, getAddressRangeSize} from '../../../lib/profile/address';
 
 interface Props
 {

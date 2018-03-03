@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 import {TraceFile} from '../../lib/file-load/file';
 import {selectWarps, selectTrace, deselectWarp, clearWarpSelection} from '../../lib/trace/actions';
 import {GlobalState} from '../../lib/state/reducers';
-import {KernelTimeline} from './kernel-timeline/kernel-timeline';
+import {KernelTimeline} from './kernel-timeline';
 import {Profile} from '../../lib/profile/profile';
 import {AddressRange, TraceSelection} from '../../lib/trace/selection';
 import {Kernel} from '../../lib/profile/kernel';

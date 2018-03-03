@@ -1,10 +1,10 @@
 import React, {PureComponent} from 'react';
 import {Card, CardBody} from 'reactstrap';
 import Timeline from 'react-visjs-timeline';
-import {Profile} from '../../../lib/profile/profile';
+import {Profile} from '../../lib/profile/profile';
 import moment from 'moment';
 import {flatMap} from 'lodash';
-import {TraceSelection} from '../../../lib/trace/selection';
+import {TraceSelection} from '../../lib/trace/selection';
 import CardHeader from 'reactstrap/lib/CardHeader';
 
 interface Props

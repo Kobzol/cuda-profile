@@ -1,17 +1,15 @@
 import React, {PureComponent} from 'react';
-import {AddressSpace, Warp} from '../../../../lib/profile/warp';
-import {Trace} from '../../../../lib/profile/trace';
-import {AddressRange} from '../../../../lib/trace/selection';
+import {AddressSpace, Warp} from '../../../lib/profile/warp';
+import {Trace} from '../../../lib/profile/trace';
+import {AddressRange} from '../../../lib/trace/selection';
 import _ from 'lodash';
-import {MemoryAccess} from '../../../../lib/profile/memory-access';
-import {addressToNum, getAccessAddressRange} from '../../../../lib/profile/address';
-import {formatDim3} from '../../../../lib/util/format';
+import {MemoryAccess} from '../../../lib/profile/memory-access';
+import {addressToNum, getAccessAddressRange} from '../../../lib/profile/address';
+import {formatDim3} from '../../../lib/util/format';
 import {Alert, Table} from 'reactstrap';
 import {createSelector, Selector} from 'reselect';
-import classNames from 'classnames';
 import MdWarning from 'react-icons/lib/md/warning';
-
-import style from './bank-conflict-table.scss';
+import styled from 'styled-components';
 
 interface State
 {
@@ -28,6 +26,23 @@ interface AccessMap
 {
     [bank: number]: {access: MemoryAccess, warp: Warp}[];
 }
+
+const BankTable = styled(Table)`
+  width: auto;
+`;
+interface BankHeaderProps {
+    conflicted: boolean;
+}
+const BankHeader = styled.th`
+  text-align: center;
+  ${(props: BankHeaderProps) => props.conflicted ? `
+    background-color: #8F3938;
+    color: #FFFFFF;
+  ` : ''}
+`;
+const Access = styled.td`
+  text-align: center;
+`;
 
 export class BankConflictTable extends PureComponent<Props, State>
 {
@@ -46,7 +61,7 @@ export class BankConflictTable extends PureComponent<Props, State>
         const accessMap = this.state.getAccessMap(this.props.warps);
         return (
             <div>
-                <Table striped bordered hover className={style.table}>
+                <BankTable striped bordered hover>
                     <thead>
                         <tr>
                             {Object.keys(accessMap).map(bank => {
@@ -54,21 +69,19 @@ export class BankConflictTable extends PureComponent<Props, State>
                                 const title = `Bank #${bank} ${conflict ? '(conflict)' : ''}`;
 
                                 return (
-                                    <th onMouseEnter={() => this.selectBank(parseInt(bank, 10))}
+                                    <BankHeader onMouseEnter={() => this.selectBank(parseInt(bank, 10))}
                                         onMouseLeave={() => this.selectBank(null)}
                                         key={bank}
                                         title={title}
-                                        className={classNames(style.bankHeader, {
-                                            [style.conflicted] : conflict
-                                        })}>
+                                        conflicted={conflict}>
                                         {bank}
-                                    </th>
+                                    </BankHeader>
                                 );
                             })}
                         </tr>
                     </thead>
                     {this.renderRows(accessMap)}
-                </Table>
+                </BankTable>
                 {sharedWarps.length > 1 &&
                 <Alert color='warning'>
                     <MdWarning /> More than one warp with shared memory access selected,
@@ -91,14 +104,13 @@ export class BankConflictTable extends PureComponent<Props, State>
             rows.push(
                 <tr key={index}>
                     {columns.map((col, i) =>
-                        <td onMouseEnter={() => this.selectBank(parseInt(validColumns[i], 10))}
+                        <Access onMouseEnter={() => this.selectBank(parseInt(validColumns[i], 10))}
                             onMouseLeave={() => this.selectBank(null)}
                             key={i}
-                            className={style.access}
                             title={`${formatDim3(col.warp.blockIdx)}.${formatDim3(col.access.threadIdx)} ` +
                             `at ${col.access.address}`}>
                             {col !== null && this.renderAccess(col.warp, col.access)}
-                        </td>
+                        </Access>
                     )}
                 </tr>
             );

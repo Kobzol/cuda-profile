@@ -1,8 +1,8 @@
 import React from 'react';
 import {PureComponent} from 'react';
-import {MemoryAllocation} from '../../../lib/profile/memory-allocation';
-import {formatByteSize} from '../../../lib/util/format';
-import {AddressSpace} from '../../../lib/profile/warp';
+import {MemoryAllocation} from '../../../../lib/profile/memory-allocation';
+import {formatByteSize} from '../../../../lib/util/format';
+import {AddressSpace} from '../../../../lib/profile/warp';
 
 interface Props
 {
