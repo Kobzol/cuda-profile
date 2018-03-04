@@ -106,6 +106,7 @@
     "tslint": "^5.7.0",
     "worker-loader": "^1.1.0"
   },
+  "homepage": "https://kobzol.github.io/cuda-profile/",
   "jest": {
     "mapCoverage": true,
     "collectCoverageFrom": [
