@@ -2,21 +2,20 @@ import React, {PureComponent} from 'react';
 import {Trace} from '../../../lib/profile/trace';
 import {Warp} from '../../../lib/profile/warp';
 import {WarpGrid} from './warp-grid/warp-grid';
-import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
-import {getAccessesAddressRange} from '../../../lib/profile/address';
+import {AddressRange, WarpAccess} from '../../../lib/trace/selection';
 import {Button, Card, CardHeader, CardBody} from 'reactstrap';
 import styled from 'styled-components';
-import {chain} from 'ramda';
 
 interface Props
 {
     trace: Trace;
     warps: Warp[];
     memorySelection: AddressRange[];
-    selectRange(range: WarpAddressSelection): void;
-    deselect(warp: Warp): void;
-    clearSelection(): void;
-    selectAllWarpAccesses(warp: Warp): void;
+    selectedAccesses: WarpAccess[];
+    onAccessSelectionChange(access: WarpAccess, active: boolean): void;
+    onDeselect(warp: Warp): void;
+    onClearSelection(): void;
+    onSelectAllWarpAccesses(warp: Warp): void;
 }
 
 const Wrapper = styled(Card)`
@@ -44,7 +43,7 @@ export class WarpList extends PureComponent<Props>
                     {this.props.warps.length > 0 &&
                         <Button title='Clear selection'
                                 size='small'
-                                onClick={this.props.clearSelection}>
+                                onClick={this.props.onClearSelection}>
                             Clear selection
                         </Button>
                     }
@@ -58,24 +57,14 @@ export class WarpList extends PureComponent<Props>
                             trace={this.props.trace}
                             warp={warp}
                             canvasDimensions={{width: 220, height: 50}}
-                            selectRange={this.handleRangeSelect}
+                            selectedAccesses={this.props.selectedAccesses}
                             memorySelection={this.props.memorySelection}
-                            selectionEnabled={true}
-                            deselect={this.props.deselect}
-                            selectAllWarpAccesses={this.props.selectAllWarpAccesses} />
+                            onAccessSelectionChange={this.props.onAccessSelectionChange}
+                            onDeselect={this.props.onDeselect}
+                            onSelectAllWarpAccesses={this.props.onSelectAllWarpAccesses} />
                     )}
                 </WarpBody>
             </Wrapper>
         );
-    }
-
-    handleRangeSelect = (range: WarpAddressSelection) =>
-    {
-        if (range !== null)
-        {
-            range.warpRange = getAccessesAddressRange(chain(warp => warp.accesses, this.props.warps),
-                this.props.warps[0].size);
-        }
-        this.props.selectRange(range);
     }
 }

@@ -2,19 +2,17 @@ import React, {PureComponent} from 'react';
 import {MemoryAccess} from '../../../../lib/profile/memory-access';
 import {Trace} from '../../../../lib/profile/trace';
 import {createBlockSelector} from './grid-data';
-import {AddressRange} from '../../../../lib/trace/selection';
+import {AddressRange, WarpAccess} from '../../../../lib/trace/selection';
 import {getWarpId, Warp, AccessType} from '../../../../lib/profile/warp';
 import {Thread} from './thread';
-import {WarpAddressSelection} from '../../../../lib/trace/selection';
-import {getAccessesAddressRange} from '../../../../lib/profile/address';
 import {Selector} from 'reselect';
 import {Badge as BsBadge, Button, ButtonGroup} from 'reactstrap';
 import {formatAccessType, formatAddressSpace, formatDim3} from '../../../../lib/util/format';
 import MdHourglassEmpty from 'react-icons/lib/md/hourglass-empty';
 import MdClose from 'react-icons/lib/md/close';
 import styled from 'styled-components';
-import {SVGGrid} from '../../svg-grid/svg-grid';
-import {Dictionary, range} from 'ramda';
+import {BlockParams, SVGGrid} from '../../svg-grid/svg-grid';
+import {Dictionary, range, findIndex, equals} from 'ramda';
 
 interface Props
 {
@@ -23,10 +21,10 @@ interface Props
     index: number;
     memorySelection: AddressRange[];
     canvasDimensions: { width: number, height: number };
-    selectRange: (range: WarpAddressSelection) => void;
-    selectionEnabled: boolean;
-    deselect: (warp: Warp) => void;
-    selectAllWarpAccesses: (warp: Warp) => void;
+    selectedAccesses: WarpAccess[];
+    onAccessSelectionChange(access: WarpAccess, active: boolean): void;
+    onDeselect(warp: Warp): void;
+    onSelectAllWarpAccesses(warp: Warp): void;
 }
 interface State
 {
@@ -92,27 +90,36 @@ export class WarpGrid extends PureComponent<Props, State>
                              renderItem={this.renderThread}
                              {...{
                                  memorySelection: this.props.memorySelection,
-                                 selectionEnabled: this.props.selectionEnabled
+                                 selectedAccesses: this.props.selectedAccesses
                              }} />
                 </Content>
             </WarpWrapper>
         );
     }
-    renderThread = (index: number, x: number, y: number, width: number, height: number): JSX.Element =>
+    renderThread = (params: BlockParams): JSX.Element =>
     {
         const warp = this.props.warp;
         const accesses = this.createWarpAccesses(this.props.trace, warp);
+        const access = accesses[params.index];
+
+        const selectedIndex = findIndex(warpAccess =>
+            warpAccess.warp === warp &&
+            equals(warpAccess.access, access), this.props.selectedAccesses
+        );
+        const selected = selectedIndex !== -1;
+
         return (
             <Thread
-                x={x}
-                y={y}
-                width={width}
-                height={height}
+                x={params.x}
+                y={params.y}
+                width={params.width}
+                height={params.height}
                 warp={warp}
-                access={accesses[index]}
+                access={access}
+                selected={selected}
+                selectedIndex={selectedIndex}
                 memorySelection={this.props.memorySelection}
-                onSelectChanged={this.handleRangeSelectChange}
-                selectionEnabled={this.props.selectionEnabled} />
+                onSelectChanged={this.props.onAccessSelectionChange} />
         );
     }
 
@@ -153,21 +160,6 @@ export class WarpGrid extends PureComponent<Props, State>
         );
     }
 
-    handleRangeSelectChange = (addressRange: AddressRange) =>
-    {
-        if (this.props.selectionEnabled)
-        {
-            if (addressRange !== null)
-            {
-                this.props.selectRange({
-                    warpRange: getAccessesAddressRange(this.props.warp.accesses, this.props.warp.size),
-                    threadRange: addressRange
-                });
-            }
-            else this.props.selectRange(null);
-        }
-    }
-
     createWarpAccesses = (trace: Trace, warp: Warp)
         : Array<MemoryAccess | null> =>
     {
@@ -181,11 +173,11 @@ export class WarpGrid extends PureComponent<Props, State>
 
     selectAllWarpAccesses = () =>
     {
-        this.props.selectAllWarpAccesses(this.props.warp);
+        this.props.onSelectAllWarpAccesses(this.props.warp);
     }
 
     deselect = () =>
     {
-        this.props.deselect(this.props.warp);
+        this.props.onDeselect(this.props.warp);
     }
 }

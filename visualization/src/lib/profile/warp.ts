@@ -22,7 +22,7 @@ export enum AddressSpace
 export interface Warp
 {
     key: string;
-    index: number;
+    index: number; // linear index within trace
     id: number;
     slot: number;
     size: number;

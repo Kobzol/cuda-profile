@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 import {Warp} from '../../../../lib/profile/warp';
 import {Button} from 'reactstrap';
 import {WarpMiniature} from './warp-miniature';
-import {SVGGrid} from '../../svg-grid/svg-grid';
+import {BlockParams, SVGGrid} from '../../svg-grid/svg-grid';
 import styled from 'styled-components';
 
 interface Props
@@ -50,18 +50,18 @@ export class WarpOverview extends PureComponent<Props, State>
             </Wrapper>
         );
     }
-    renderWarpMiniature = (index: number, x: number, y: number, width: number, height: number): JSX.Element =>
+    renderWarpMiniature = (params: BlockParams): JSX.Element =>
     {
-        if (index >= this.props.warps.length || index >= this.state.limit) return null;
-        const warp = this.props.warps[index];
+        if (params.index >= this.props.warps.length || params.index >= this.state.limit) return null;
+        const warp = this.props.warps[params.index];
         const selected = this.props.selectedWarps.includes(warp);
 
         return (
             <WarpMiniature
-                x={x}
-                y={y}
-                width={width}
-                height={height}
+                x={params.x}
+                y={params.y}
+                width={params.width}
+                height={params.height}
                 warp={warp}
                 selected={selected}
                 onClick={this.handleMiniatureClick} />

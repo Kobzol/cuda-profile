@@ -1,10 +1,12 @@
 import {
     checkIntersection, getIntersection, getAccessesAddressRange, getAddressRangeSize,
-    getAllocationAddressRange
+    getAllocationAddressRange, getWarpAccessesRange
 } from '../lib/profile/address';
 import bigInt from 'big-integer';
 import {BigInteger} from 'big-integer';
 import {MemoryAccess} from '../lib/profile/memory-access';
+import {WarpAccess} from '../lib/trace/selection';
+import {createWarp} from './util';
 
 function num(value: string): BigInteger
 {
@@ -134,5 +136,38 @@ test('Allocation address range is calculated correctly ', () => {
     })).toEqual({
         from: address,
         to: '0xFFFFAFC'
+    });
+});
+test('Address range of warp accesses is calculated correctly', () => {
+    const range = {
+        from: '0x1000',
+        to: '0x4000'
+    };
+    const warp = createWarp({
+        size: 4
+    });
+    const createAccess = (address: string): WarpAccess =>
+    {
+        return {
+            warp,
+            access: {
+                id: 0,
+                threadIdx: {x: 0, y: 0, z: 0},
+                address
+            }
+        };
+    };
+
+    const accesses = [
+        createAccess('0x1050'),
+        createAccess('0x5000'),
+        createAccess('0x2000'),
+        createAccess('0x4000'),
+        createAccess('0x0800')
+    ];
+
+    expect(getWarpAccessesRange(range, accesses)).toEqual({
+        from: '0x1050',
+        to: '0x2004'
     });
 });

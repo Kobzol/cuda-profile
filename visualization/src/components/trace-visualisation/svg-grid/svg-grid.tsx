@@ -3,13 +3,22 @@ import GridLayout from 'd3-v4-grid';
 import styled from 'styled-components';
 import {range} from 'ramda';
 
+export interface BlockParams
+{
+    index: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
 interface Props
 {
     width: number;
     height: number;
     rows: number;
     cols: number;
-    renderItem(index: number, x: number, y: number, width: number, height: number): JSX.Element;
+    renderItem(params: BlockParams): JSX.Element;
 }
 
 const SVG = styled.svg`
@@ -52,7 +61,13 @@ export class SVGGrid extends PureComponent<Props>
                 const index = y * (width) + x;
                 grid.push(
                     <Fragment key={index}>
-                        {this.props.renderItem(index, nodes[index].x, nodes[index].y, nodeSize[0], nodeSize[1])}
+                        {this.props.renderItem({
+                            index,
+                            x: nodes[index].x,
+                            y: nodes[index].y,
+                            width: nodeSize[0],
+                            height: nodeSize[1]}
+                        )}
                     </Fragment>
                 );
             }

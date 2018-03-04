@@ -1,3 +1,6 @@
+import {Warp} from '../profile/warp';
+import {MemoryAccess} from '../profile/memory-access';
+
 export interface TraceSelection
 {
     kernel: number;
@@ -13,8 +16,16 @@ export interface AddressRange
     to: string;
 }
 
-export interface WarpAddressSelection
+export interface WarpAccess
 {
-    warpRange: AddressRange;
-    threadRange: AddressRange;
+    warp: Warp;
+    access: MemoryAccess;
+}
+
+export function createWarpAccess(warp: Warp, access: MemoryAccess): WarpAccess
+{
+    return {
+        warp,
+        access
+    };
 }

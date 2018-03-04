@@ -5,13 +5,12 @@ import {selectWarps, selectTrace, deselectWarp, clearWarpSelection} from '../../
 import {GlobalState} from '../../lib/state/reducers';
 import {KernelTimeline} from './kernel-timeline';
 import {Profile} from '../../lib/profile/profile';
-import {AddressRange, TraceSelection} from '../../lib/trace/selection';
+import {AddressRange, TraceSelection, WarpAccess} from '../../lib/trace/selection';
 import {Kernel} from '../../lib/profile/kernel';
 import {Trace} from '../../lib/profile/trace';
 import {selectedWarps, selectedKernel, selectedTrace} from '../../lib/trace/reducer';
 import {Warp} from '../../lib/profile/warp';
 import {WarpList} from './warp-list/warp-list';
-import {WarpAddressSelection} from '../../lib/trace/selection';
 import {Routes} from '../../lib/nav/routes';
 import {push} from 'react-router-redux';
 import {WarpDetail} from './warp-detail/warp-detail';
@@ -19,7 +18,7 @@ import {WarpPanel} from './warp-panel/warp-panel';
 import {Action} from 'typescript-fsa';
 import {withRouter} from 'react-router';
 import styled from 'styled-components';
-import {equals} from 'ramda';
+import {equals, without} from 'ramda';
 
 export const selectAllWarpAccesses = (warp: Warp) =>
 {
@@ -55,7 +54,7 @@ type Props = StateProps & DispatchProps;
 
 interface State
 {
-    rangeSelections: WarpAddressSelection[];
+    selectedAccesses: WarpAccess[];
     memorySelection: AddressRange[];
 }
 
@@ -81,7 +80,7 @@ const RightColumn = Column.extend`
 class TraceVisualisationComponent extends PureComponent<Props, State>
 {
     state: State = {
-        rangeSelections: [],
+        selectedAccesses: [],
         memorySelection: []
     };
 
@@ -153,19 +152,39 @@ class TraceVisualisationComponent extends PureComponent<Props, State>
                     trace={this.props.selectedTrace}
                     warps={this.props.selectedWarps}
                     memorySelection={this.state.memorySelection}
-                    selectRange={(range) => this.setState({
-                        rangeSelections: range === null ? [] : [range]
-                    })}
-                    deselect={this.props.deselectWarp}
-                    clearSelection={this.props.clearWarpSelection}
-                    selectAllWarpAccesses={this.props.selectAllWarpAccesses} />
+                    selectedAccesses={this.state.selectedAccesses}
+                    onAccessSelectionChange={this.handleAccessSelectChange}
+                    onDeselect={this.deselectWarp}
+                    onClearSelection={this.clearWarpSelection}
+                    onSelectAllWarpAccesses={this.props.selectAllWarpAccesses} />
                 <WarpDetail
                     trace={this.props.selectedTrace}
                     warps={this.props.selectedWarps}
-                    rangeSelections={this.state.rangeSelections}
+                    selectedAccesses={this.state.selectedAccesses}
                     onMemorySelect={this.setMemorySelection} />
             </RightColumn>
         );
+    }
+
+    handleAccessSelectChange = (access: WarpAccess, active: boolean) =>
+    {
+        this.setState(state => ({
+            selectedAccesses: active ? [...state.selectedAccesses, access] : without([access], state.selectedAccesses)
+        }));
+    }
+    deselectWarp = (warp: Warp) =>
+    {
+        this.setState(state => ({
+            selectedAccesses: state.selectedAccesses.filter(w => w.warp.index !== warp.index)
+        }));
+        this.props.deselectWarp(warp);
+    }
+    clearWarpSelection = () =>
+    {
+        this.setState(() => ({
+            selectedAccesses: []
+        }));
+        this.props.clearWarpSelection();
     }
 
     setMemorySelection = (memorySelection: AddressRange[]) =>

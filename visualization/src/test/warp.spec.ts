@@ -1,40 +1,6 @@
-import {
-    AccessType, AddressSpace, getBlockId, getConflicts, getCtaId, getLaneId, getWarpId, getWarpStart,
-    Warp
-} from '../lib/profile/warp';
+import {getBlockId, getConflicts, getCtaId, getLaneId, getWarpId, getWarpStart, Warp} from '../lib/profile/warp';
 import {InvalidWarpData} from '../lib/profile/errors';
-import {DebugLocation} from '../lib/profile/metadata';
-import {Dim3} from '../lib/profile/dim3';
-import {MemoryAccess} from '../lib/profile/memory-access';
-
-function createWarp(params: {key?: string,
-                    index?: number,
-                    id?: number,
-                    slot?: number,
-                    size?: number,
-                    accessType?: AccessType,
-                    space?: AddressSpace,
-                    type?: string,
-                    timestamp?: string,
-                    location?: DebugLocation | null,
-                    blockIdx?: Dim3,
-                    accesses?: MemoryAccess[]}): Warp
-{
-    return {
-        key: params.key || '',
-        index: params.index || 0,
-        id: params.id || 0,
-        slot: params.slot || 0,
-        size: params.size || 4,
-        accessType: params.accessType || AccessType.Read,
-        space: params.space || AddressSpace.Global,
-        type: params.type || '',
-        timestamp: params.timestamp || '0',
-        location: params.location || null,
-        blockIdx: params.blockIdx || { x: 0, y: 0, z: 0 },
-        accesses: params.accesses || []
-    };
-}
+import {createWarp} from './util';
 
 test('Warp start is calculated correctly', () => {
     expect(getWarpStart(1, 32, {

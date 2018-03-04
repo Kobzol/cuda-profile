@@ -1,9 +1,9 @@
 import bigInt, {BigInteger} from 'big-integer';
-import {AddressRange, WarpAddressSelection} from '../trace/selection';
+import {AddressRange, WarpAccess} from '../trace/selection';
 import {MemoryAccess} from './memory-access';
 import {MemoryAllocation} from './memory-allocation';
 
-function createRange(from: BigInteger, to: BigInteger): AddressRange
+export function createRange(from: BigInteger, to: BigInteger): AddressRange
 {
     return {
         from: numToAddress(from),
@@ -53,12 +53,6 @@ export function intersects(a: AddressRange, b: AddressRange): boolean
     return getIntersection(a, b) !== a;
 }
 
-export function getSelectionRange(bound: AddressRange, selections: WarpAddressSelection[]): AddressRange
-{
-    return getIntersection(bound, selections.length > 0 ?
-        selections[0].warpRange : bound);
-}
-
 export function getAccessAddressRange(access: MemoryAccess, size: number = 1): AddressRange
 {
     return {
@@ -87,6 +81,38 @@ export function getAccessesAddressRange(accesses: MemoryAccess[], size: number =
 
     return createRange(minAddress, maxAddress);
 }
+export function getWarpAccessesRange(bound: AddressRange, accesses: WarpAccess[]): AddressRange
+{
+    let minAddress = bigInt('FFFFFFFFFFFFFFFF', 16);
+    let maxAddress = bigInt('0', 16);
+    let foundIntersect = false;
+
+    for (let i = 0; i < accesses.length; i++)
+    {
+        const access = accesses[i].access;
+        const warp = accesses[i].warp;
+        if (intersects(bound, getAccessAddressRange(access, warp.size)))
+        {
+            const addressStart = addressToNum(accesses[i].access.address);
+            const addressEnd = addressStart.add(accesses[i].warp.size);
+            if (addressStart.lt(minAddress))
+            {
+                minAddress = addressStart;
+            }
+            if (addressEnd.gt(maxAddress))
+            {
+                maxAddress = addressEnd;
+            }
+
+            foundIntersect = true;
+        }
+    }
+
+    if (!foundIntersect) return {...bound};
+
+    return createRange(minAddress, maxAddress);
+}
+
 export function getAllocationAddressRange(allocation: MemoryAllocation): AddressRange
 {
     const from = addressToNum(allocation.address);

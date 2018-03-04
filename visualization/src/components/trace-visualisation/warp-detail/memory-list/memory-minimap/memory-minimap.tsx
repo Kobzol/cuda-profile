@@ -1,15 +1,15 @@
 import React from 'react';
 import {PureComponent} from 'react';
 import {MemoryAllocation} from '../../../../../lib/profile/memory-allocation';
-import {AddressRange, WarpAddressSelection} from '../../../../../lib/trace/selection';
-import {getAllocationAddressRange, getSelectionRange} from '../../../../../lib/profile/address';
+import {AddressRange, WarpAccess} from '../../../../../lib/trace/selection';
+import {getAllocationAddressRange, getWarpAccessesRange} from '../../../../../lib/profile/address';
 
 interface Props
 {
     width: number;
     height: number;
     allocation: MemoryAllocation;
-    rangeSelections: WarpAddressSelection[];
+    selectedAccesses: WarpAccess[];
 }
 
 export class MemoryMinimap extends PureComponent<Props>
@@ -68,6 +68,6 @@ export class MemoryMinimap extends PureComponent<Props>
 
     getAddressRange = (): AddressRange =>
     {
-        return getSelectionRange(getAllocationAddressRange(this.props.allocation), this.props.rangeSelections);
+        return getWarpAccessesRange(getAllocationAddressRange(this.props.allocation), this.props.selectedAccesses);
     }
 }

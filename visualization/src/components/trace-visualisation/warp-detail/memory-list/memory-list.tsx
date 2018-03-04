@@ -1,8 +1,7 @@
 import React, {PureComponent} from 'react';
 import {MemoryAllocation} from '../../../../lib/profile/memory-allocation';
-import {MemoryBlock} from './memory-block/memory-block';
-import {AddressRange, WarpAddressSelection} from '../../../../lib/trace/selection';
-import {MemoryMinimap} from './memory-minimap/memory-minimap';
+import {AllocationView} from './allocation-view/allocation-view';
+import {AddressRange, WarpAccess} from '../../../../lib/trace/selection';
 import styled from 'styled-components';
 import {Warp} from '../../../../lib/profile/warp';
 import {any} from 'ramda';
@@ -11,7 +10,7 @@ import {getAccessesAddressRange, getAllocationAddressRange, intersects} from '..
 interface Props
 {
     allocations: MemoryAllocation[];
-    rangeSelections: WarpAddressSelection[];
+    selectedAccesses: WarpAccess[];
     selectedWarps: Warp[];
     onMemorySelect(memorySelection: AddressRange[]): void;
 }
@@ -24,21 +23,23 @@ export class MemoryList extends PureComponent<Props>
 {
     render()
     {
+        /*
+        * <MemoryMinimap
+                            width={200}
+                            height={100}
+                            rangeSelections={this.props.rangeSelections}
+                            allocation={alloc} />
+        * */
         const allocations = this.getActiveAllocations(this.props.selectedWarps, this.props.allocations);
         return (
             <div>
                 {allocations.length === 0 && <div>No allocations detected for selected accesses.</div>}
                 {allocations.map(alloc =>
                     <Row key={alloc.address}>
-                        <MemoryBlock
+                        <AllocationView
                             allocation={alloc}
-                            rangeSelections={this.props.rangeSelections}
+                            selectedAccesses={this.props.selectedAccesses}
                             onMemorySelect={this.props.onMemorySelect} />
-                        <MemoryMinimap
-                            width={200}
-                            height={100}
-                            rangeSelections={this.props.rangeSelections}
-                            allocation={alloc} />
                     </Row>
                 )}
             </div>

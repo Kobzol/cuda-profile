@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import {TraceHeader} from './trace-header';
 import {TraceSelection} from '../../../lib/trace/selection';
 import {contains} from 'ramda';
+import {getFilename} from '../../../lib/util/string';
 
 interface Props
 {
@@ -115,7 +116,7 @@ export class WarpPanel extends PureComponent<Props, State>
         const dim = `${z || 'z'}.${y || 'y'}.${x || 'x'}`;
         const location = this.state.locationFilter.map(loc =>
             <SourceLocationEntry key={`${loc.file}:${loc.line}`}>
-                {loc.file}:{loc.line}
+                {getFilename(loc.file)}:{loc.line}
             </SourceLocationEntry>
         );
 

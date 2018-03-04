@@ -2,10 +2,11 @@ import React from 'react';
 import {PureComponent} from 'react';
 import {MemoryAllocation} from '../../../../../lib/profile/memory-allocation';
 import {
-    addressToNum, checkIntersection, getAddressRangeSize,
-    getAllocationAddressRange, numToAddress, getSelectionRange
+    addressToNum, getAddressRangeSize, getAllocationAddressRange, numToAddress,
+    getWarpAccessesRange, addressAddStr, createRange, checkIntersection,
+    intersects, getAccessAddressRange
 } from '../../../../../lib/profile/address';
-import {AddressRange, WarpAddressSelection} from '../../../../../lib/trace/selection';
+import {AddressRange, WarpAccess} from '../../../../../lib/trace/selection';
 import {zoom} from 'd3-zoom';
 import GridLayout from 'd3-v4-grid';
 import {select} from 'd3-selection';
@@ -16,16 +17,16 @@ import {Badge, Card, CardBody} from 'reactstrap';
 import CardHeader from 'reactstrap/lib/CardHeader';
 import {getFilename} from '../../../../../lib/util/string';
 import styled from 'styled-components';
+import {BlockParams, SVGGrid} from '../../../svg-grid/svg-grid';
+import {Block} from './block';
+import {Dictionary, zipObj, map, addIndex} from 'ramda';
 
 interface Props
 {
     allocation: MemoryAllocation;
-    rangeSelections: WarpAddressSelection[];
+    selectedAccesses: WarpAccess[];
     onMemorySelect: (memorySelection: AddressRange[]) => void;
 }
-
-const selectedBlock = 'rgb(220, 0, 0)';
-const activeBlock = 'rgb(65, 105, 225)';
 
 const Wrapper = styled(Card)`
   width: 100%;
@@ -49,11 +50,14 @@ const BadgeSource = MemoryBadge.extend`
   background-color: #1AB717;
 `;
 
-export class MemoryBlock extends PureComponent<Props>
-{
-    private blockWrapper: HTMLDivElement = null;
+const rows = 20;
+const cols = 60;
 
-    componentDidMount()
+export class AllocationView extends PureComponent<Props>
+{
+    private wrapper: HTMLDivElement = null;
+
+    /*componentDidMount()
     {
         this.renderd3();
     }
@@ -61,23 +65,23 @@ export class MemoryBlock extends PureComponent<Props>
     componentDidUpdate()
     {
         this.renderd3();
-    }
+    }*/
 
     renderd3()
     {
-        const svg = select(this.blockWrapper).select('svg');
+        const svg = select(this.wrapper).select('svg');
         const width = (svg.node() as Element).getBoundingClientRect().width;
         const height = (svg.node() as Element).getBoundingClientRect().height;
 
         const effectiveRange = this.calculateRange();
         const size = getAddressRangeSize(effectiveRange);
 
-        const dim = 16;
+        const dim = 32;
         const elements = dim * dim;
         const blockSize = Math.max(4, Math.ceil(size / elements));
 
         // label
-        select(this.blockWrapper)
+        select(this.wrapper)
             .select('.block-label')
             .text(`${effectiveRange.from} (block size ${blockSize})`);
 
@@ -133,7 +137,7 @@ export class MemoryBlock extends PureComponent<Props>
             .call(props)
             .attr('stroke', 'rgb(0, 0, 0)')
             .attr('stroke-width', '0.5')
-            .attr('fill', activeBlock)
+            .attr('fill', 'rgb(0, 0, 0)')
             .on('mouseenter', (data: {index: number}) => {
                 const blockFrom = start.add(data.index * blockSize);
                 const blockTo = blockFrom.add(blockSize);
@@ -152,56 +156,104 @@ export class MemoryBlock extends PureComponent<Props>
             .exit()
             .remove();
 
-        if (this.props.rangeSelections.length > 0)
+        if (this.props.selectedAccesses.length > 0)
         {
-            const rangeFrom = addressToNum(this.props.rangeSelections[0].threadRange.from);
-            const rangeTo = addressToNum(this.props.rangeSelections[0].threadRange.to);
-
             blocks.attr('fill', (data: {index: number}) => {
                 const blockFrom = start.add(data.index * blockSize);
                 const blockTo = blockFrom.add(blockSize);
 
-                if (checkIntersection(rangeFrom, rangeTo, blockFrom, blockTo))
+                if (this.props.selectedAccesses.find(a => checkIntersection(
+                    addressToNum(a.access.address),
+                    addressToNum(addressAddStr(a.access.address, a.warp.size)),
+                        blockFrom,
+                        blockTo)) !== undefined)
                 {
-                    return selectedBlock;
+                    return 'rgb(255, 0, 0)';
                 }
-                else return activeBlock;
+
+                return 'rgb(255, 255, 255)';
             });
         }
-        else blocks.attr('fill', activeBlock);
+        else blocks.attr('fill', 'rgb(255, 255, 255)');
     }
 
     render()
     {
-        return (
-            <Wrapper>
-                <Header>
-                    {this.createLabel(this.props.allocation)}
-                </Header>
-                <Body>
-                    <div ref={(wrapper) => this.blockWrapper = wrapper}>
+        /*return <div ref={(wrapper) => this.wrapper = wrapper} style={{width: '100%'}}>
                         <div className='block-label' />
                         <svg width={'100%'}>
                             <g className='blocks' />
                         </svg>
-                    </div>
+                    </div>;*/
+
+        const addressRange = this.calculateRange();
+        const blockSize = this.calculateBlockSize();
+        const indexedAccesses = addIndex(map)((access, index) => ({
+            access,
+            index
+        }), this.props.selectedAccesses);
+        const intersectedAccesses = indexedAccesses.filter(a =>
+            intersects(getAccessAddressRange(a.access.access), addressRange)
+        );
+        const indices = intersectedAccesses.map(a => addressToNum(a.access.access.address)
+            .subtract(addressToNum(addressRange.from))
+            .divide(blockSize).toJSNumber().toString()
+        );
+        const accessMap = zipObj(indices, intersectedAccesses);
+
+        return (
+            <Wrapper>
+                <Header>
+                    {this.renderLabel(this.props.allocation, addressRange)}
+                </Header>
+                <Body>
+                    <SVGGrid
+                        width={1200}
+                        height={240}
+                        rows={rows}
+                        cols={cols}
+                        renderItem={(params) => this.renderBlock(params, addressRange, blockSize, accessMap)} />
                 </Body>
             </Wrapper>
         );
     }
+    renderBlock = (params: BlockParams, allocRange: AddressRange, blockSize: number,
+                   accessMap: Dictionary<{access: WarpAccess, index: number}>): JSX.Element =>
+    {
+        const start = addressAddStr(allocRange.from, params.index * blockSize);
+        const end = addressAddStr(start, blockSize);
+        const addressRange = createRange(addressToNum(start), addressToNum(end));
+        const index = params.index.toString();
+        const indexedAccess = accessMap.hasOwnProperty(index) ? accessMap[index] : null;
+        const access = indexedAccess !== null ? indexedAccess.access : null;
+        const accessIndex = indexedAccess !== null ? indexedAccess.index : -1;
 
-    createLabel = (allocation: MemoryAllocation): JSX.Element =>
+        return (
+            <Block
+                x={params.x}
+                y={params.y}
+                width={params.width}
+                height={params.height}
+                range={addressRange}
+                access={access}
+                accessIndex={accessIndex}
+                onMemorySelect={this.handleMemorySelect} />
+        );
+    }
+    renderLabel = (allocation: MemoryAllocation, addressRange: AddressRange): JSX.Element =>
     {
         return (
             <>
-                <BadgeDecl>{this.createVarDecl(allocation)}</BadgeDecl>
+                <BadgeDecl>{this.renderAllocDeclaration(allocation)}</BadgeDecl>
                 <BadgeAddress>{allocation.address}</BadgeAddress>
                 <MemoryBadge>{formatAddressSpace(allocation.space)}</MemoryBadge>
                 <BadgeSource>{getFilename(allocation.location)}</BadgeSource>
+                <MemoryBadge>{addressRange.from} - {addressRange.to}</MemoryBadge>
+                <MemoryBadge>one square is {this.calculateBlockSize()} bytes</MemoryBadge>
             </>
         );
     }
-    createVarDecl = (allocation: MemoryAllocation): JSX.Element =>
+    renderAllocDeclaration = (allocation: MemoryAllocation): JSX.Element =>
     {
         const {size, elementSize, type, name} = allocation;
         if (size && elementSize && type && name)
@@ -211,8 +263,26 @@ export class MemoryBlock extends PureComponent<Props>
         return <>{formatByteSize(size)} of {type}</>;
     }
 
+    handleMemorySelect = (addressRange: AddressRange) =>
+    {
+        if (addressRange === null)
+        {
+            this.props.onMemorySelect([]);
+        }
+        else this.props.onMemorySelect([addressRange]);
+    }
+
+    calculateBlockSize = (): number =>
+    {
+        const elementCount = rows * cols;
+        const size = getAddressRangeSize(this.calculateRange());
+        const total = Math.ceil(size / elementCount);
+        const clamped = Math.max(4, total);
+        return (Math.floor(clamped / 4)) * 4;
+    }
+
     calculateRange = (): AddressRange =>
     {
-        return getSelectionRange(getAllocationAddressRange(this.props.allocation), this.props.rangeSelections);
+        return getWarpAccessesRange(getAllocationAddressRange(this.props.allocation), this.props.selectedAccesses);
     }
 }

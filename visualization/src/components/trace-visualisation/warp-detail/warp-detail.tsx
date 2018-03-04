@@ -1,7 +1,7 @@
 import React, {PureComponent} from 'react';
 import {Trace} from '../../../lib/profile/trace';
 import {Warp} from '../../../lib/profile/warp';
-import {AddressRange, WarpAddressSelection} from '../../../lib/trace/selection';
+import {AddressRange, WarpAccess} from '../../../lib/trace/selection';
 import {Card, CardHeader, CardBody} from 'reactstrap';
 import {MemoryConflictTable} from './memory-conflict-table';
 import {BankConflictTable} from './bank-conflict-table';
@@ -13,7 +13,7 @@ interface Props
 {
     trace: Trace;
     warps: Warp[];
-    rangeSelections: WarpAddressSelection[];
+    selectedAccesses: WarpAccess[];
     onMemorySelect: (selection: AddressRange[]) => void;
 }
 
@@ -66,7 +66,7 @@ export class WarpDetail extends PureComponent<Props, State>
                         <TabPane tabId={2} title='Memory map'>
                             <MemoryList
                                 allocations={this.props.trace.allocations}
-                                rangeSelections={this.props.rangeSelections}
+                                selectedAccesses={this.props.selectedAccesses}
                                 selectedWarps={this.props.warps}
                                 onMemorySelect={this.props.onMemorySelect} />
                         </TabPane>
