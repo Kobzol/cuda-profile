@@ -23,5 +23,6 @@ public:
 private:
     Context& context;
 
-    llvm::Value* getAddressSpace(uint32_t addressSpace);
+    llvm::Value* getAddressSpace(llvm::Value* value);
+    llvm::Value* getAddressSpace(uint32_t space);
 };

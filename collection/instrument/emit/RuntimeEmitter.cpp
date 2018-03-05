@@ -3,10 +3,16 @@
 
 #include <llvm/IR/Module.h>
 #include <iostream>
+#include <llvm/Support/Debug.h>
 
 using namespace llvm;
 
 static const std::string KERNEL_CONTEXT_TYPE = "cupr::KernelContext";
+
+static Function* toFunction(Constant* constant)
+{
+    return cast<Function>(constant->stripPointerCasts());
+}
 
 
 std::string RuntimeEmitter::runtimePrefix(const std::string& name)
@@ -121,7 +127,7 @@ void RuntimeEmitter::emitFirstThreadActions(const std::vector<GlobalVariable*>& 
 
 Function* RuntimeEmitter::getStoreFunction()
 {
-    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+    return toFunction(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("store"),
             this->context.getTypes().voidType(),
             this->context.getTypes().voidPtr(),
@@ -133,7 +139,7 @@ Function* RuntimeEmitter::getStoreFunction()
 }
 llvm::Function* RuntimeEmitter::getLoadFunction()
 {
-    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+    return toFunction(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("load"),
             this->context.getTypes().voidType(),
             this->context.getTypes().voidPtr(),
@@ -145,7 +151,7 @@ llvm::Function* RuntimeEmitter::getLoadFunction()
 }
 Function* RuntimeEmitter::getKernelStartFunction()
 {
-    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+    return toFunction(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("kernelStart"),
             this->context.getTypes().voidType(),
             this->context.getTypes().getCompositeType(KERNEL_CONTEXT_TYPE)->getPointerTo(),
@@ -153,7 +159,7 @@ Function* RuntimeEmitter::getKernelStartFunction()
 }
 Function* RuntimeEmitter::getKernelEndFunction()
 {
-    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+    return toFunction(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("kernelEnd"),
             this->context.getTypes().voidType(),
             this->context.getTypes().getCompositeType(KERNEL_CONTEXT_TYPE)->getPointerTo(),
@@ -161,7 +167,7 @@ Function* RuntimeEmitter::getKernelEndFunction()
 }
 Function* RuntimeEmitter::getMallocFunction()
 {
-    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+    return toFunction(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("malloc"),
             this->context.getTypes().voidType(),
             this->context.getTypes().int8Ptr(),
@@ -174,7 +180,7 @@ Function* RuntimeEmitter::getMallocFunction()
 }
 Function* RuntimeEmitter::getFreeFunction()
 {
-    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+    return toFunction(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("free"),
             this->context.getTypes().voidType(),
             this->context.getTypes().int8Ptr(),
@@ -183,7 +189,7 @@ Function* RuntimeEmitter::getFreeFunction()
 
 Function* RuntimeEmitter::getCreateKernelContextFunction()
 {
-    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+    return toFunction(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("initKernelContext"),
             this->context.getTypes().voidType(),
             this->context.getTypes().getCompositeType(KERNEL_CONTEXT_TYPE)->getPointerTo(),
@@ -192,7 +198,7 @@ Function* RuntimeEmitter::getCreateKernelContextFunction()
 }
 Function* RuntimeEmitter::getDestroyKernelContextFunction()
 {
-    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+    return toFunction(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("disposeKernelContext"),
             this->context.getTypes().voidType(),
             this->context.getTypes().getCompositeType(KERNEL_CONTEXT_TYPE)->getPointerTo(),
@@ -201,14 +207,14 @@ Function* RuntimeEmitter::getDestroyKernelContextFunction()
 
 Function* RuntimeEmitter::getIsFirstThreadFunction()
 {
-    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+    return toFunction(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("isFirstThread"),
             this->context.getTypes().boolType(),
             nullptr));
 }
 Function* RuntimeEmitter::getMarkSharedBufferFunction()
 {
-    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+    return toFunction(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("markSharedBuffer"),
             this->context.getTypes().voidType(),
             this->context.getTypes().int8Ptr(),
@@ -219,7 +225,7 @@ Function* RuntimeEmitter::getMarkSharedBufferFunction()
 }
 Function* RuntimeEmitter::getStoreDimensionsFunction()
 {
-    return cast<Function>(this->context.getModule()->getOrInsertFunction(
+    return toFunction(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("storeDimensions"),
             this->context.getTypes().voidType(),
             nullptr));

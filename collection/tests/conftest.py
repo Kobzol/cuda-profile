@@ -21,6 +21,7 @@ PROJECT_DIR = os.path.dirname(os.path.dirname(__file__))
 INSTRUMENT_LIB = "{0}/instrument/libinstrument.so".format(BUILD_DIR)
 RUNTIME_LIB_DIR = "{0}/runtime".format(BUILD_DIR)
 RUNTIME_TRACKING_LIB_DIR = "{0}/runtimetracker".format(BUILD_DIR)
+COMPILER = os.environ.get("COMPILER", "clang++")
 INPUT_FILENAME = "input.cu"
 
 
@@ -35,7 +36,7 @@ def compile(root, lib, dir, code, debug):
     with open(os.path.join(dir, inputname), "w") as f:
         f.write(code)
 
-    args = ["clang++"]
+    args = [COMPILER]
 
     if debug:
         args += ["-g", "-O0"]

@@ -15,7 +15,11 @@
 using namespace llvm;
 
 namespace llvm {
+#if __clang_major__ >= 5
+    FunctionPass* createInferAddressSpacesPass();
+#else
     FunctionPass* createNVPTXInferAddressSpacesPass();
+#endif
     bool isKernelFunction(const Function& fn);
 }
 
@@ -54,7 +58,11 @@ void CudaPass::instrumentCuda(Module& module)
     {
         if (isKernelFunction(fn))
         {
+#if __clang_major__ >= 5
+            auto pass = createInferAddressSpacesPass();
+#else
             auto pass = createNVPTXInferAddressSpacesPass();
+#endif
             pass->runOnFunction(fn);
             Kernel kernel(this->context);
             kernel.handleKernel(&fn);
