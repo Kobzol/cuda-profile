@@ -7,6 +7,7 @@ set(SOURCE_FILES
         emit/RuntimeEmitter.cpp
         emit/MemoryAlloc.cpp
         emit/Kernel.cpp
+        util/AddressSpaceResolver.cpp
         util/Types.cpp
         util/Values.cpp
         util/Demangler.cpp

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Context.h"
+#include "../util/AddressSpaceResolver.h"
 
 namespace llvm {
     class Function;
@@ -12,17 +13,12 @@ namespace llvm {
 class MemoryAccess
 {
 public:
-    explicit MemoryAccess(Context& context): context(context)
-    {
-
-    }
+    explicit MemoryAccess(Context& context);
 
     void handleStore(llvm::StoreInst* store, int32_t debugIndex);
     void handleLoad(llvm::LoadInst* load, int32_t debugIndex);
 
 private:
+    AddressSpaceResolver resolver;
     Context& context;
-
-    llvm::Value* getAddressSpace(llvm::Value* value);
-    llvm::Value* getAddressSpace(uint32_t space);
 };
