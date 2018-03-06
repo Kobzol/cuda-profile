@@ -30,13 +30,15 @@ def create_test_dir():
     return tempfile.mkdtemp("cu")
 
 
-def compile(root, lib, dir, code, debug, instrument_locals):
+def compile(root, lib, dir, code, debug, instrument_locals, kernel_regex):
     inputname = INPUT_FILENAME
     outputname = "cuda"
 
     env = os.environ.copy()
     if instrument_locals:
         env["CUPR_INSTRUMENT_LOCALS"] = "1"
+    if kernel_regex:
+        env["CUPR_KERNEL_REGEX"] = str(kernel_regex)
 
     with open(os.path.join(dir, inputname), "w") as f:
         f.write(code)
@@ -114,6 +116,7 @@ def compile_and_run(code,
                     compress=False,
                     runtime_tracking=False,
                     instrument_locals=False,
+                    kernel_regex=None,
                     format="json"):
     tmpdir = create_test_dir()
 
@@ -138,7 +141,8 @@ def compile_and_run(code,
     line_offset = len(prelude.splitlines())
 
     try:
-        (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code, debug, instrument_locals)
+        (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code, debug,
+                                           instrument_locals, kernel_regex)
 
         if retcode != 0:
             raise Exception(str(retcode) + "\n" + out + "\n" + err)

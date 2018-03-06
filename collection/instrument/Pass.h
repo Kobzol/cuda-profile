@@ -3,6 +3,7 @@
 #include <llvm/Pass.h>
 #include <unordered_map>
 #include "Context.h"
+#include "util/RegexFilter.h"
 
 namespace llvm {
     class CallInst;
@@ -25,13 +26,11 @@ private:
 
     llvm::Function* augmentKernel(llvm::Function* fn);
 
-    std::unordered_map<llvm::Function*, llvm::Function*> kernelMap;
-
     void handleFunctionCall(llvm::CallInst* call);
+    bool isInstrumentableCuda(llvm::Module& module);
+    bool isInstrumentableCpp(llvm::Module& module);
 
     Context context;
-
-    bool isInstrumentableCuda(llvm::Module& module);
-
-    bool isInstrumentableCpp(llvm::Module& module);
+    std::unordered_map<llvm::Function*, llvm::Function*> kernelMap;
+    RegexFilter filter;
 };

@@ -1,13 +1,16 @@
 #include "Parameters.h"
 
-#include <cstdlib>
 #include <cstring>
-
-using namespace cupr;
 
 bool Parameters::shouldInstrumentLocals()
 {
     return Parameters::isParameterEnabled("CUPR_INSTRUMENT_LOCALS");
+}
+std::string Parameters::kernelRegex()
+{
+    auto regex = getenv("CUPR_KERNEL_REGEX");
+    if (regex == nullptr) return "";
+    return std::string(regex);
 }
 
 bool Parameters::isParameterEnabled(const char* name)

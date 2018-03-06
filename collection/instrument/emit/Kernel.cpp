@@ -40,14 +40,14 @@ static bool isInstrumentable(Instruction& instruction)
             return false;
         }
 
-        if (!isLocalStore(store) || cupr::Parameters::shouldInstrumentLocals())
+        if (!isLocalStore(store) || Parameters::shouldInstrumentLocals())
         {
             return true;
         }
     }
     else if (auto* load = dyn_cast<LoadInst>(&instruction))
     {
-        if (!isLocalLoad(load) || cupr::Parameters::shouldInstrumentLocals())
+        if (!isLocalLoad(load) || Parameters::shouldInstrumentLocals())
         {
             return true;
         }

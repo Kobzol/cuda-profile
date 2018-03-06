@@ -11,6 +11,9 @@
 #include "../runtime/Prefix.h"
 #include "emit/Kernel.h"
 #include "emit/RuntimeEmitter.h"
+#include "util/RegexFilter.h"
+#include "Parameters.h"
+#include "util/Demangler.h"
 
 using namespace llvm;
 
@@ -30,7 +33,7 @@ bool isInstrumentationFunction(Function& fn)
     return fn.getName().find(CU_PREFIX_STR) == 0;
 }
 
-CudaPass::CudaPass(): ModulePass(CudaPass::ID)
+CudaPass::CudaPass(): ModulePass(CudaPass::ID), filter((Parameters::kernelRegex()))
 {
 
 }
@@ -49,6 +52,7 @@ bool CudaPass::runOnModule(Module& module)
 
 void CudaPass::instrumentCuda(Module& module)
 {
+    RegexFilter filter(Parameters::kernelRegex());
     if (!this->isInstrumentableCuda(module))
     {
         return;
@@ -56,8 +60,9 @@ void CudaPass::instrumentCuda(Module& module)
 
     for (Function& fn : module.getFunctionList())
     {
-        if (isKernelFunction(fn))
+        if (isKernelFunction(fn) && this->filter.matchesFunction(&fn))
         {
+            std::cerr << "Instrumenting kernel " << Demangler().demangle(fn.getName().str()) << std::endl;
 #if __clang_major__ >= 5
             auto pass = createInferAddressSpacesPass();
 #else
@@ -143,6 +148,12 @@ void CudaPass::handleFunctionCall(CallInst* call)
     if (name == "cudaLaunch")
     {
         KernelLaunch kernelLaunch(this->context);
+        auto kernel = dyn_cast<Function>(call->getOperand(0)->stripPointerCasts());
+        if (kernel && !this->filter.matchesFunction(kernel))
+        {
+            return;
+        }
+
         kernelLaunch.handleKernelLaunch(call);
     }
     else if (name == "cudaMalloc")

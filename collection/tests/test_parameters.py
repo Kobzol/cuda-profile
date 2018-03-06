@@ -1,4 +1,4 @@
-from conftest import param_all_formats, kernel_file, run_file, requires_protobuf
+from conftest import param_all_formats, kernel_file, run_file, requires_protobuf, metadata_file
 
 
 def test_parameters_buffer_size(profile):
@@ -74,7 +74,8 @@ def test_parameters_compression_run(profile, format):
     assert compressed[run_file()]["compress"]
 
 
-def test_parameters_instrument_locals_disabled(profile):
+@param_all_formats
+def test_parameters_instrument_locals_disabled(profile, format):
     data = profile("""
     __global__ void kernel(int* p) {
         int a = 5;
@@ -86,14 +87,15 @@ def test_parameters_instrument_locals_disabled(profile):
         kernel<<<1, 1>>>(dptr);
         cudaFree(dptr);
         return 0;
-    }""")
+    }""", format=format)
 
-    accesses = data[kernel_file("kernel")]["accesses"]
+    accesses = data[kernel_file("kernel", format=format)]["accesses"]
 
     assert len(accesses) == 1
 
 
-def test_parameters_instrument_locals_enable(profile):
+@param_all_formats
+def test_parameters_instrument_locals_enable(profile, format):
     data = profile("""
     __global__ void kernel(int* p) {
         int a = 5;
@@ -105,8 +107,44 @@ def test_parameters_instrument_locals_enable(profile):
         kernel<<<1, 1>>>(dptr);
         cudaFree(dptr);
         return 0;
-    }""", instrument_locals=True)
+    }""", format=format, instrument_locals=True)
 
-    accesses = data[kernel_file("kernel")]["accesses"]
+    accesses = data[kernel_file("kernel", format=format)]["accesses"]
 
     assert len(accesses) == 4
+
+
+@param_all_formats
+def test_parameters_kernel_regex(profile, format):
+    data = profile("""
+    __global__ void addVectors(int* p) {
+        int a = 5;
+        *p = a;
+    }
+    __global__ void subtractVectors(int* p) {
+        int a = 5;
+        *p = a;
+    }
+    __global__ void generalKernel(int* p) {
+        int a = 5;
+        *p = a;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        addVectors<<<1, 1>>>(dptr);
+        subtractVectors<<<1, 1>>>(dptr);
+        generalKernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }""", format=format, kernel_regex=".*a.*ors.*", with_metadata=True)
+
+    mappings = data["mappings"]
+
+    assert metadata_file("addVectors") in mappings
+    assert metadata_file("subtractVectors") in mappings
+    assert metadata_file("generalKernel") not in mappings
+
+    assert len(mappings[kernel_file("addVectors", format=format)]["accesses"]) == 1
+    assert len(mappings[kernel_file("subtractVectors", format=format)]["accesses"]) == 1
+    assert kernel_file("generalKernel", format=format) not in mappings

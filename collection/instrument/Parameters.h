@@ -1,15 +1,14 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
-namespace cupr
+class Parameters
 {
-    class Parameters
-    {
-    public:
-        static bool shouldInstrumentLocals();
+public:
+    static bool shouldInstrumentLocals();
+    static std::string kernelRegex();
 
-    private:
-        static bool isParameterEnabled(const char* name);
-    };
-}
+private:
+    static bool isParameterEnabled(const char* name);
+};
