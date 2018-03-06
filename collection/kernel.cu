@@ -1,5 +1,5 @@
 #include "general.h"
-#include "device/CuprRuntime.h"
+#include "include/CuprRuntime.h"
 
 __global__ void kernel(int *p)
 {
