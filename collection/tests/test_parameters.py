@@ -72,3 +72,41 @@ def test_parameters_compression_run(profile, format):
 
     assert not uncompressed[run_file()]["compress"]
     assert compressed[run_file()]["compress"]
+
+
+def test_parameters_instrument_locals_disabled(profile):
+    data = profile("""
+    __global__ void kernel(int* p) {
+        int a = 5;
+        *p = a;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }""")
+
+    accesses = data[kernel_file("kernel")]["accesses"]
+
+    assert len(accesses) == 1
+
+
+def test_parameters_instrument_locals_enable(profile):
+    data = profile("""
+    __global__ void kernel(int* p) {
+        int a = 5;
+        *p = a;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }""", instrument_locals=True)
+
+    accesses = data[kernel_file("kernel")]["accesses"]
+
+    assert len(accesses) == 4

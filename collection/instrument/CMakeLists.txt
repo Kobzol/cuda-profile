@@ -1,5 +1,6 @@
 set(SOURCE_FILES
         Context.cpp
+        Parameters.cpp
         Pass.cpp
         emit/MemoryAccess.cpp
         emit/KernelLaunch.cpp

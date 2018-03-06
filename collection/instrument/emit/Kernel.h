@@ -33,11 +33,6 @@ private:
 
     void instrumentStore(llvm::StoreInst* store, int32_t debugIndex);
     void instrumentLoad(llvm::LoadInst* load, int32_t debugIndex);
-
-    bool isLocalStore(llvm::StoreInst* store);
-    bool isLocalLoad(llvm::LoadInst* load);
-
-    bool isInstrumentable(llvm::Instruction& instruction);
     void instrumentInstruction(llvm::Instruction* instruction, int32_t debugIndex);
 
     std::vector<llvm::GlobalVariable*> extractSharedBuffers(llvm::Module* module);

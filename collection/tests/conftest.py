@@ -22,6 +22,7 @@ INSTRUMENT_LIB = "{0}/instrument/libinstrument.so".format(BUILD_DIR)
 RUNTIME_LIB_DIR = "{0}/runtime".format(BUILD_DIR)
 RUNTIME_TRACKING_LIB_DIR = "{0}/runtimetracker".format(BUILD_DIR)
 COMPILER = os.environ.get("COMPILER", "clang++")
+INCLUDE_DIR = "include"
 INPUT_FILENAME = "input.cu"
 
 
@@ -29,9 +30,13 @@ def create_test_dir():
     return tempfile.mkdtemp("cu")
 
 
-def compile(root, lib, dir, code, debug):
+def compile(root, lib, dir, code, debug, instrument_locals):
     inputname = INPUT_FILENAME
     outputname = "cuda"
+
+    env = os.environ.copy()
+    if instrument_locals:
+        env["CUPR_INSTRUMENT_LOCALS"] = "1"
 
     with open(os.path.join(dir, inputname), "w") as f:
         f.write(code)
@@ -46,7 +51,7 @@ def compile(root, lib, dir, code, debug):
              "-I/usr/local/cuda/include",
              "-L/usr/local/cuda/lib64",
              "-L{}".format(os.path.join(root, RUNTIME_LIB_DIR)),
-             "-I{}".format(os.path.join(root, "device")),
+             "-I{}".format(os.path.join(root, INCLUDE_DIR)),
              "-Xclang", "-load",
              "-Xclang", os.path.join(root, lib),
              "-lcudart", "-ldl", "-lrt", "-lruntime",
@@ -58,7 +63,8 @@ def compile(root, lib, dir, code, debug):
     process = subprocess.Popen(args,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
-                               cwd=dir)
+                               cwd=dir,
+                               env=env)
     (out, err) = process.communicate()
     return (os.path.join(dir, outputname), process.returncode, out, err)
 
@@ -107,6 +113,7 @@ def compile_and_run(code,
                     debug=True,
                     compress=False,
                     runtime_tracking=False,
+                    instrument_locals=False,
                     format="json"):
     tmpdir = create_test_dir()
 
@@ -131,7 +138,7 @@ def compile_and_run(code,
     line_offset = len(prelude.splitlines())
 
     try:
-        (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code, debug)
+        (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code, debug, instrument_locals)
 
         if retcode != 0:
             raise Exception(str(retcode) + "\n" + out + "\n" + err)

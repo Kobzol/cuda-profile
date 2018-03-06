@@ -9,16 +9,52 @@
 #include <llvm/IR/DebugInfoMetadata.h>
 
 #include "MemoryAccess.h"
+#include "RuntimeEmitter.h"
+#include "../Parameters.h"
 #include "../util/DebugExtractor.h"
 #include "../util/Demangler.h"
-#include "../../runtime/format/json/picojson.h"
 #include "../util/LLVMAddressSpace.h"
 #include "../util/FunctionUtils.h"
 #include "../util/StringUtils.h"
-#include "RuntimeEmitter.h"
 #include "../util/FunctionContentLoader.h"
+#include "../../runtime/format/json/picojson.h"
 
 using namespace llvm;
+
+static bool isLocalStore(StoreInst* store)
+{
+    return isa<AllocaInst>(store->getPointerOperand()->stripPointerCasts());
+}
+static bool isLocalLoad(LoadInst* load)
+{
+    return isa<AllocaInst>(load->getPointerOperand()->stripPointerCasts());
+}
+
+static bool isInstrumentable(Instruction& instruction)
+{
+    if (auto* store = dyn_cast<StoreInst>(&instruction))
+    {
+        // ignore parameter writes
+        if (isa<Argument>(store->getValueOperand()))
+        {
+            return false;
+        }
+
+        if (!isLocalStore(store) || cupr::Parameters::shouldInstrumentLocals())
+        {
+            return true;
+        }
+    }
+    else if (auto* load = dyn_cast<LoadInst>(&instruction))
+    {
+        if (!isLocalLoad(load) || cupr::Parameters::shouldInstrumentLocals())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 void Kernel::handleKernel(Function* function)
 {
@@ -38,7 +74,7 @@ std::vector<Instruction*> Kernel::collectInstructions(Function* function)
     {
         for (auto& inst: block.getInstList())
         {
-            if (this->isInstrumentable(inst))
+            if (isInstrumentable(inst))
             {
                 instructions.push_back(&inst);
             }
@@ -69,35 +105,6 @@ std::vector<DebugInfo> Kernel::instrumentInstructions(const std::vector<Instruct
     }
 
     return debugInfo;
-}
-
-bool Kernel::isLocalStore(StoreInst* store)
-{
-    return isa<AllocaInst>(store->getPointerOperand());
-}
-bool Kernel::isLocalLoad(LoadInst* load)
-{
-    return isa<AllocaInst>(load->getPointerOperand());
-}
-
-bool Kernel::isInstrumentable(Instruction& instruction)
-{
-    if (auto* store = dyn_cast<StoreInst>(&instruction))
-    {
-        if (!this->isLocalStore(store))
-        {
-            return true;
-        }
-    }
-    else if (auto* load = dyn_cast<LoadInst>(&instruction))
-    {
-        if (!this->isLocalLoad(load))
-        {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 void Kernel::instrumentInstruction(Instruction* instruction, int32_t debugIndex)

@@ -64,6 +64,7 @@ void CudaPass::instrumentCuda(Module& module)
             auto pass = createNVPTXInferAddressSpacesPass();
 #endif
             pass->runOnFunction(fn);
+
             Kernel kernel(this->context);
             kernel.handleKernel(&fn);
         }
