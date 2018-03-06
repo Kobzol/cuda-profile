@@ -4,11 +4,11 @@
 
 bool Parameters::shouldInstrumentLocals()
 {
-    return Parameters::isParameterEnabled("CUPR_INSTRUMENT_LOCALS");
+    return Parameters::isParameterEnabled("INSTRUMENT_LOCALS");
 }
 std::string Parameters::kernelRegex()
 {
-    auto regex = getenv("CUPR_KERNEL_REGEX");
+    auto regex = getenv("KERNEL_REGEX");
     if (regex == nullptr) return "";
     return std::string(regex);
 }

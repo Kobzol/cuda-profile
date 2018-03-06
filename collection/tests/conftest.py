@@ -36,9 +36,9 @@ def compile(root, lib, dir, code, debug, instrument_locals, kernel_regex):
 
     env = os.environ.copy()
     if instrument_locals:
-        env["CUPR_INSTRUMENT_LOCALS"] = "1"
+        env["INSTRUMENT_LOCALS"] = "1"
     if kernel_regex:
-        env["CUPR_KERNEL_REGEX"] = str(kernel_regex)
+        env["KERNEL_REGEX"] = str(kernel_regex)
 
     with open(os.path.join(dir, inputname), "w") as f:
         f.write(code)
@@ -122,11 +122,11 @@ def compile_and_run(code,
 
     env = {}
     if buffer_size is not None:
-        env["CUPR_BUFFER_SIZE"] = str(buffer_size)
+        env["BUFFER_SIZE"] = str(buffer_size)
     if format == "protobuf":
-        env["CUPR_PROTOBUF"] = "1"
+        env["PROTOBUF"] = "1"
     if compress:
-        env["CUPR_COMPRESS"] = "1"
+        env["COMPRESS"] = "1"
     if runtime_tracking:
         env["LD_PRELOAD"] = os.path.join(PROJECT_DIR, RUNTIME_TRACKING_LIB_DIR, "libruntimetracker.so")
 

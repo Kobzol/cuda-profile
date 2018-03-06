@@ -10,20 +10,20 @@ static uint32_t BUFFER_SIZE_DEFAULT = 1024 * 1024;
 
 uint32_t Parameters::getBufferSize()
 {
-    char* envBufferSize = getenv("CUPR_BUFFER_SIZE");
+    char* envBufferSize = getenv("BUFFER_SIZE");
     if (envBufferSize == nullptr) return BUFFER_SIZE_DEFAULT;
     return static_cast<uint32_t>(std::stoi(envBufferSize));
 }
 
 bool Parameters::isPrettifyEnabled()
 {
-    return isParameterEnabled("CUPR_PRETTIFY");
+    return isParameterEnabled("PRETTIFY");
 }
 
 bool Parameters::isCompressionEnabled()
 {
 #ifdef CUPR_USE_ZLIB
-    return isParameterEnabled("CUPR_COMPRESS");
+    return isParameterEnabled("COMPRESS");
 #else
     return false;
 #endif
@@ -32,7 +32,7 @@ bool Parameters::isCompressionEnabled()
 bool Parameters::isProtobufEnabled()
 {
 #ifdef CUPR_USE_PROTOBUF
-    return isParameterEnabled("CUPR_PROTOBUF");
+    return isParameterEnabled("PROTOBUF");
 #else
     return false;
 #endif
@@ -40,7 +40,7 @@ bool Parameters::isProtobufEnabled()
 
 bool Parameters::isMappedMemoryEnabled()
 {
-    return isParameterEnabled("CUPR_HOST_MEMORY");
+    return isParameterEnabled("HOST_MEMORY");
 }
 
 bool Parameters::isParameterEnabled(const char* name)

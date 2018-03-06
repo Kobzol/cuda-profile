@@ -26,7 +26,7 @@ pushd ${BUILD_DIR}
             -I/usr/local/cuda/samples/common/inc \
             -L./runtime \
             -Xclang -load -Xclang ./instrument/libinstrument.so \
-            -z muldefs -lcudart -ldl -lrt -lruntime -pthread -xcuda \
+            -z muldefs -lcudart -lruntime -xcuda \
             ${SRC_FILES} -o cuda
 
     if [ ${RUNTIME_TRACKING} == 1 ]; then
@@ -34,7 +34,7 @@ pushd ${BUILD_DIR}
     fi
 
     # run instrumented program
-    LD_LIBRARY_PATH=./runtime CUPR_PROTOBUF=${PROTOBUF} CUPR_COMPRESS=${COMPRESS} ./cuda
+    LD_LIBRARY_PATH=./runtime PROTOBUF=${PROTOBUF} COMPRESS=${COMPRESS} ./cuda
 
     exit 0
 popd

@@ -2,6 +2,7 @@
 
 #include <dlfcn.h>
 #include <driver_types.h>
+#include <iostream>
 
 #define WRAP(name, ret, body, ...)\
     using name##_t = ret (*)(__VA_ARGS__);\
