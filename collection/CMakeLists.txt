@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.4)
 project(cuda)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 find_package(CUDA REQUIRED)
@@ -54,6 +56,9 @@ add_subdirectory("runtime")
 
 # Memtracker
 add_subdirectory("runtimetracker")
+
+# Benchmark
+add_subdirectory("benchmark")
 
 # Tests
 add_custom_target(tests COMMAND py.test ${CMAKE_CURRENT_SOURCE_DIR}/tests)
