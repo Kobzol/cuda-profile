@@ -30,7 +30,7 @@ def create_test_dir():
     return tempfile.mkdtemp("cu")
 
 
-def compile(root, lib, dir, code, debug, instrument_locals, kernel_regex):
+def compile(root, lib, dir, code, debug, instrument_locals, kernel_regex, release):
     inputname = INPUT_FILENAME
     outputname = "cuda"
 
@@ -46,7 +46,7 @@ def compile(root, lib, dir, code, debug, instrument_locals, kernel_regex):
     args = [COMPILER]
 
     if debug:
-        args += ["-g", "-O0"]
+        args += ["-g", "-O2" if release else "-O0"]
 
     args += ["-std=c++14",
              "--cuda-gpu-arch=sm_30",
@@ -117,6 +117,7 @@ def compile_and_run(code,
                     runtime_tracking=False,
                     instrument_locals=False,
                     kernel_regex=None,
+                    release=False,
                     format="json"):
     tmpdir = create_test_dir()
 
@@ -142,7 +143,7 @@ def compile_and_run(code,
 
     try:
         (exe, retcode, out, err) = compile(PROJECT_DIR, INSTRUMENT_LIB, tmpdir, code, debug,
-                                           instrument_locals, kernel_regex)
+                                           instrument_locals, kernel_regex, release)
 
         if retcode != 0:
             raise Exception(str(retcode) + "\n" + out + "\n" + err)
