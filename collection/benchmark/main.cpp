@@ -1,14 +1,25 @@
+#ifdef COMPILE_ONLY
+int main(int argc, char** argv)
+{
+    return 0;
+}
+#else
+
 #include "Benchmark.h"
 
 void vectorAdd();
 
+#define BENCHMARK(name)\
+    Benchmark name##Bench(#name);\
+    name##Bench.measure([]() {\
+        name();\
+    }, 10);\
+    name##Bench.print()
+
 int main(int argc, char** argv)
 {
-    Benchmark vectorAddBench("vectorAdd");
-    vectorAddBench.measure([]() {
-        vectorAdd();
-    }, 10);
-    vectorAddBench.print();
+    BENCHMARK(vectorAdd);
 
     return 0;
 }
+#endif

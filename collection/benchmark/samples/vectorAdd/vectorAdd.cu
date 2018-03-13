@@ -25,7 +25,7 @@
 #include <helper_cuda.h>
 
 #ifdef PROFILE
-    #include "../../include/CuprRuntime.h"
+    #include <include/CuprRuntime.h>
 #endif
 /**
  * CUDA Kernel Device code

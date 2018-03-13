@@ -8,7 +8,6 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 find_package(CUDA REQUIRED)
 
-#set(LLVM_DIR "/home/kobzol/libraries/llvm-5.0.1-build/lib/cmake/llvm")
 find_package(LLVM CONFIG REQUIRED)
 add_definitions(${LLVM_DEFINITIONS})
 
