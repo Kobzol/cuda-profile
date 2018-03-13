@@ -2,8 +2,8 @@
 
 #include <cstddef>
 #include <cstdlib>
+#include <cstring>
 #include <vector>
-#include <iostream>
 
 #include "../runtime/Prefix.h"
 #include "../runtime/tracedata/AccessRecord.h"
@@ -117,24 +117,24 @@ extern "C"
         return ret;
     }
     extern "C" __device__ void CU_PREFIX(store)(void* address, size_t size, uint32_t addressSpace,
-                                                size_t type, int32_t debugIndex)
+                                                size_t type, int32_t debugIndex, uint64_t value)
     {
         ATOMIC_INSERT(cupr::deviceAccessRecords,
                       &cupr::deviceAccessRecordIndex,
                       cupr::deviceBufferSize,
                       cupr::AccessRecord(cupr::AccessType::Write, blockIdx, threadIdx, warpid(),
                                          address, size, static_cast<cupr::AddressSpace>(addressSpace),
-                                         static_cast<int64_t>(clock64()), type, debugIndex));
+                                         static_cast<int64_t>(clock64()), type, debugIndex, value));
     }
     extern "C" __device__ void CU_PREFIX(load)(void* address, size_t size, uint32_t addressSpace,
-                                               size_t type, int32_t debugIndex)
+                                               size_t type, int32_t debugIndex, uint64_t value)
     {
         ATOMIC_INSERT(cupr::deviceAccessRecords,
                       &cupr::deviceAccessRecordIndex,
                       cupr::deviceBufferSize,
                       cupr::AccessRecord(cupr::AccessType::Read, blockIdx, threadIdx, warpid(),
                               address, size, static_cast<cupr::AddressSpace>(addressSpace),
-                              static_cast<int64_t>(clock64()), type, debugIndex));
+                              static_cast<int64_t>(clock64()), type, debugIndex, value));
     }
     extern "C" __device__ bool CU_PREFIX(isFirstThread)()
     {

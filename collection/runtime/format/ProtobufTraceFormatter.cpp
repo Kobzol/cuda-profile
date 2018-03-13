@@ -34,6 +34,7 @@ void cupr::ProtobufTraceFormatter::formatTrace(std::ostream& os, const std::stri
         buffer->mutable_blockidx()->set_x(access.blockIdx.x);
         buffer->mutable_blockidx()->set_y(access.blockIdx.y);
         buffer->mutable_blockidx()->set_z(access.blockIdx.z);
+        buffer->set_value(this->hexPointer(reinterpret_cast<const void*>(access.value)));
     }
 
     for (auto& allocation: allocations)

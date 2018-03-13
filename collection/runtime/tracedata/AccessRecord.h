@@ -21,11 +21,11 @@ namespace cupr
         __universal__ AccessRecord(AccessType accessType, uint3 blockIdx, uint3 threadIdx,
                                    uint32_t warpId, void* memory, size_t size,
                                    AddressSpace addressSpace, int64_t timestamp, size_t type,
-                                   int32_t debugIndex) :
+                                   int32_t debugIndex, uint64_t value) :
                 kind(accessType), blockIdx(blockIdx), threadIdx(threadIdx),
                 warpId(warpId), address(memory), size(size),
                 addressSpace(addressSpace), timestamp(timestamp), type(type),
-                debugIndex(debugIndex)
+                debugIndex(debugIndex), value(value)
         {
 
         }
@@ -42,5 +42,6 @@ namespace cupr
         AddressSpace addressSpace = AddressSpace::Global;
 
         size_t type = 0;
+        uint64_t value = 0;
     };
 }

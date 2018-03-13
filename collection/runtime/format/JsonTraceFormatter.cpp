@@ -24,7 +24,8 @@ picojson::value cupr::JsonTraceFormatter::jsonify(const cupr::AccessRecord& reco
             {"size",      picojson::value((double) record.size)},
             {"space",     picojson::value((double) record.addressSpace)},
             {"typeIndex", picojson::value((double) record.type)},
-            {"timestamp", picojson::value(std::to_string(record.timestamp))}
+            {"timestamp", picojson::value(std::to_string(record.timestamp))},
+            {"value", picojson::value(this->hexPointer(reinterpret_cast<const void*>(record.value)))}
     });
 }
 

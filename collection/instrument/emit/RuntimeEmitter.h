@@ -22,17 +22,14 @@ public:
 
     }
 
-    void store(llvm::Value* address,
-               llvm::Value* size,
-               llvm::Value* addressSpace,
-               llvm::Value* type,
-               llvm::Value* debugIndex
-    );
+    void store(llvm::Value* address, llvm::Value* size, llvm::Value* addressSpace, llvm::Value* type,
+                   llvm::Value* debugIndex, llvm::Value* value);
     void load(llvm::Value* address,
               llvm::Value* size,
               llvm::Value* addressSpace,
               llvm::Value* type,
-              llvm::Value* debugIndex
+              llvm::Value* debugIndex,
+              llvm::Value* value
     );
 
     void kernelStart(llvm::Value* kernelContext);

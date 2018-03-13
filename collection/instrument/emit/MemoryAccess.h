@@ -1,5 +1,6 @@
 #pragma once
 
+#include <llvm/IR/IRBuilder.h>
 #include "../Context.h"
 #include "../util/AddressSpaceResolver.h"
 
@@ -7,6 +8,7 @@ namespace llvm {
     class Function;
     class LoadInst;
     class StoreInst;
+    class Value;
 }
 
 
@@ -21,4 +23,6 @@ public:
 private:
     AddressSpaceResolver resolver;
     Context& context;
+
+    llvm::Value* castToInt64(llvm::Value* value, llvm::IRBuilder<>& builder);
 };
