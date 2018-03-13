@@ -31,9 +31,9 @@ Benchmark::Benchmark(std::string name): name(std::move(name))
 
 }
 
-TimeRecord Benchmark::average() const
+double Benchmark::average() const
 {
-    TimeRecord sum;
+    double sum = 0.0;
     for (auto time: this->times)
     {
         sum += time;
@@ -46,15 +46,10 @@ void Benchmark::measure(const std::function<void()>& body, size_t times)
     for (size_t i = 0; i < times; i++)
     {
         auto start = std::chrono::steady_clock::now();
-        cupr::CudaTimer timer(false);
-
-        timer.start();
         body();
-        timer.stop_wait();
 
-        this->times.emplace_back(
-                std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count(),
-                timer.get_time()
+        this->times.push_back(
+                std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count()
         );
     }
 }
@@ -62,5 +57,5 @@ void Benchmark::measure(const std::function<void()>& body, size_t times)
 void Benchmark::print()
 {
     auto avg = this->average();
-    std::cout << this->name << ": " <<  avg.realTime << " CPU, " << avg.cudaTime << " GPU" << std::endl;
+    std::cout << this->name << ": " <<  avg << " ms" << std::endl;
 }

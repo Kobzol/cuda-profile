@@ -24,11 +24,11 @@ public:
     explicit Benchmark(std::string name);
 
     void measure(const std::function<void()>& body, size_t times);
-    TimeRecord average() const;
+    double average() const;
 
     void print();
 
 private:
     std::string name;
-    std::vector<TimeRecord> times;
+    std::vector<double> times;
 };
