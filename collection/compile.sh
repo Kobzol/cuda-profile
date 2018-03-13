@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-LLVM_DIR=/home/kobzol/libraries/llvm-4.0.1-build
-CLANG=clang++ # ${LLVM_DIR}/bin/clang++
+LLVM_DIR=/home/kobzol/libraries/llvm-6.0.0-build
+CLANG=clang++ #${LLVM_DIR}/bin/clang++
 CUDA_DIR=/usr/local/cuda
 SRC_FILES=${1-"../main.cpp ../kernel.cu"} # ../kernel2.cu
 PROTOBUF=${2-0}
@@ -18,12 +18,12 @@ pushd ${BUILD_DIR}
     # build pass
     make
 
-    # ${CLANG} -I/usr/local/cuda/samples/common/inc -O0 -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
+    # ${CLANG} -I${CUDA_DIR}/samples/common/inc -O0 -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
 
     # run pass and compile
     ${CLANG} -g -O0 -std=c++14 --cuda-gpu-arch=sm_30 \
-            -I/usr/local/cuda/include -L/usr/local/cuda/lib64 \
-            -I/usr/local/cuda/samples/common/inc \
+            -I${CUDA_DIR}/include -L${CUDA_DIR}/lib64 \
+            -I${CUDA_DIR}/samples/common/inc \
             -L./runtime \
             -Xclang -load -Xclang ./instrument/libinstrument.so \
             -z muldefs -lcudart -lruntime -xcuda \

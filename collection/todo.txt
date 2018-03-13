@@ -3,3 +3,6 @@
 - track more CUDA memory allocations (2D, array, pitched memory)
 - coalesce memory accesses into warps before emit
 - documentation
+
+FIX: cudaMalloc in Clang 5/6 release
+FIX: createInferAddressSpacesPass in Clang 5/6 Release
