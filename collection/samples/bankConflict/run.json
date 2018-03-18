@@ -1,0 +1,9 @@
+{
+  "compress": false,
+  "end": 1521384925293,
+  "start": 1521384925136,
+  "traces": [
+    "kernel-0.trace.json"
+  ],
+  "type": "run"
+}
