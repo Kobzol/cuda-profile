@@ -21,7 +21,7 @@ void MemoryAccess::handleStore(StoreInst* store, int32_t debugIndex)
     emitter.store(
             emitter.getBuilder().CreatePointerCast(store->getPointerOperand(), this->context.getTypes().voidPtr()),
             this->context.getValues().int64(size), this->resolver.getAddressSpace(store),
-            this->context.getValues().int64(this->context.getTypeMapper().mapType(store->getValueOperand()->getType())),
+            this->context.getValues().int64(this->context.getTypeMapper().mapItem(store->getValueOperand()->getType())),
             this->context.getValues().int32(debugIndex),
             this->castToInt64(store->getValueOperand(), emitter.getBuilder())
     );
@@ -36,7 +36,7 @@ void MemoryAccess::handleLoad(LoadInst* load, int32_t debugIndex)
     emitter.load(emitter.getBuilder().CreatePointerCast(load->getPointerOperand(), this->context.getTypes().voidPtr()),
                  this->context.getValues().int64(size),
                  this->resolver.getAddressSpace(load),
-                 this->context.getValues().int64(this->context.getTypeMapper().mapType(load->getType())),
+                 this->context.getValues().int64(this->context.getTypeMapper().mapItem(load->getType())),
                  this->context.getValues().int32(debugIndex),
                  this->castToInt64(load, emitter.getBuilder())
     );

@@ -37,7 +37,17 @@ picojson::value cupr::JsonTraceFormatter::jsonify(const cupr::AllocRecord& recor
     {
         typeKey = "typeIndex";
         typeValue = picojson::value((double) record.typeIndex);
-    } else typeValue = picojson::value(record.type);
+    }
+    else typeValue = picojson::value(record.type);
+
+    std::string nameKey = "nameString";
+    picojson::value nameValue;
+    if (record.name == nullptr)
+    {
+        nameKey = "nameIndex";
+        nameValue = picojson::value((double) record.nameIndex);
+    }
+    else nameValue = picojson::value(record.name);
 
     return picojson::value(picojson::object {
             {"address",     picojson::value(this->hexPointer(record.address))},
@@ -46,7 +56,7 @@ picojson::value cupr::JsonTraceFormatter::jsonify(const cupr::AllocRecord& recor
             {"space",       picojson::value((double) record.addressSpace)},
             {typeKey,       typeValue},
             {"active",      picojson::value(record.active)},
-            {"name",        picojson::value(record.name == nullptr ? "" : record.name)},
+            {nameKey,       nameValue},
             {"location",    picojson::value(record.location == nullptr ? "" : record.location)},
     });
 }

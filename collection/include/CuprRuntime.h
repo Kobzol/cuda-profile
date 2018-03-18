@@ -152,11 +152,11 @@ extern "C"
         cupr::deviceDimensions->warpSize = warpSize;
     }
     extern "C" __device__ void CU_PREFIX(markSharedBuffer)(void* address, size_t size, size_t elementSize,
-                                                           size_t type)
+                                                           size_t type, size_t nameIndex)
     {
         ATOMIC_INSERT(cupr::deviceSharedBuffers,
                       &cupr::deviceSharedBufferIndex,
                       cupr::deviceBufferSize,
-                      cupr::AllocRecord(address, size, elementSize, cupr::AddressSpace::Shared, type));
+                      cupr::AllocRecord(address, size, elementSize, cupr::AddressSpace::Shared, type, nameIndex));
     }
 }

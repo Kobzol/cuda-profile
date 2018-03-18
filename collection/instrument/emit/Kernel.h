@@ -29,7 +29,9 @@ private:
 
     std::vector<llvm::Instruction*> collectInstructions(llvm::Function* function);
     std::vector<DebugInfo> instrumentInstructions(const std::vector<llvm::Instruction*>& instructions);
-    void emitKernelMetadata(llvm::Function* function, std::vector<DebugInfo> debugRecods, TypeMapper& mapper);
+    void emitKernelMetadata(llvm::Function* function, std::vector<DebugInfo> debugRecods,
+                            Mapper<llvm::Type*>& typeMapper,
+                            Mapper<std::string>& nameMapper);
 
     void instrumentStore(llvm::StoreInst* store, int32_t debugIndex);
     void instrumentLoad(llvm::LoadInst* load, int32_t debugIndex);

@@ -40,6 +40,11 @@ public:
                 llvm::Value* name, llvm::Value* location);
     void free(llvm::Value* address);
 
+    void markSharedBuffer(llvm::Value* address, llvm::Value* size, llvm::Value* elementSize, llvm::Value* type,
+                          llvm::Value* name);
+    void storeKernelDimensions();
+    llvm::Instruction* isFirstThread();
+
     llvm::IRBuilder<>& getBuilder()
     {
         return this->builder;
@@ -47,7 +52,8 @@ public:
 
     llvm::Value* createKernelContext(llvm::Value* kernelName);
 
-    void emitFirstThreadActions(const std::vector<llvm::GlobalVariable*>& sharedBuffers);
+    llvm::Instruction* barrier();
+    void setInsertPoint(llvm::BasicBlock* block);
 
 private:
     llvm::Function* getStoreFunction();

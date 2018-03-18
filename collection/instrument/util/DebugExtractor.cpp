@@ -68,20 +68,11 @@ const Function* DebugExtractor::findVarScope(const Value* value)
 
 std::unique_ptr<DebugInfo> DebugExtractor::getGlobalVarDebugInfo(const GlobalVariable* global)
 {
-    const Module* module = global->getParent();
-    if (NamedMDNode* cu = module->getNamedMetadata("llvm.dbg.cu"))
+    SmallVector<DIGlobalVariableExpression*, 10> info;
+    global->getDebugInfo(info);
+    for (auto& di: info)
     {
-        for (unsigned i = 0, e = cu->getNumOperands(); i != e; ++i)
-        {
-            auto* compileUnit = cast<DICompileUnit>(cu->getOperand(i));
-            for (DIGlobalVariableExpression* globalDI : compileUnit->getGlobalVariables())
-            {
-                /*if (globalDI->getVariable()->get == global) TODO
-                {
-                    return std::make_unique<DebugInfo>(globalDI);
-                }*/
-            }
-        }
+        return std::make_unique<DebugInfo>(di->getVariable());
     }
 
     return std::make_unique<DebugInfo>();

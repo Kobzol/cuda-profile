@@ -45,7 +45,6 @@ void cupr::ProtobufTraceFormatter::formatTrace(std::ostream& os, const std::stri
         buffer->set_elementsize(static_cast<google::protobuf::int32>(allocation.elementSize));
         buffer->set_space(static_cast<google::protobuf::int32>(allocation.addressSpace));
         buffer->set_active(allocation.active);
-        buffer->set_name(allocation.name == nullptr ? "" : allocation.name);
         buffer->set_location(allocation.location == nullptr ? "" : allocation.location);
 
         if (allocation.type == nullptr)
@@ -53,6 +52,12 @@ void cupr::ProtobufTraceFormatter::formatTrace(std::ostream& os, const std::stri
             buffer->set_typeindex(static_cast<google::protobuf::int32>(allocation.typeIndex));
         }
         else buffer->set_typestring(allocation.type);
+
+        if (allocation.name == nullptr)
+        {
+            buffer->set_nameindex(static_cast<google::protobuf::int32>(allocation.nameIndex));
+        }
+        else buffer->set_namestring(allocation.name);
     }
 
     trace.set_kernel(kernel);

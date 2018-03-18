@@ -35,7 +35,7 @@ def test_allocation_global(profile, format):
     assert allocations[0]["typeString"] == "i32"
     assert allocations[0]["space"] == 0
     assert allocations[0]["address"] == data["stdout"].strip()
-    assert allocations[0]["name"] == "dptr"
+    assert allocations[0]["nameString"] == "dptr"
     assert allocations[0]["location"].endswith("input.cu:9")
 
 
@@ -111,7 +111,7 @@ def test_parameters_runtime_tracking_overwrite(profile):
 
     for record in allocations:
         if record["size"] == alloc["size"]:
-            assert record["name"] == "dptr"
+            assert record["nameString"] == "dptr"
             return
 
     assert False  # allocation was not overwritten by static tracking

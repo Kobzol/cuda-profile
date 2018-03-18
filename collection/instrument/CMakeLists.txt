@@ -5,6 +5,7 @@ set(SOURCE_FILES
         emit/MemoryAccess.cpp
         emit/MemoryAlloc.cpp
         emit/Kernel.cpp
+        emit/KernelInit.cpp
         emit/KernelLaunch.cpp
         emit/RuntimeEmitter.cpp
         util/AddressSpaceResolver.cpp
@@ -15,7 +16,6 @@ set(SOURCE_FILES
         util/FunctionUtils.cpp
         util/RegexFilter.cpp
         util/StringUtils.cpp
-        util/TypeMapper.cpp
         util/Types.cpp
         util/Values.cpp
 )

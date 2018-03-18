@@ -41,7 +41,7 @@ public:
     llvm::StructType* getCompositeType(const std::string& name);
     void getGlobalVariableSize(llvm::GlobalVariable* globalVariable, size_t& size, size_t& elementSize);
 
-    std::string stringify(llvm::Type* type);
+    std::string stringify(const llvm::Type* type);
     
 private:
     llvm::Module* module = nullptr;

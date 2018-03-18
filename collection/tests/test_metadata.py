@@ -137,6 +137,27 @@ def test_metadata_type_index_shared_variable(profile, format):
     assert access["typeIndex"] == types.index("float")
 
 
+@param_all_formats
+def test_metadata_name_index_shared_buffer(profile, format):
+    data = profile("""
+    #include <cstdio>
+    __global__ void kernel() {
+        __shared__ float arr[10];
+        arr[threadIdx.x] = threadIdx.x;
+    }
+    int main() {
+        kernel<<<1, 1>>>();
+        return 0;
+    }
+    """, format=format)
+
+    names = data[metadata_file("kernel")]["nameMap"]
+    assert len(names) > 0
+
+    allocations = data[kernel_file("kernel", format=format)]["allocations"][0]
+    assert allocations["nameIndex"] == names.index("arr")
+
+
 def test_metadata_type_and_name(profile):
     data = profile("""
     __global__ void kernel(int* p) {

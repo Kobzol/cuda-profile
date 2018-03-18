@@ -27,9 +27,9 @@ namespace cupr
         }
 
         __device__ AllocRecord(void* address, size_t size, size_t elementSize,
-                               AddressSpace addressSpace, size_t type)
+                               AddressSpace addressSpace, size_t type, size_t nameIndex)
                 : address(address), size(size), elementSize(elementSize),
-                  addressSpace(addressSpace), typeIndex(type)
+                  addressSpace(addressSpace), typeIndex(type), nameIndex(nameIndex)
         {
 
         }
@@ -43,5 +43,6 @@ namespace cupr
         size_t typeIndex = 0;
         bool active = true;
         AddressSpace addressSpace = AddressSpace::Global;
+        size_t nameIndex = 0;
     };
 }

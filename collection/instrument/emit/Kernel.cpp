@@ -18,6 +18,7 @@
 #include "../util/StringUtils.h"
 #include "../util/FunctionContentLoader.h"
 #include "../../runtime/format/json/picojson.h"
+#include "KernelInit.h"
 
 using namespace llvm;
 
@@ -64,7 +65,7 @@ void Kernel::handleKernel(Function* function)
     auto instructions = this->collectInstructions(function);
     auto debugRecords = this->instrumentInstructions(instructions);
 
-    this->emitKernelMetadata(function, debugRecords, this->context.getTypeMapper());
+    this->emitKernelMetadata(function, debugRecords, this->context.getTypeMapper(), this->context.getNameMapper());
 }
 
 std::vector<Instruction*> Kernel::collectInstructions(Function* function)
@@ -131,7 +132,9 @@ void Kernel::instrumentLoad(LoadInst* load, int32_t debugIndex)
     handler.handleLoad(load, debugIndex);
 }
 
-void Kernel::emitKernelMetadata(Function* function, std::vector<DebugInfo> debugRecods, TypeMapper& mapper)
+void Kernel::emitKernelMetadata(Function* function, std::vector<DebugInfo> debugRecods,
+                                Mapper<llvm::Type*>& typeMapper,
+                                Mapper<std::string>& nameMapper)
 {
     Demangler demangler;
     std::string name = demangler.demangle(function->getName().str());
@@ -146,9 +149,14 @@ void Kernel::emitKernelMetadata(Function* function, std::vector<DebugInfo> debug
         }));
     }
     std::vector<picojson::value> jsonTypes;
-    for (auto& type : mapper.getTypes())
+    for (auto& item : typeMapper.getMappedItems())
     {
-        jsonTypes.emplace_back(type);
+        jsonTypes.emplace_back(item);
+    }
+    std::vector<picojson::value> jsonNames;
+    for (auto& item : nameMapper.getMappedItems())
+    {
+        jsonNames.emplace_back(item);
     }
 
     std::string kernelName = name.substr(0, name.find('('));
@@ -162,6 +170,7 @@ void Kernel::emitKernelMetadata(Function* function, std::vector<DebugInfo> debug
             {"kernel", picojson::value(kernelName)},
             {"locations", picojson::value(jsonRecords)},
             {"typeMap", picojson::value(jsonTypes)},
+            {"nameMap", picojson::value(jsonNames)},
             {"source", picojson::value(picojson::object {
                     {"file", picojson::value(info->isValid() ? StringUtils::getFullPath(info->getFilename()) : "")},
                     {"line", picojson::value((double) (info->isValid() ? info->getLine() : 0))},
@@ -192,6 +201,6 @@ bool Kernel::isSharedBuffer(GlobalVariable& variable)
 
 void Kernel::emitFirstThreadActions(Function* function, const std::vector<GlobalVariable*>& sharedBuffers)
 {
-    RuntimeEmitter emitter(this->context, FunctionUtils::getFirstInstruction(function));
-    emitter.emitFirstThreadActions(sharedBuffers);
+    KernelInit init(this->context);
+    init.handleKernelInit(function, sharedBuffers);
 }

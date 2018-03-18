@@ -81,7 +81,7 @@ void Types::getGlobalVariableSize(GlobalVariable* globalVariable, size_t& size, 
     else elementSize = size = type->getPrimitiveSizeInBits() / 8;
 }
 
-std::string Types::stringify(Type* type)
+std::string Types::stringify(const Type* type)
 {
     if (isa<StructType>(type))
     {

@@ -2,8 +2,6 @@
 #include "../../runtime/Prefix.h"
 
 #include <llvm/IR/Module.h>
-#include <iostream>
-#include <llvm/Support/Debug.h>
 
 using namespace llvm;
 
@@ -12,16 +10,6 @@ static const std::string KERNEL_CONTEXT_TYPE = "cupr::KernelContext";
 static Function* toFunction(Constant* constant)
 {
     return cast<Function>(constant->stripPointerCasts());
-}
-static Type* getSharedBufferType(GlobalVariable* buffer)
-{
-    Type* type = buffer->getInitializer()->getType();
-
-    if (auto arrType = dyn_cast<ArrayType>(type))
-    {
-        return arrType->getContainedType(0);
-    }
-    return type;
 }
 
 
@@ -86,6 +74,36 @@ void RuntimeEmitter::free(Value* address)
     });
 }
 
+void RuntimeEmitter::markSharedBuffer(Value* address, Value* size, Value* elementSize, Value* type, Value* name)
+{
+    this->builder.CreateCall(this->getMarkSharedBufferFunction(), {
+            address, size, elementSize,
+            type, name
+    });
+}
+void RuntimeEmitter::storeKernelDimensions()
+{
+    this->builder.CreateCall(this->getStoreDimensionsFunction());
+}
+Instruction* RuntimeEmitter::isFirstThread()
+{
+    return this->builder.CreateCall(this->getIsFirstThreadFunction());
+}
+
+Instruction* RuntimeEmitter::barrier()
+{
+    return this->builder.CreateCall(this->context.getModule()->getOrInsertFunction(
+            "llvm.nvvm.barrier0",
+            this->context.getTypes().voidType(),
+            nullptr)
+    );
+}
+
+void RuntimeEmitter::setInsertPoint(BasicBlock* block)
+{
+    this->builder.SetInsertPoint(block);
+}
+
 Value* RuntimeEmitter::createKernelContext(Value* kernelName)
 {
     auto type = this->context.getTypes().getCompositeType(KERNEL_CONTEXT_TYPE);
@@ -96,40 +114,6 @@ Value* RuntimeEmitter::createKernelContext(Value* kernelName)
     });
 
     return alloc;
-}
-
-void RuntimeEmitter::emitFirstThreadActions(const std::vector<GlobalVariable*>& sharedBuffers)
-{
-    Function* function = this->getBuilder().GetInsertBlock()->getParent();
-    Module* module = function->getParent();
-
-    auto sync = this->builder.CreateCall(
-            module->getOrInsertFunction("llvm.nvvm.barrier0",
-                                        this->context.getTypes().voidType(),
-                                        nullptr));
-
-    auto bufferBlock = BasicBlock::Create(module->getContext(), "sharedBuffers", function, sync->getParent());
-    auto entryBlock = BasicBlock::Create(module->getContext(), "entry", function, bufferBlock);
-
-    this->builder.SetInsertPoint(bufferBlock);
-    for (auto& buffer: sharedBuffers)
-    {
-        size_t size, elementSize;
-        this->context.getTypes().getGlobalVariableSize(buffer, size, elementSize);
-
-        this->builder.CreateCall(this->getMarkSharedBufferFunction(), {
-                this->builder.CreatePointerCast(buffer, this->context.getTypes().voidPtr()),
-                this->context.getValues().int64(size),
-                this->context.getValues().int64(elementSize),
-                this->context.getValues().int64(this->context.getTypeMapper().mapType(getSharedBufferType(buffer)))
-        });
-    }
-    this->builder.CreateCall(this->getStoreDimensionsFunction());
-    this->builder.CreateBr(sync->getParent());
-
-    this->builder.SetInsertPoint(entryBlock);
-    this->builder.CreateCondBr(this->builder.CreateCall(this->getIsFirstThreadFunction()),
-                               bufferBlock, sync->getParent());
 }
 
 Function* RuntimeEmitter::getStoreFunction()
@@ -145,7 +129,7 @@ Function* RuntimeEmitter::getStoreFunction()
             this->context.getTypes().int64(),
             nullptr));
 }
-llvm::Function* RuntimeEmitter::getLoadFunction()
+Function* RuntimeEmitter::getLoadFunction()
 {
     return toFunction(this->context.getModule()->getOrInsertFunction(
             RuntimeEmitter::runtimePrefix("load"),
@@ -227,6 +211,7 @@ Function* RuntimeEmitter::getMarkSharedBufferFunction()
             RuntimeEmitter::runtimePrefix("markSharedBuffer"),
             this->context.getTypes().voidType(),
             this->context.getTypes().int8Ptr(),
+            this->context.getTypes().int64(),
             this->context.getTypes().int64(),
             this->context.getTypes().int64(),
             this->context.getTypes().int64(),
