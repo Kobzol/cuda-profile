@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 import {AddressRange, WarpAccess} from '../../../../../lib/trace/selection';
 import {Color, default as chroma} from 'chroma-js';
 import {AccessType} from '../../../../../lib/profile/warp';
-import {getIdentifier, READ_COLOR, WRITE_COLOR} from '../../../warp-access-settings';
+import {getIdentifier, READ_COLOR, WRITE_COLOR} from '../../../warp-access-ui';
 
 interface Props
 {

@@ -1,7 +1,7 @@
 import React, {PureComponent} from 'react';
 import {Kernel} from '../../../lib/profile/kernel';
 import {Trace} from '../../../lib/profile/trace';
-import {Warp} from '../../../lib/profile/warp';
+import {AccessType, Warp} from '../../../lib/profile/warp';
 import {WarpFilter} from './warp-filter';
 import {Dim3} from '../../../lib/profile/dim3';
 import {WarpOverview} from './warp-overview/warp-overview';
@@ -13,6 +13,7 @@ import {TraceHeader} from './trace-header';
 import {TraceSelection} from '../../../lib/trace/selection';
 import {contains} from 'ramda';
 import {getFilename} from '../../../lib/util/string';
+import {BadgeRead, BadgeWrite} from '../warp-access-ui';
 
 interface Props
 {
@@ -27,6 +28,10 @@ interface State
 {
     blockFilter: Dim3;
     locationFilter: SourceLocation[];
+    typeFilter: {
+        read: boolean;
+        write: boolean;
+    };
     sourceModalOpened: boolean;
     activePanels: number[];
 }
@@ -51,12 +56,26 @@ const Section = styled.div`
     margin: 0;
   }
 `;
+const FilterWrapper = styled.div`
+  margin-bottom: 10px;
+`;
+const Row = styled.div`
+  display: flex;
+  align-items: center;
+`;
+const Label = styled.span`
+  margin-right: 5px;
+`;
 
 export class WarpPanel extends PureComponent<Props, State>
 {
     state: State = {
         blockFilter: { x: null, y: null, z: null },
         locationFilter: [],
+        typeFilter: {
+            read: true,
+            write: true
+        },
         sourceModalOpened: false,
         activePanels: []
     };
@@ -82,21 +101,9 @@ export class WarpPanel extends PureComponent<Props, State>
                             onClose={this.closeSourceModal}/>
                     }
                     <Section>
-                        <h4>Active filters</h4>
-                        {this.isFilterActive() ? this.renderFilter(warps) :
-                            `No filters (${this.props.trace.warps.length} accesses total)`}
+                        <h4>Filters</h4>
+                        {this.renderFilters(warps)}
                     </Section>
-                    <Section>
-                        <h4>Filter by block index</h4>
-                        <WarpFilter
-                            filter={this.state.blockFilter}
-                            onFilterChange={this.changeBlockFilter} />
-                    </Section>
-                    {this.props.kernel.metadata.source &&
-                        <Section>
-                            <Button onClick={this.openSourceModal}>Filter by source location</Button>
-                        </Section>
-                    }
                     <Section>
                         <h4>Filtered access minimap</h4>
                         <WarpOverview
@@ -108,12 +115,9 @@ export class WarpPanel extends PureComponent<Props, State>
             </Wrapper>
         );
     }
-    renderFilter = (warps: Warp[]): JSX.Element =>
+    renderFilters = (warps: Warp[]): JSX.Element =>
     {
         const label = `${warps.length} accesses selected by filter (${this.props.trace.warps.length} total)`;
-
-        const {x, y, z} = this.state.blockFilter;
-        const dim = `${z || 'z'}.${y || 'y'}.${x || 'x'}`;
         const location = this.state.locationFilter.map(loc =>
             <SourceLocationEntry key={`${loc.file}:${loc.line}`}>
                 {getFilename(loc.file)}:{loc.line}
@@ -121,41 +125,56 @@ export class WarpPanel extends PureComponent<Props, State>
         );
 
         return (
-            <div>
-                <div>Block index: {dim}</div>
-                {this.state.locationFilter.length > 0 &&
-                <div>
-                    Source locations:
-                    <ListGroup>{location}</ListGroup>
-                </div>}
+            <>
+                <FilterWrapper>
+                    <Row>
+                        <Label>Block:</Label>
+                        <WarpFilter
+                            filter={this.state.blockFilter}
+                            onFilterChange={this.changeBlockFilter} />
+                    </Row>
+                    <Row>
+                        <Label>Type:</Label>
+                        <Row>
+                            <input type='checkbox' checked={this.state.typeFilter.read}
+                                   onChange={this.handleTypeReadChange} />
+                            <BadgeRead>read</BadgeRead>
+                        </Row>
+                        <Row>
+                            <input type='checkbox' checked={this.state.typeFilter.write}
+                                   onChange={this.handleTypeWriteChange} />
+                            <BadgeWrite>write</BadgeWrite>
+                        </Row>
+                    </Row>
+                    {this.state.locationFilter.length > 0 &&
+                    <div>
+                        Source locations:
+                        <ListGroup>{location}</ListGroup>
+                    </div>}
+                    {this.props.kernel.metadata.source &&
+                    <Section>
+                        <Button size='sm' onClick={this.openSourceModal}>Filter by source location</Button>
+                    </Section>
+                    }
+                </FilterWrapper>
                 <div>{label}</div>
                 <Button onClick={this.resetFilters} color='danger'>Reset filter</Button>
-            </div>
+            </>
         );
     }
 
     getFilteredWarps = (): Warp[] =>
     {
         const {x, y, z} = this.state.blockFilter;
-        if (!this.isFilterActive()) return this.props.trace.warps;
-
         return this.props.trace.warps.filter(warp => {
             if (x !== null && warp.blockIdx.x !== x) return false;
             if (y !== null && warp.blockIdx.y !== y) return false;
             if (z !== null && warp.blockIdx.z !== z) return false;
             if (this.state.locationFilter.length > 0 && !this.testLocationFilter(warp)) return false;
+            if (!this.state.typeFilter.read && warp.accessType === AccessType.Read) return false;
+            if (!this.state.typeFilter.write && warp.accessType === AccessType.Write) return false;
             return true;
         });
-    }
-
-    isFilterActive = (): boolean =>
-    {
-        return (
-            this.state.blockFilter.x !== null ||
-            this.state.blockFilter.y !== null ||
-            this.state.blockFilter.z !== null ||
-            this.state.locationFilter.length > 0
-        );
     }
 
     changeBlockFilter = (blockFilter: Dim3) =>
@@ -168,7 +187,11 @@ export class WarpPanel extends PureComponent<Props, State>
     {
         this.setState(() => ({
             blockFilter: { x: null, y: null, z: null },
-            locationFilter: []
+            locationFilter: [],
+            typeFilter: {
+                read: true,
+                write: true
+            }
         }));
     }
 
@@ -180,6 +203,26 @@ export class WarpPanel extends PureComponent<Props, State>
     {
         const location: SourceLocation = { file: warp.location.file, line: warp.location.line };
         return contains(location, this.state.locationFilter);
+    }
+    handleTypeReadChange = (event: React.FormEvent<HTMLInputElement>) =>
+    {
+        const read = event.currentTarget.checked;
+        this.setState(state => ({
+            typeFilter: {
+                ...state.typeFilter,
+                read
+            }
+        }));
+    }
+    handleTypeWriteChange = (event: React.FormEvent<HTMLInputElement>) =>
+    {
+        const write = event.currentTarget.checked;
+        this.setState(state => ({
+            typeFilter: {
+                ...state.typeFilter,
+                write
+            }
+        }));
     }
 
     changeSourcePanelVisibility = (sourceModalOpened: boolean) =>

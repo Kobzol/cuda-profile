@@ -25,6 +25,9 @@ interface State
 const Wrapper = styled(Card)`
   margin-top: 10px;
 `;
+const Header = styled(CardHeader)`
+  padding: 0;
+`;
 const Body = styled(CardBody)`
   padding: 10px;
 `;
@@ -42,15 +45,16 @@ export class WarpDetail extends PureComponent<Props, State>
     {
         return (
             <Wrapper>
-                <CardHeader>Detail</CardHeader>
-                <Body>
+                <Header>
                     <Nav tabs>
                         {this.renderNav(0, 'Memory conflicts')}
                         {this.renderNav(1, 'Bank conflicts')}
                         {this.renderNav(2, 'Memory map')}
                     </Nav>
+                </Header>
+                <Body>
                     <TabContent activeTab={this.state.activeTab}
-                          id='warp-detail'>
+                                id='warp-detail'>
                         <TabPane tabId={0} title='Memory conflicts'>
                             <MemoryConflictTable
                                 trace={this.props.trace}

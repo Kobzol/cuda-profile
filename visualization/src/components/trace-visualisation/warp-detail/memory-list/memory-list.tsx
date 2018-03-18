@@ -21,15 +21,16 @@ const Row = styled.div`
 
 export class MemoryList extends PureComponent<Props>
 {
-    render()
+    render(): JSX.Element
     {
+        return null;
         /*
         * <MemoryMinimap
                             width={200}
                             height={100}
                             rangeSelections={this.props.rangeSelections}
                             allocation={alloc} />
-        * */
+        *
         const allocations = this.getActiveAllocations(this.props.selectedWarps, this.props.allocations);
         return (
             <div>
@@ -43,7 +44,7 @@ export class MemoryList extends PureComponent<Props>
                     </Row>
                 )}
             </div>
-        );
+        );*/
     }
 
     getActiveAllocations = (warps: Warp[], allocations: MemoryAllocation[]): MemoryAllocation[] =>

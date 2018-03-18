@@ -35,12 +35,15 @@ interface BankHeaderProps {
 }
 const BankHeader = styled.th`
   text-align: center;
+  padding: 0 !important;
   ${(props: BankHeaderProps) => props.conflicted ? `
     background-color: #8F3938;
     color: #FFFFFF;
   ` : ''}
 `;
 const Access = styled.td`
+  padding: 0.25rem !important;
+  font-size: 11px;
   text-align: center;
 `;
 
@@ -107,7 +110,8 @@ export class BankConflictTable extends PureComponent<Props, State>
                         <Access onMouseEnter={() => this.selectBank(parseInt(validColumns[i], 10))}
                             onMouseLeave={() => this.selectBank(null)}
                             key={i}
-                            title={`${formatDim3(col.warp.blockIdx)}.${formatDim3(col.access.threadIdx)} ` +
+                            title={col !== null &&
+                            `${formatDim3(col.warp.blockIdx)}.${formatDim3(col.access.threadIdx)} ` +
                             `at ${col.access.address}`}>
                             {col !== null && this.renderAccess(col.warp, col.access)}
                         </Access>
@@ -120,13 +124,11 @@ export class BankConflictTable extends PureComponent<Props, State>
 
         return <tbody>{rows}</tbody>;
     }
-
+//<MdWarning key={access.id} />
     renderAccess = (warp: Warp, access: MemoryAccess): JSX.Element =>
     {
         return (
-            <span>
-                <MdWarning key={access.id} />
-            </span>
+            <span>{formatDim3(access.threadIdx)}</span>
         );
     }
 

@@ -18,14 +18,17 @@ const FilterWrapper = styled.div`
   }
 `;
 const AxisWrapper = styled.div`
+  display: flex;
   margin-right: 5px;
 `;
 const AxisLabel = styled.div`
   text-align: center;
+  margin-right: 5px;
 `;
 const AxisInput = styled(Input)`
   padding: 0;
 `;
+
 
 export class WarpFilter extends PureComponent<Props>
 {

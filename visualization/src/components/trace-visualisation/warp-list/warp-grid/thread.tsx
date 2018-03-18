@@ -6,7 +6,7 @@ import {AddressRange, createWarpAccess, WarpAccess} from '../../../../lib/trace/
 import {formatDim3} from '../../../../lib/util/format';
 import {Color, default as chroma} from 'chroma-js';
 import {any} from 'ramda';
-import {getIdentifier, READ_COLOR, WRITE_COLOR} from '../../warp-access-settings';
+import {getIdentifier, READ_COLOR, WRITE_COLOR} from '../../warp-access-ui';
 
 interface Props
 {

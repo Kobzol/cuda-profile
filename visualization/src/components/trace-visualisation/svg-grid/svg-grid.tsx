@@ -39,6 +39,7 @@ export class SVGGrid extends PureComponent<Props>
     }
     renderGrid = (): JSX.Element[] =>
     {
+
         const layout = this.calculateLayout({
             rows: this.props.rows,
             cols: this.props.cols
@@ -60,15 +61,13 @@ export class SVGGrid extends PureComponent<Props>
             {
                 const index = y * (width) + x;
                 grid.push(
-                    <Fragment key={index}>
-                        {this.props.renderItem({
-                            index,
-                            x: nodes[index].x,
-                            y: nodes[index].y,
-                            width: nodeSize[0],
-                            height: nodeSize[1]}
-                        )}
-                    </Fragment>
+                    this.props.renderItem({
+                        index,
+                        x: nodes[index].x,
+                        y: nodes[index].y,
+                        width: nodeSize[0],
+                        height: nodeSize[1]}
+                    )
                 );
             }
         }

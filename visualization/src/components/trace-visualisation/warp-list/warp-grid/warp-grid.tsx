@@ -13,6 +13,7 @@ import MdClose from 'react-icons/lib/md/close';
 import styled from 'styled-components';
 import {BlockParams, SVGGrid} from '../../svg-grid/svg-grid';
 import {Dictionary, range, findIndex, equals} from 'ramda';
+import {BadgeRead, BadgeWrite} from '../../warp-access-ui';
 
 interface Props
 {
@@ -63,12 +64,6 @@ const BadgeBlock = Badge.extend`
 const BadgeSize = Badge.extend`
   background-color: #800080;
 `;
-const BadgeRead = Badge.extend`
-  background-color: #006400;
-`;
-const BadgeWrite = Badge.extend`
-  background-color: #8B0000;
-`;
 
 export class WarpGrid extends PureComponent<Props, State>
 {
@@ -110,6 +105,7 @@ export class WarpGrid extends PureComponent<Props, State>
 
         return (
             <Thread
+                key={params.index}
                 x={params.x}
                 y={params.y}
                 width={params.width}

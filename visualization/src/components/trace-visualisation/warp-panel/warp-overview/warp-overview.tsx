@@ -33,15 +33,20 @@ export class WarpOverview extends PureComponent<Props, State>
         const width = 320;
         const height = 200;
         const increaseLimit = this.state.limit < this.props.warps.length;
+
+        const cols = 16;
+        const rows = 16;
+
         return (
             <Wrapper>
                 {this.props.warps.length === 0 ? 'No warps match the active filters' :
                     <SVGGrid width={width}
                              height={height}
-                             rows={16}
-                             cols={16}
+                             rows={rows}
+                             cols={cols}
                              renderItem={this.renderWarpMiniature}
                              {...{
+                                 warps: this.props.warps,
                                  selectedWarps: this.props.selectedWarps,
                                  limit: this.state.limit
                              }} />
@@ -58,6 +63,7 @@ export class WarpOverview extends PureComponent<Props, State>
 
         return (
             <WarpMiniature
+                key={warp.index}
                 x={params.x}
                 y={params.y}
                 width={params.width}
