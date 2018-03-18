@@ -1,0 +1,9 @@
+{
+  "compress": true,
+  "end": 1521390424840,
+  "start": 1521390424227,
+  "traces": [
+    "vectorAdd-0.trace.gzip.protobuf"
+  ],
+  "type": "run"
+}
