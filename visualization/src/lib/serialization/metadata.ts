@@ -3,6 +3,7 @@ export interface Metadata
     type: string;
     kernel: string;
     typeMap: string[];
+    nameMap: string[];
     locations: DebugLocation[];
     source: SourceMetadata;
 }

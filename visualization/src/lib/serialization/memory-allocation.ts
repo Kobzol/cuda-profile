@@ -9,6 +9,7 @@ export interface MemoryAllocation
     typeIndex: number;
     typeString: string;
     active: boolean;
-    name: string;
+    nameIndex: number;
+    nameString: string;
     location: string;
 }

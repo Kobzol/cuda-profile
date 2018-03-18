@@ -1,6 +1,7 @@
 export interface Metadata
 {
     typeMap: string[];
+    nameMap: string[];
     locations: DebugLocation[];
     source: SourceLocation & { content: string };
 }

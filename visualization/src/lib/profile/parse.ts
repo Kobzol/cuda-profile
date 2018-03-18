@@ -25,6 +25,7 @@ function parseMetadata(metadata: MetadataFormat): Metadata
 {
     return {
         typeMap: metadata.typeMap,
+        nameMap: metadata.nameMap,
         locations: metadata.locations,
         source: metadata.source
     };
@@ -39,8 +40,8 @@ function parseAllocations(allocations: MemoryAllocationFormat[], metadata: Metad
             size: allocation.size,
             space: allocation.space,
             elementSize: allocation.elementSize,
-            type: allocation.typeString !== '' ? allocation.typeString : metadata.typeMap[allocation.typeIndex],
-            name: allocation.name,
+            type: allocation.typeString ? allocation.typeString : metadata.typeMap[allocation.typeIndex],
+            name: allocation.nameString ? allocation.nameString : metadata.nameMap[allocation.nameIndex],
             location: allocation.location
     }));
 }

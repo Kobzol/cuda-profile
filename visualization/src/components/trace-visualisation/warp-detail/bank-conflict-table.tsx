@@ -124,7 +124,7 @@ export class BankConflictTable extends PureComponent<Props, State>
 
         return <tbody>{rows}</tbody>;
     }
-//<MdWarning key={access.id} />
+
     renderAccess = (warp: Warp, access: MemoryAccess): JSX.Element =>
     {
         return (
