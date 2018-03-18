@@ -2,6 +2,8 @@ import bigInt, {BigInteger} from 'big-integer';
 import {AddressRange, WarpAccess} from '../trace/selection';
 import {MemoryAccess} from './memory-access';
 import {MemoryAllocation} from './memory-allocation';
+import {Warp} from './warp';
+import {chain} from 'ramda';
 
 export function createRange(from: BigInteger, to: BigInteger): AddressRange
 {
@@ -111,6 +113,13 @@ export function getWarpAccessesRange(bound: AddressRange, accesses: WarpAccess[]
     if (!foundIntersect) return {...bound};
 
     return createRange(minAddress, maxAddress);
+}
+export function getWarpsRange(bound: AddressRange, warps: Warp[]): AddressRange
+{
+    return getWarpAccessesRange(bound, chain(warp => warp.accesses.map(access => ({
+        warp,
+        access
+    })), warps));
 }
 
 export function getAllocationAddressRange(allocation: MemoryAllocation): AddressRange

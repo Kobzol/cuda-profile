@@ -31,11 +31,12 @@ export class WarpOverview extends PureComponent<Props, State>
     render()
     {
         const width = 320;
-        const height = 200;
         const increaseLimit = this.state.limit < this.props.warps.length;
 
+        const displayedWarpCount = Math.min(this.props.warps.length, this.state.limit);
         const cols = 16;
-        const rows = 16;
+        const rows = Math.max(Math.ceil(displayedWarpCount / cols), 16);
+        const height = rows * 12.5;
 
         return (
             <Wrapper>

@@ -23,14 +23,12 @@ export class MemoryList extends PureComponent<Props>
 {
     render(): JSX.Element
     {
-        return null;
-        /*
-        * <MemoryMinimap
+        /*<MemoryMinimap
                             width={200}
                             height={100}
                             rangeSelections={this.props.rangeSelections}
                             allocation={alloc} />
-        *
+        */
         const allocations = this.getActiveAllocations(this.props.selectedWarps, this.props.allocations);
         return (
             <div>
@@ -40,11 +38,12 @@ export class MemoryList extends PureComponent<Props>
                         <AllocationView
                             allocation={alloc}
                             selectedAccesses={this.props.selectedAccesses}
+                            selectedWarps={this.props.selectedWarps}
                             onMemorySelect={this.props.onMemorySelect} />
                     </Row>
                 )}
             </div>
-        );*/
+        );
     }
 
     getActiveAllocations = (warps: Warp[], allocations: MemoryAllocation[]): MemoryAllocation[] =>

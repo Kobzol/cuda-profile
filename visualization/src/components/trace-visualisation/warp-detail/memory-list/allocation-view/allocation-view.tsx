@@ -2,16 +2,11 @@ import React from 'react';
 import {PureComponent} from 'react';
 import {MemoryAllocation} from '../../../../../lib/profile/memory-allocation';
 import {
-    addressToNum, getAddressRangeSize, getAllocationAddressRange, numToAddress,
-    getWarpAccessesRange, addressAddStr, createRange, checkIntersection,
-    intersects, getAccessAddressRange
+    addressToNum, getAddressRangeSize, getAllocationAddressRange,
+    getWarpAccessesRange, addressAddStr, createRange,
+    intersects, getAccessAddressRange,
 } from '../../../../../lib/profile/address';
 import {AddressRange, WarpAccess} from '../../../../../lib/trace/selection';
-import {zoom} from 'd3-zoom';
-import GridLayout from 'd3-v4-grid';
-import {select} from 'd3-selection';
-import {range} from 'd3-array';
-import * as d3 from 'd3';
 import {formatAddressSpace, formatByteSize} from '../../../../../lib/util/format';
 import {Badge, Card, CardBody} from 'reactstrap';
 import CardHeader from 'reactstrap/lib/CardHeader';
@@ -20,11 +15,13 @@ import styled from 'styled-components';
 import {BlockParams, SVGGrid} from '../../../svg-grid/svg-grid';
 import {Block} from './block';
 import {Dictionary, zipObj, map, addIndex} from 'ramda';
+import {Warp} from '../../../../../lib/profile/warp';
 
 interface Props
 {
     allocation: MemoryAllocation;
     selectedAccesses: WarpAccess[];
+    selectedWarps: Warp[];
     onMemorySelect: (memorySelection: AddressRange[]) => void;
 }
 
@@ -51,13 +48,13 @@ const BadgeSource = MemoryBadge.extend`
 `;
 
 const rows = 20;
-const cols = 60;
+const cols = 40;
 
 export class AllocationView extends PureComponent<Props>
 {
-    private wrapper: HTMLDivElement = null;
+    /*private wrapper: HTMLDivElement = null;
 
-    /*componentDidMount()
+    componentDidMount()
     {
         this.renderd3();
     }
@@ -65,7 +62,7 @@ export class AllocationView extends PureComponent<Props>
     componentDidUpdate()
     {
         this.renderd3();
-    }*/
+    }
 
     renderd3()
     {
@@ -175,7 +172,7 @@ export class AllocationView extends PureComponent<Props>
             });
         }
         else blocks.attr('fill', 'rgb(255, 255, 255)');
-    }
+    }*/
 
     render()
     {
@@ -187,7 +184,7 @@ export class AllocationView extends PureComponent<Props>
                     </div>;*/
 
         const addressRange = this.calculateRange();
-        const blockSize = this.calculateBlockSize();
+        const blockSize = this.calculateBlockSize(addressRange);
         const indexedAccesses = addIndex(map)((access, index) => ({
             access,
             index
@@ -230,6 +227,7 @@ export class AllocationView extends PureComponent<Props>
 
         return (
             <Block
+                key={`${start}-${end}`}
                 x={params.x}
                 y={params.y}
                 width={params.width}
@@ -249,7 +247,7 @@ export class AllocationView extends PureComponent<Props>
                 <MemoryBadge>{formatAddressSpace(allocation.space)}</MemoryBadge>
                 <BadgeSource>{getFilename(allocation.location)}</BadgeSource>
                 <MemoryBadge>{addressRange.from} - {addressRange.to}</MemoryBadge>
-                <MemoryBadge>one square is {this.calculateBlockSize()} bytes</MemoryBadge>
+                <MemoryBadge>one square is {this.calculateBlockSize(addressRange)} bytes</MemoryBadge>
             </>
         );
     }
@@ -272,17 +270,18 @@ export class AllocationView extends PureComponent<Props>
         else this.props.onMemorySelect([addressRange]);
     }
 
-    calculateBlockSize = (): number =>
+    calculateBlockSize = (addressRange: AddressRange): number =>
     {
         const elementCount = rows * cols;
-        const size = getAddressRangeSize(this.calculateRange());
-        const total = Math.ceil(size / elementCount);
-        const clamped = Math.max(4, total);
-        return (Math.floor(clamped / 4)) * 4;
+        const size = getAddressRangeSize(addressRange);
+        const blockSize = Math.ceil(size / elementCount);
+        const clamped = Math.max(4, blockSize);
+        return Math.ceil(clamped);
     }
 
     calculateRange = (): AddressRange =>
     {
         return getWarpAccessesRange(getAllocationAddressRange(this.props.allocation), this.props.selectedAccesses);
+        //return getWarpsRange(getAllocationAddressRange(this.props.allocation), this.props.selectedWarps);
     }
 }
