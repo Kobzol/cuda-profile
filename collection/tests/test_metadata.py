@@ -36,7 +36,8 @@ def test_metadata_debug_location(profile):
     check_debug_record(data, records[1], "store", 4)
 
 
-def test_metadata_debug_index(profile):
+@param_all_formats
+def test_metadata_debug_index(profile, format):
     data = profile("""
     __global__ void kernel(int* p) {
         int x = *p;
@@ -48,13 +49,14 @@ def test_metadata_debug_index(profile):
         kernel<<<1, 1>>>(dptr);
         cudaFree(dptr);
         return 0;
-    }""")
-    accesses = data[kernel_file("kernel")]["accesses"]
+    }""", format=format)
+    accesses = data[kernel_file("kernel", format=format)]["accesses"]
     assert accesses[0]["debugId"] == 0
     assert accesses[1]["debugId"] == 1
 
 
-def test_metadata_debug_index_missing(profile):
+@param_all_formats
+def test_metadata_debug_index_missing(profile, format):
     data = profile("""
     __global__ void kernel(int* p) {
         int x = *p;
@@ -66,13 +68,14 @@ def test_metadata_debug_index_missing(profile):
         kernel<<<1, 1>>>(dptr);
         cudaFree(dptr);
         return 0;
-    }""", debug=False)
-    accesses = data[kernel_file("kernel")]["accesses"]
+    }""", format=format, debug=False)
+    accesses = data[kernel_file("kernel", format=format)]["accesses"]
     assert accesses[0]["debugId"] == -1
     assert accesses[1]["debugId"] == -1
 
 
-def test_metadata_type_index(profile):
+@param_all_formats
+def test_metadata_type_index(profile, format):
     data = profile("""
     __global__ void kernel(int* p) {
         int x = *p;
@@ -83,13 +86,55 @@ def test_metadata_type_index(profile):
         kernel<<<1, 1>>>(dptr);
         cudaFree(dptr);
         return 0;
-    }""")
+    }""", format=format)
 
     types = data[metadata_file("kernel")]["typeMap"]
     assert len(types) > 0
 
-    access = data[kernel_file("kernel")]["accesses"][0]
+    access = data[kernel_file("kernel", format=format)]["accesses"][0]
     assert access["typeIndex"] == types.index("i32")
+
+
+@param_all_formats
+def test_metadata_type_index_shared_buffer(profile, format):
+    data = profile("""
+    #include <cstdio>
+    __global__ void kernel() {
+        __shared__ float arr[10];
+        arr[threadIdx.x] = threadIdx.x;
+    }
+    int main() {
+        kernel<<<1, 1>>>();
+        return 0;
+    }
+    """, format=format)
+
+    types = data[metadata_file("kernel")]["typeMap"]
+    assert len(types) > 0
+
+    access = data[kernel_file("kernel", format=format)]["accesses"][0]
+    assert access["typeIndex"] == types.index("float")
+
+
+@param_all_formats
+def test_metadata_type_index_shared_variable(profile, format):
+    data = profile("""
+    #include <cstdio>
+    __global__ void kernel() {
+        __shared__ float arr;
+        arr = threadIdx.x;
+    }
+    int main() {
+        kernel<<<1, 1>>>();
+        return 0;
+    }
+    """, format=format)
+
+    types = data[metadata_file("kernel")]["typeMap"]
+    assert len(types) > 0
+
+    access = data[kernel_file("kernel", format=format)]["accesses"][0]
+    assert access["typeIndex"] == types.index("float")
 
 
 def test_metadata_type_and_name(profile):

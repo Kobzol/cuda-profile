@@ -13,6 +13,16 @@ static Function* toFunction(Constant* constant)
 {
     return cast<Function>(constant->stripPointerCasts());
 }
+static Type* getSharedBufferType(GlobalVariable* buffer)
+{
+    Type* type = buffer->getInitializer()->getType();
+
+    if (auto arrType = dyn_cast<ArrayType>(type))
+    {
+        return arrType->getContainedType(0);
+    }
+    return type;
+}
 
 
 std::string RuntimeEmitter::runtimePrefix(const std::string& name)
@@ -111,7 +121,7 @@ void RuntimeEmitter::emitFirstThreadActions(const std::vector<GlobalVariable*>& 
                 this->builder.CreatePointerCast(buffer, this->context.getTypes().voidPtr()),
                 this->context.getValues().int64(size),
                 this->context.getValues().int64(elementSize),
-                this->context.getValues().int64(this->context.getTypeMapper().mapType(buffer->getType()))
+                this->context.getValues().int64(this->context.getTypeMapper().mapType(getSharedBufferType(buffer)))
         });
     }
     this->builder.CreateCall(this->getStoreDimensionsFunction());
