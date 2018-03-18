@@ -282,6 +282,6 @@ export class AllocationView extends PureComponent<Props>
     calculateRange = (): AddressRange =>
     {
         return getWarpAccessesRange(getAllocationAddressRange(this.props.allocation), this.props.selectedAccesses);
-        //return getWarpsRange(getAllocationAddressRange(this.props.allocation), this.props.selectedWarps);
+        // return getWarpsRange(getAllocationAddressRange(this.props.allocation), this.props.selectedWarps);
     }
 }

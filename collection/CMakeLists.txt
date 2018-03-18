@@ -59,6 +59,9 @@ add_subdirectory("runtimetracker")
 # Benchmark
 add_subdirectory("benchmark")
 
+# Samples
+add_subdirectory("samples")
+
 # Tests
 add_custom_target(tests COMMAND py.test ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 add_dependencies(tests instrument)
