@@ -76,41 +76,6 @@ void CudaPass::instrumentCuda(Module& module)
     }
 }
 
-Function* CudaPass::augmentKernel(Function* fn)
-{
-    if (this->kernelMap.find(fn) == this->kernelMap.end())
-    {
-        FunctionType *type = fn->getFunctionType();
-        std::vector<Type *> arguments;
-        arguments.insert(arguments.end(), type->param_begin(), type->param_end());
-        arguments.push_back(this->context.getTypes().int32());
-
-        FunctionType *newType = FunctionType::get(type->getReturnType(), arguments, type->isVarArg());
-
-        Function *augmented = Function::Create(newType, fn->getLinkage(), fn->getName().str() + "_clone");
-        fn->getParent()->getFunctionList().push_back(augmented);
-
-        ValueToValueMapTy map;
-
-        auto newArgs = augmented->arg_begin();
-        for (auto args = fn->arg_begin(); args != fn->arg_end(); ++args, ++newArgs) {
-            map[&(*args)] = &(*newArgs);
-            newArgs->setName(args->getName());
-        }
-
-        SmallVector<ReturnInst *, 100> returns;
-        CloneFunctionInto(augmented, fn, map, true, returns);
-        // TODO: CloneDebugInfoMetadata
-
-        augmented->setCallingConv(fn->getCallingConv());
-
-        this->kernelMap[fn] = augmented;
-        return augmented;
-    }
-
-    return this->kernelMap[fn];
-}
-
 void CudaPass::instrumentCpp(Module& module)
 {
     if (!this->isInstrumentableCpp(module))

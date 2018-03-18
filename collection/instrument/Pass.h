@@ -24,8 +24,6 @@ private:
     void instrumentCuda(llvm::Module& module);
     void instrumentCpp(llvm::Module& module);
 
-    llvm::Function* augmentKernel(llvm::Function* fn);
-
     void handleFunctionCall(llvm::CallInst* call);
     bool isInstrumentableCuda(llvm::Module& module);
     bool isInstrumentableCpp(llvm::Module& module);

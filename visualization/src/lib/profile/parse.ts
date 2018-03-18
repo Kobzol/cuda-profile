@@ -112,7 +112,7 @@ function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[],
         });
     }
 
-    const warps = Object.keys(dict).map(key => dict[key]).slice(-100); // TODO;
+    const warps = Object.keys(dict).map(key => dict[key]);
     warps.sort((a: Warp, b: Warp) => {
         if (a.timestamp === b.timestamp) return 0;
         return a.timestamp < b.timestamp ? -1 : 1;
