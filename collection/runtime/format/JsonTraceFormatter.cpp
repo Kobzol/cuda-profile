@@ -88,7 +88,8 @@ void cupr::JsonTraceFormatter::formatTrace(std::ostream& os,
                     {"y", picojson::value((double) dimensions.block.y)},
                     {"z", picojson::value((double) dimensions.block.z)}
             })},
-            {"warpSize", picojson::value((double) dimensions.warpSize)}
+            {"warpSize", picojson::value((double) dimensions.warpSize)},
+            {"bankSize", picojson::value((double) dimensions.bankSize)}
     });
 
 #ifdef CUPR_USE_ZLIB

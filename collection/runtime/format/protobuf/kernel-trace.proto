@@ -16,4 +16,5 @@ message KernelTrace {
     required cupr.proto.Dim3 gridDim = 7;
     required cupr.proto.Dim3 blockDim = 8;
     required int32 warpSize = 9;
+    required int32 bankSize = 10;
 }

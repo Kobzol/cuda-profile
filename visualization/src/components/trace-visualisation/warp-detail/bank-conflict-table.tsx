@@ -158,7 +158,11 @@ export class BankConflictTable extends PureComponent<Props, State>
         })), warps);
 
         return groupBy((pair: {warp: Warp, access: MemoryAccess}) =>
-                addressToNum(pair.access.address).divide(4).mod(32).toJSNumber().toString(),
+                addressToNum(pair.access.address)
+                    .divide(this.props.trace.bankSize)
+                    .mod(this.props.trace.warpSize)
+                    .toJSNumber()
+                    .toString(),
             accessesWithWarp);
     }
 }

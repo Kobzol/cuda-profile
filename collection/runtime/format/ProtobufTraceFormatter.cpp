@@ -71,6 +71,7 @@ void cupr::ProtobufTraceFormatter::formatTrace(std::ostream& os, const std::stri
     trace.mutable_blockdim()->set_y(dimensions.block.y);
     trace.mutable_blockdim()->set_z(dimensions.block.z);
     trace.set_warpsize(dimensions.warpSize);
+    trace.set_banksize(dimensions.bankSize);
 
     if (compress)
     {

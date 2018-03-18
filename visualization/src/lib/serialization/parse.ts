@@ -1,19 +1,19 @@
 import {FileType, TraceFile} from '../file-load/file';
-import {Run} from './run';
-import {Trace} from './trace';
-import {Warp} from './warp';
-import {Metadata} from './metadata';
-import {Kernel} from './kernel';
-import {Profile} from './profile';
-import {Metadata as MetadataFormat} from '../serialization/metadata';
-import {Trace as TraceFormat} from '../serialization/trace';
-import {Run as RunFormat} from '../serialization/run';
-import {MemoryAccess as MemoryAccessFormat} from '../serialization/memory-access';
-import {MemoryAllocation as MemoryAllocationFormat} from '../serialization/memory-allocation';
-import {MemoryAllocation} from './memory-allocation';
+import {Run} from '../profile/run';
+import {Trace} from '../profile/trace';
+import {Warp} from '../profile/warp';
+import {Metadata} from '../profile/metadata';
+import {Kernel} from '../profile/kernel';
+import {Profile} from '../profile/profile';
+import {Metadata as MetadataFormat} from './metadata';
+import {Trace as TraceFormat} from './trace';
+import {Run as RunFormat} from './run';
+import {MemoryAccess as MemoryAccessFormat} from './memory-access';
+import {MemoryAllocation as MemoryAllocationFormat} from './memory-allocation';
+import {MemoryAllocation} from '../profile/memory-allocation';
 import {hasOwnProperty} from 'tslint/lib/utils';
-import {getLaneId, getWarpId, getWarpStart} from './warp';
-import {MissingProfileData} from './errors';
+import {getLaneId, getWarpId, getWarpStart} from '../profile/warp';
+import {MissingProfileData} from '../profile/errors';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
@@ -55,7 +55,8 @@ function parseTrace(trace: TraceFormat, metadata: Metadata): Trace
         allocations: parseAllocations(trace.allocations, metadata),
         gridDimension: trace.gridDim,
         blockDimension: trace.blockDim,
-        warpSize: trace.warpSize
+        warpSize: trace.warpSize,
+        bankSize: trace.bankSize
     };
 }
 

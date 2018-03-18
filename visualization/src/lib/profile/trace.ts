@@ -11,4 +11,5 @@ export interface Trace
     gridDimension: Dim3;
     blockDimension: Dim3;
     warpSize: number;
+    bankSize: number;
 }

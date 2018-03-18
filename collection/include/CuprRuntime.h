@@ -94,6 +94,11 @@ extern "C"
         DeviceDimensions dimensions;
         CHECK_CUDA_CALL(cudaMemcpy(&dimensions, context->deviceDimensions, sizeof(DeviceDimensions), cudaMemcpyDeviceToHost));
 
+        cudaSharedMemConfig sharedMemConfig;
+        CHECK_CUDA_CALL(cudaDeviceGetSharedMemConfig(&sharedMemConfig));
+
+        dimensions.bankSize = sharedMemConfig == cudaSharedMemBankSizeEightByte ? 8 : 4;
+
         typedef cudaError (*cudaFreeType)(void*);
 
         cudaFreeType freeFn = cupr::Parameters::isMappedMemoryEnabled() ? (cudaFreeType) cudaFreeHost : (cudaFreeType) cudaFree;

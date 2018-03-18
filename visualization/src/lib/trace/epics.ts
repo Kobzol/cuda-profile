@@ -5,7 +5,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/of';
 import '../util/redux-observable';
 import {buildProfile} from '../profile/actions';
-import {parseProfileAsync} from '../profile/parse';
+import {parseProfileAsync} from '../serialization/parse';
 import {Observable} from 'rxjs/Observable';
 
 

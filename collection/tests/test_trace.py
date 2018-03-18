@@ -104,7 +104,7 @@ def test_trace_dimensions(profile, format):
 
 
 @param_all_formats
-def test_warp_size(profile, format):
+def test_trace_warp_size(profile, format):
     data = profile("""
     #include <cstdio>
     __global__ void kernel() {
@@ -119,7 +119,27 @@ def test_warp_size(profile, format):
 
 
 @param_all_formats
-def test_warp_id(profile, format):
+def test_trace_bank_size(profile, format):
+    data = profile("""
+    #include <cstdio>
+    __global__ void kernel() {
+        int x = threadIdx.x;
+    }
+    int main() {
+        cudaDeviceSetSharedMemConfig(cudaSharedMemBankSizeFourByte);
+        kernel<<<1, 1>>>();
+        
+        cudaDeviceSetSharedMemConfig(cudaSharedMemBankSizeEightByte);
+        kernel<<<1, 1>>>();
+        return 0;
+    }
+    """, format=format)
+    assert data[kernel_file("kernel", format=format)]["bankSize"] == 4
+    assert data[kernel_file("kernel", index=1, format=format)]["bankSize"] == 8
+
+
+@param_all_formats
+def test_trace_warp_id(profile, format):
     data = profile("""
     #include <cstdio>
     __global__ void kernel(int* p) {
