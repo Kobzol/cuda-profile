@@ -12,6 +12,7 @@ namespace cupr
         static bool isCompressionEnabled();
         static bool isProtobufEnabled();
         static bool isMappedMemoryEnabled();
+        static bool isOutputEnabled();
 
     private:
         static bool isParameterEnabled(const char* name);

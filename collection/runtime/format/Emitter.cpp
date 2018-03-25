@@ -1,4 +1,5 @@
 #include "Emitter.h"
+#include "../Parameters.h"
 
 #include "json/picojson.h"
 #include "json/json_helper.h"
@@ -32,6 +33,8 @@ void Emitter::emitKernelTrace(const std::string& kernelName, const DeviceDimensi
                               const std::vector<AccessRecord>& records,
                               const std::vector<AllocRecord>& allocations, float duration)
 {
+    if (!Parameters::isOutputEnabled()) return;
+
     if (this->kernelCount.find(kernelName) == this->kernelCount.end())
     {
         this->kernelCount.insert({kernelName, 0});

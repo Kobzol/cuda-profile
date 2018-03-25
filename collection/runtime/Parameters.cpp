@@ -43,6 +43,11 @@ bool Parameters::isMappedMemoryEnabled()
     return isParameterEnabled("HOST_MEMORY");
 }
 
+bool Parameters::isOutputEnabled()
+{
+    return !Parameters::isParameterEnabled("DISABLE_OUTPUT");
+}
+
 bool Parameters::isParameterEnabled(const char* name)
 {
     char* parameter = getenv(name);

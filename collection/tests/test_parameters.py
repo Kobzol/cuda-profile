@@ -148,3 +148,22 @@ def test_parameters_kernel_regex(profile, format):
     assert len(mappings[kernel_file("addVectors", format=format)]["accesses"]) == 1
     assert len(mappings[kernel_file("subtractVectors", format=format)]["accesses"]) == 1
     assert kernel_file("generalKernel", format=format) not in mappings
+
+
+@param_all_formats
+def test_parameters_disable_output(profile, format):
+    code = """
+    __global__ void kernel(int* p) {
+        *p = 5;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }
+    """
+    data = profile(code, disable_output=True)
+
+    assert kernel_file("kernel", format=format) not in data

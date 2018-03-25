@@ -118,6 +118,7 @@ def compile_and_run(code,
                     instrument_locals=False,
                     kernel_regex=None,
                     release=False,
+                    disable_output=False,
                     format="json"):
     tmpdir = create_test_dir()
 
@@ -128,6 +129,8 @@ def compile_and_run(code,
         env["PROTOBUF"] = "1"
     if compress:
         env["COMPRESS"] = "1"
+    if disable_output:
+        env["DISABLE_OUTPUT"] = "1"
     if runtime_tracking:
         env["LD_PRELOAD"] = os.path.join(PROJECT_DIR, RUNTIME_TRACKING_LIB_DIR, "libruntimetracker.so")
 
