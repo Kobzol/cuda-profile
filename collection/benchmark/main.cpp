@@ -8,17 +8,21 @@ int main(int argc, char** argv)
 #include "Benchmark.h"
 
 void vectorAdd();
+void simpleGL();
+void mandelbrot();
 
-#define BENCHMARK(name)\
+#define BENCHMARK(name, count)\
     Benchmark name##Bench(#name);\
     name##Bench.measure([]() {\
         name();\
-    }, 10);\
+    }, count);\
     name##Bench.print()
 
 int main(int argc, char** argv)
 {
-    BENCHMARK(vectorAdd);
+    BENCHMARK(vectorAdd, 10);
+    BENCHMARK(simpleGL, 5);
+    BENCHMARK(mandelbrot, 2);
 
     return 0;
 }

@@ -1,4 +1,5 @@
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --cuda-gpu-arch=sm_30 -Xclang -load -Xclang ${CMAKE_BINARY_DIR}/instrument/libinstrument.so")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --cuda-gpu-arch=sm_30 -g -Xclang -load -Xclang ${CMAKE_BINARY_DIR}/instrument/libinstrument.so")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z muldefs")
 
 file(GLOB CUDA_SOURCES samples/**/*.cu)
 file(GLOB CUDA_CPP_SOURCES samples/**/*.cpp)
@@ -9,7 +10,7 @@ include_directories("${CUDA_TOOLKIT_ROOT_DIR}/samples/common/inc")
 include_directories("${PROJECT_SOURCE_DIR}")
 link_directories("${CUDA_TOOLKIT_ROOT_DIR}/lib64")
 
-set(LIBRARIES cudart runtime)
+set(LIBRARIES cudart runtime GL GLU glut)
 
 set(SOURCE_FILES
         Benchmark.cpp
