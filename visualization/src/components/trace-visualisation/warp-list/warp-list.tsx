@@ -5,6 +5,7 @@ import {WarpGrid} from './warp-grid/warp-grid';
 import {AddressRange, WarpAccess} from '../../../lib/trace/selection';
 import {Button, Card, CardHeader, CardBody} from 'reactstrap';
 import styled from 'styled-components';
+import MdClear from 'react-icons/lib/md/clear';
 
 interface Props
 {
@@ -44,7 +45,7 @@ export class WarpList extends PureComponent<Props>
                         <Button title='Clear selection'
                                 size='small'
                                 onClick={this.props.onClearSelection}>
-                            Clear selection
+                            <MdClear />
                         </Button>
                     }
                 </Header>

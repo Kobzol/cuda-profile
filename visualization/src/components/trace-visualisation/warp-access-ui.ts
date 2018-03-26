@@ -7,15 +7,8 @@ const Badge = styled(BsBadge)`
   font-size: 12px;
 `;
 
-export const BadgeRead = styled(Badge)`
-  background-color: #006400;
-`;
-export const BadgeWrite = styled(Badge)`
-  background-color: #8B0000;
-`;
-
-export const WRITE_COLOR = chroma(180, 20, 0);
-export const READ_COLOR = chroma(20, 180, 20);
+export const READ_COLOR = chroma('#24AE5D');
+export const WRITE_COLOR = chroma('#BB1E3E');
 
 export function getIdentifier(index: number): string
 {

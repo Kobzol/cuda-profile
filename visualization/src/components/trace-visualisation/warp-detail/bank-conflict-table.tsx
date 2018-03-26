@@ -110,9 +110,9 @@ export class BankConflictTable extends PureComponent<Props, State>
                         <Access onMouseEnter={() => this.selectBank(parseInt(validColumns[i], 10))}
                             onMouseLeave={() => this.selectBank(null)}
                             key={i}
-                            title={col !== null &&
+                            title={col !== null ?
                             `${formatDim3(col.warp.blockIdx)}.${formatDim3(col.access.threadIdx)} ` +
-                            `at ${col.access.address}`}>
+                            `at ${col.access.address}` : ''}>
                             {col !== null && this.renderAccess(col.warp, col.access)}
                         </Access>
                     )}

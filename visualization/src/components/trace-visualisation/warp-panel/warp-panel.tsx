@@ -13,7 +13,9 @@ import {TraceHeader} from './trace-header';
 import {TraceSelection} from '../../../lib/trace/selection';
 import {contains} from 'ramda';
 import {getFilename} from '../../../lib/util/string';
-import {BadgeRead, BadgeWrite} from '../warp-access-ui';
+import MdViewList from 'react-icons/lib/md/view-list';
+import MdClose from 'react-icons/lib/md/close';
+import {AccessFilter, AccessTypeFilter} from './access-type-filter';
 
 interface Props
 {
@@ -28,16 +30,19 @@ interface State
 {
     blockFilter: Dim3;
     locationFilter: SourceLocation[];
-    typeFilter: {
-        read: boolean;
-        write: boolean;
-    };
+    typeFilter: AccessFilter;
     sourceModalOpened: boolean;
     activePanels: number[];
 }
 
 const Wrapper = styled(Card)`
   
+`;
+const Header = styled(CardHeader)`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
 `;
 const BodyWrapper = styled(CardBody)`
   padding: 10px;
@@ -59,12 +64,14 @@ const Section = styled.div`
 const FilterWrapper = styled.div`
   margin-bottom: 10px;
 `;
-const Row = styled.div`
-  display: flex;
-  align-items: center;
+const Block = styled.div`
+  margin-bottom: 10px;
 `;
 const Label = styled.span`
   margin-right: 5px;
+`;
+const SourceList = styled(ListGroup)`
+  margin-bottom: 5px;
 `;
 
 export class WarpPanel extends PureComponent<Props, State>
@@ -85,12 +92,18 @@ export class WarpPanel extends PureComponent<Props, State>
         const warps = this.getFilteredWarps();
         return (
             <Wrapper>
-                <CardHeader>Selected kernel</CardHeader>
+                <Header>
+                    <span>Selected kernel</span>
+                    <Button
+                        onClick={this.deselectTrace}
+                        color='primary' outline title='Change kernel'>
+                        <MdViewList />
+                    </Button>
+                </Header>
                 <BodyWrapper>
                     <TraceHeader
                         kernel={this.props.kernel}
-                        trace={this.props.trace}
-                        selectTrace={this.props.selectTrace} />
+                        trace={this.props.trace} />
                     {this.props.kernel.metadata.source &&
                         <SourceModal
                             opened={this.state.sourceModalOpened}
@@ -127,38 +140,32 @@ export class WarpPanel extends PureComponent<Props, State>
         return (
             <>
                 <FilterWrapper>
-                    <Row>
-                        <Label>Block:</Label>
+                    <Block>
+                        <Label>Block</Label>
                         <WarpFilter
                             filter={this.state.blockFilter}
                             onFilterChange={this.changeBlockFilter} />
-                    </Row>
-                    <Row>
-                        <Label>Type:</Label>
-                        <Row>
-                            <input type='checkbox' checked={this.state.typeFilter.read}
-                                   onChange={this.handleTypeReadChange} />
-                            <BadgeRead>read</BadgeRead>
-                        </Row>
-                        <Row>
-                            <input type='checkbox' checked={this.state.typeFilter.write}
-                                   onChange={this.handleTypeWriteChange} />
-                            <BadgeWrite>write</BadgeWrite>
-                        </Row>
-                    </Row>
-                    {this.state.locationFilter.length > 0 &&
-                    <div>
-                        Source locations:
-                        <ListGroup>{location}</ListGroup>
-                    </div>}
+                    </Block>
+                    <Block>
+                        <Label>Type</Label>
+                        <AccessTypeFilter
+                            filter={this.state.typeFilter}
+                            onChange={this.handleTypeFilterChange} />
+                    </Block>
                     {this.props.kernel.metadata.source &&
-                    <Section>
+                    <div>
+                        <Label>Source locations</Label>
+                        <SourceList>{location}</SourceList>
                         <Button size='sm' onClick={this.openSourceModal}>Filter by source location</Button>
-                    </Section>
+                    </div>
                     }
                 </FilterWrapper>
                 <div>{label}</div>
-                <Button onClick={this.resetFilters} color='danger'>Reset filter</Button>
+                {this.isFilterActive() &&
+                    <Button onClick={this.resetFilters} color='danger'>
+                        <MdClose/> Reset filter
+                    </Button>
+                }
             </>
         );
     }
@@ -195,6 +202,18 @@ export class WarpPanel extends PureComponent<Props, State>
         }));
     }
 
+    isFilterActive = (): boolean =>
+    {
+        return !(
+            this.state.blockFilter.x === null &&
+            this.state.blockFilter.y === null &&
+            this.state.blockFilter.z === null &&
+            this.state.typeFilter.read &&
+            this.state.typeFilter.write &&
+            this.state.locationFilter.length === 0
+        );
+    }
+
     setLocationFilter = (locationFilter: SourceLocation[]) =>
     {
         this.setState(() => ({ locationFilter }));
@@ -204,25 +223,16 @@ export class WarpPanel extends PureComponent<Props, State>
         const location: SourceLocation = { file: warp.location.file, line: warp.location.line };
         return contains(location, this.state.locationFilter);
     }
-    handleTypeReadChange = (event: React.FormEvent<HTMLInputElement>) =>
+    handleTypeFilterChange = (typeFilter: AccessFilter) =>
     {
-        const read = event.currentTarget.checked;
-        this.setState(state => ({
-            typeFilter: {
-                ...state.typeFilter,
-                read
-            }
+        this.setState(() => ({
+            typeFilter
         }));
     }
-    handleTypeWriteChange = (event: React.FormEvent<HTMLInputElement>) =>
+
+    deselectTrace = () =>
     {
-        const write = event.currentTarget.checked;
-        this.setState(state => ({
-            typeFilter: {
-                ...state.typeFilter,
-                write
-            }
-        }));
+        this.props.selectTrace(null);
     }
 
     changeSourcePanelVisibility = (sourceModalOpened: boolean) =>

@@ -52,7 +52,7 @@ export class WarpOverview extends PureComponent<Props, State>
                                  limit: this.state.limit
                              }} />
                 }
-                {increaseLimit && <Button onClick={this.increaseLimit} color='primary'>Show more warps</Button>}
+                {increaseLimit && <Button onClick={this.increaseLimit}>Show more warps</Button>}
             </Wrapper>
         );
     }

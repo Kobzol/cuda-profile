@@ -36,15 +36,13 @@ const Body = styled(CardBody)`
 `;
 const MemoryBadge = styled(Badge)`
   margin-right: 5px;
+  border: 0;
 `;
 const BadgeAddress = MemoryBadge.extend`
-  background-color: #337AB7;
+  background-color: #1cb756;
 `;
 const BadgeDecl = MemoryBadge.extend`
-  background-color: #B353B7;
-`;
-const BadgeSource = MemoryBadge.extend`
-  background-color: #1AB717;
+  background-color: #337AB7;
 `;
 
 const rows = 20;
@@ -245,7 +243,7 @@ export class AllocationView extends PureComponent<Props>
                 <BadgeDecl>{this.renderAllocDeclaration(allocation)}</BadgeDecl>
                 <BadgeAddress>{allocation.address}</BadgeAddress>
                 <MemoryBadge>{formatAddressSpace(allocation.space)}</MemoryBadge>
-                <BadgeSource>{getFilename(allocation.location)}</BadgeSource>
+                <MemoryBadge>{getFilename(allocation.location)}</MemoryBadge>
                 <MemoryBadge>{addressRange.from} - {addressRange.to}</MemoryBadge>
                 <MemoryBadge>one square is {this.calculateBlockSize(addressRange)} bytes</MemoryBadge>
             </>

@@ -2,22 +2,26 @@ import React, {PureComponent} from 'react';
 import moment from 'moment';
 import {Kernel} from '../../../lib/profile/kernel';
 import {Trace} from '../../../lib/profile/trace';
-import {Button} from 'reactstrap';
 import styled from 'styled-components';
-import {TraceSelection} from '../../../lib/trace/selection';
 
 interface Props
 {
     kernel: Kernel;
     trace: Trace;
-    selectTrace(selection: TraceSelection): void;
 }
 
 const Wrapper = styled.div`
 
 `;
+const Row = styled.div`
+  display: flex;
+`;
 const KernelName = styled.span`
   font-weight: bold;
+`;
+const Label = styled.div`
+  min-width: 80px;
+  margin-right: 10px;
 `;
 
 export class TraceHeader extends PureComponent<Props>
@@ -29,23 +33,15 @@ export class TraceHeader extends PureComponent<Props>
 
         return (
             <Wrapper>
-                <div>
+                <Row>
+                    <Label>Kernel:</Label>
                     <KernelName>{this.props.kernel.name}</KernelName>
-                    <span>{` from ${start} to ${end}`}</span>
-                </div>
-                <Button
-                    onClick={this.deselectTrace}
-                    color='primary' outline>
-                    Select another kernel
-                </Button>
+                </Row>
+                <Row>
+                    <Label>Duration:</Label>
+                    <div>{start} - {end}</div>
+                </Row>
             </Wrapper>
         );
-    }
-
-
-
-    deselectTrace = () =>
-    {
-        this.props.selectTrace(null);
     }
 }
