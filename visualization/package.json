@@ -45,7 +45,7 @@
     "reactstrap": "^5.0.0-beta.2",
     "redux": "^3.7.2",
     "redux-observable": "^0.16.0",
-    "redux-persist": "^5.2.2",
+    "redux-persist": "^5.9.1",
     "redux-thunk": "^2.2.0",
     "reselect": "^3.0.1",
     "rxjs": "^5.4.3",
