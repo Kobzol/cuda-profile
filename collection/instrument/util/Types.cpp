@@ -71,7 +71,8 @@ StructType* Types::getCompositeType(const std::string& name)
 }
 void Types::getGlobalVariableSize(GlobalVariable* globalVariable, size_t& size, size_t& elementSize)
 {
-    Type* type = globalVariable->getInitializer()->getType();
+    Type* type = globalVariable->hasInitializer() ? globalVariable->getInitializer()->getType() :
+                 globalVariable->getValueType();
 
     if (auto arrType = dyn_cast<ArrayType>(type))
     {

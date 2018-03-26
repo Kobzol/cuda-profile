@@ -12,7 +12,8 @@ using namespace llvm;
 
 static Type* getSharedBufferType(GlobalVariable* buffer)
 {
-    Type* type = buffer->getInitializer()->getType();
+    Type* type = buffer->hasInitializer() ? buffer->getInitializer()->getType() :
+                 buffer->getValueType();
 
     if (auto arrType = dyn_cast<ArrayType>(type))
     {
