@@ -1,7 +1,7 @@
 #include <CuprRuntime.h>
 #include <cuda_runtime_api.h>
 
-__global__ void kernel(int *p, int *q)
+__global__ void bankConflict(int *p, int *q)
 {
     __shared__ float mem[64];
 
@@ -29,7 +29,7 @@ int main(int argc, char** argv)
     cudaMalloc((void**) &dPtr, sizeof(data));
     cudaMemcpy(dPtr, data, sizeof(data), cudaMemcpyHostToDevice);
 
-    kernel<<<1, COUNT>>>(dPtr, dPtr);
+    bankConflict<<<1, COUNT>>>(dPtr, dPtr);
 
     int ptr[COUNT];
     cudaMemcpy(ptr, dPtr, sizeof(data), cudaMemcpyDeviceToHost);
