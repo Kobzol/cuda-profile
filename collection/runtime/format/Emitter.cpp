@@ -3,6 +3,7 @@
 
 #include "json/picojson.h"
 #include "json/json_helper.h"
+#include "warp/WarpGrouper.h"
 
 using namespace cupr;
 
@@ -54,8 +55,17 @@ void Emitter::emitKernelTrace(const std::string& kernelName, const DeviceDimensi
 
     this->traceFiles.push_back(filename);
 
-    std::ofstream kernelOutput(filepath);
-    this->formatter->formatTrace(kernelOutput, kernelName, dimensions, records, allocations,
+    WarpGrouper grouper;
+    auto warps = grouper.groupWarps(records, dimensions);
+
+    auto mode = std::ios::out;
+    if (this->formatter->isBinary())
+    {
+        mode |= std::ios::binary;
+    }
+    std::ofstream kernelOutput(filepath, mode);
+
+    this->formatter->formatTrace(kernelOutput, kernelName, dimensions, warps, allocations,
                                  start, end, this->prettify, this->compress);
 }
 
@@ -84,7 +94,7 @@ void Emitter::copyMetadataFiles()
 std::string Emitter::getTraceSuffix()
 {
     auto suffix = this->formatter->getSuffix();
-    if (this->compress)
+    if (this->formatter->supportsCompression() && this->compress)
     {
         return "gzip." + suffix;
     }

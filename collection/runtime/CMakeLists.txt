@@ -1,19 +1,39 @@
-FILE(GLOB PROTOBUF_CXX_FILES format/protobuf/generated/*.cc)
 set(SOURCE_FILES
+        CudaTimer.cpp
+        Init.cpp
+        Parameters.cpp
+        RuntimeState.cpp
+        format/CapnpTraceFormatter.cpp
         format/Emitter.cpp
         format/TraceFormatter.cpp
         format/JsonTraceFormatter.cpp
         format/ProtobufTraceFormatter.cpp
+        format/warp/Warp.cpp
+        format/warp/WarpGrouper.cpp
         tracking/Memtracker.cpp
-        CudaTimer.cpp
-        RuntimeState.cpp
-        Init.cpp
-        Parameters.cpp
 )
 
-add_library(runtime SHARED ${SOURCE_FILES} ${PROTOBUF_CXX_FILES})
+# Compile Capnp definitions
+if (CapnProto_FOUND)
+    capnp_generate_cpp(capnpTraceSources capnpTraceHeaders format/capnp/cupr.capnp)
+    message("Generated Capnp definitions")
+endif()
+
+# Compile Protobuf definitions
+if (PROTOBUF_FOUND)
+    PROTOBUF_GENERATE_CPP(protoTraceSources protoTraceHeaders ${ProtoFiles})
+    message("Generated Protobuf definitions")
+endif()
+
+add_library(runtime SHARED ${SOURCE_FILES} ${capnpTraceSources} ${protoTraceSources})
 target_link_libraries(runtime ${CUDA_LIBRARIES})
+if (CapnProto_FOUND)
+    target_link_libraries(runtime capnp kj)
+endif()
 if (PROTOBUF_FOUND)
     target_link_libraries(runtime ${PROTOBUF_LIBRARIES})
-endif(PROTOBUF_FOUND)
-target_include_directories(runtime PRIVATE ${CUDA_INCLUDE_DIRS})
+endif()
+if (ZLIB_FOUND)
+    target_link_libraries(runtime z)
+endif()
+target_include_directories(runtime PRIVATE ${CUDA_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})

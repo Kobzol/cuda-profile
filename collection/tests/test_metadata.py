@@ -50,9 +50,9 @@ def test_metadata_debug_index(profile, format):
         cudaFree(dptr);
         return 0;
     }""", format=format)
-    accesses = data[kernel_file("kernel", format=format)]["accesses"]
-    assert accesses[0]["debugId"] == 0
-    assert accesses[1]["debugId"] == 1
+    warps = data[kernel_file("kernel", format=format)]["warps"]
+    assert warps[0]["debugId"] == 0
+    assert warps[1]["debugId"] == 1
 
 
 @param_all_formats
@@ -69,9 +69,9 @@ def test_metadata_debug_index_missing(profile, format):
         cudaFree(dptr);
         return 0;
     }""", format=format, debug=False)
-    accesses = data[kernel_file("kernel", format=format)]["accesses"]
-    assert accesses[0]["debugId"] == -1
-    assert accesses[1]["debugId"] == -1
+    warps = data[kernel_file("kernel", format=format)]["warps"]
+    assert warps[0]["debugId"] == -1
+    assert warps[1]["debugId"] == -1
 
 
 @param_all_formats
@@ -91,8 +91,8 @@ def test_metadata_type_index(profile, format):
     types = data[metadata_file("kernel")]["typeMap"]
     assert len(types) > 0
 
-    access = data[kernel_file("kernel", format=format)]["accesses"][0]
-    assert access["typeIndex"] == types.index("i32")
+    warp = data[kernel_file("kernel", format=format)]["warps"][0]
+    assert warp["typeIndex"] == types.index("i32")
 
 
 @param_all_formats
@@ -112,8 +112,8 @@ def test_metadata_type_index_shared_buffer(profile, format):
     types = data[metadata_file("kernel")]["typeMap"]
     assert len(types) > 0
 
-    access = data[kernel_file("kernel", format=format)]["accesses"][0]
-    assert access["typeIndex"] == types.index("float")
+    warp = data[kernel_file("kernel", format=format)]["warps"][0]
+    assert warp["typeIndex"] == types.index("float")
 
 
 @param_all_formats
@@ -133,8 +133,8 @@ def test_metadata_type_index_shared_variable(profile, format):
     types = data[metadata_file("kernel")]["typeMap"]
     assert len(types) > 0
 
-    access = data[kernel_file("kernel", format=format)]["accesses"][0]
-    assert access["typeIndex"] == types.index("float")
+    warp = data[kernel_file("kernel", format=format)]["warps"][0]
+    assert warp["typeIndex"] == types.index("float")
 
 
 @param_all_formats

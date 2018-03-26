@@ -16,13 +16,6 @@ export enum AddressSpace
 export interface MemoryAccess
 {
     threadIdx: Dim3;
-    blockIdx: Dim3;
-    warpId: number;
-    debugId: number;
     address: string;
-    size: number;
-    kind: AccessType;
-    space: AddressSpace;
-    typeIndex: number;
-    timestamp: string;
+    value: string;
 }

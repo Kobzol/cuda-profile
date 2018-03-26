@@ -6,6 +6,10 @@
 
 using namespace cupr;
 
+const char* Parameters::PROTOBUF_FORMAT = "PROTOBUF";
+const char* Parameters::CAPNP_FORMAT = "CAPNP";
+const char* Parameters::JSON_FORMAT = "JSON";
+
 static uint32_t BUFFER_SIZE_DEFAULT = 1024 * 1024;
 
 uint32_t Parameters::getBufferSize()
@@ -29,13 +33,24 @@ bool Parameters::isCompressionEnabled()
 #endif
 }
 
-bool Parameters::isProtobufEnabled()
+std::string Parameters::getFormat()
 {
-#ifdef CUPR_USE_PROTOBUF
-    return isParameterEnabled("PROTOBUF");
-#else
-    return false;
+    std::string format = Parameters::JSON_FORMAT;
+    auto input = Parameters::getParameterString("FORMAT");
+#ifdef CUPR_USE_CAPNP
+    if (input && *input == Parameters::CAPNP_FORMAT)
+    {
+        format = Parameters::CAPNP_FORMAT;
+    }
 #endif
+#ifdef CUPR_USE_PROTOBUF
+    if (input && *input == Parameters::PROTOBUF_FORMAT)
+    {
+        format = Parameters::PROTOBUF_FORMAT;
+    }
+#endif
+
+    return format;
 }
 
 bool Parameters::isMappedMemoryEnabled()
@@ -54,4 +69,12 @@ bool Parameters::isParameterEnabled(const char* name)
     return  parameter != nullptr &&
             strlen(parameter) > 0 &&
             parameter[0] == '1';
+}
+
+std::unique_ptr<std::string> Parameters::getParameterString(const char* name)
+{
+    char* parameter = getenv(name);
+    if (parameter == nullptr) return std::unique_ptr<std::string>();
+
+    return std::make_unique<std::string>(parameter);
 }

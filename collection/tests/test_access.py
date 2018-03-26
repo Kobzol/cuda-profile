@@ -9,21 +9,25 @@ class AccessType:
 @param_all_formats
 def test_access_address_match(profile, format):
     data = profile("""
-    #include <cstdio>
+    #include <iostream>
+    #include <iomanip>
     __global__ void kernel(int* p) {
         *p = 5;
     }
     int main() {
         int* dptr;
         cudaMalloc(&dptr, sizeof(int));
-        printf("%p\\n", dptr);
+
+        size_t value = reinterpret_cast<size_t>(dptr);
+        std::cout << std::uppercase << std::hex << std::setfill('0') << "0x" << std::setw(16) << value << std::endl;
+
         kernel<<<1, 1>>>(dptr);
         cudaFree(dptr);
         return 0;
     }
     """, format=format, with_metadata=True)
     assert data["stdout"].strip() == data["mappings"][kernel_file("kernel",
-                                                                  format=format)]["accesses"][0]["address"]
+                                                                  format=format)]["warps"][0]["accesses"][0]["address"]
 
 
 @param_all_formats
@@ -42,10 +46,10 @@ def test_access_type(profile, format):
         return 0;
     }
     """, format=format, with_metadata=True)
-    accesses = data["mappings"][kernel_file("kernel", format=format)]["accesses"]
+    warps = data["mappings"][kernel_file("kernel", format=format)]["warps"]
 
-    assert accesses[0]["kind"] == AccessType.Write
-    assert accesses[1]["kind"] == AccessType.Read
+    assert warps[0]["kind"] == AccessType.Write
+    assert warps[1]["kind"] == AccessType.Read
 
 
 @param_all_formats
@@ -65,10 +69,10 @@ def test_access_value_int(profile, format):
         return 0;
     }
     """, format=format, with_metadata=True)
-    accesses = data["mappings"][kernel_file("kernel", format=format)]["accesses"]
+    warps = data["mappings"][kernel_file("kernel", format=format)]["warps"]
 
-    assert accesses[0]["value"] == "0x539"
-    assert accesses[1]["value"] == "0x539"
+    assert warps[0]["accesses"][0]["value"] == "0x0000000000000539"
+    assert warps[1]["accesses"][0]["value"] == "0x0000000000000539"
 
 
 @param_all_formats
@@ -88,10 +92,10 @@ def test_access_value_float(profile, format):
         return 0;
     }
     """, format=format, with_metadata=True)
-    accesses = data["mappings"][kernel_file("kernel", format=format)]["accesses"]
+    warps = data["mappings"][kernel_file("kernel", format=format)]["warps"]
 
-    assert accesses[0]["value"] == "0x539"
-    assert accesses[1]["value"] == "0x539"
+    assert warps[0]["accesses"][0]["value"] == "0x0000000000000539"
+    assert warps[1]["accesses"][0]["value"] == "0x0000000000000539"
 
 
 @param_all_formats
@@ -111,16 +115,17 @@ def test_access_value_bool(profile, format):
         return 0;
     }
     """, format=format, with_metadata=True)
-    accesses = data["mappings"][kernel_file("kernel", format=format)]["accesses"]
+    warps = data["mappings"][kernel_file("kernel", format=format)]["warps"]
 
-    assert accesses[0]["value"] == "0x1"
-    assert accesses[1]["value"] == "0x1"
+    assert warps[0]["accesses"][0]["value"] == "0x0000000000000001"
+    assert warps[1]["accesses"][0]["value"] == "0x0000000000000001"
 
 
 @param_all_formats
 def test_access_value_ptr(profile, format):
     data = profile("""
-    #include <cstdio>
+    #include <iostream>
+    #include <iomanip>
     __global__ void kernel(size_t* p) {
         p[threadIdx.x] = (size_t) p;
     }
@@ -130,15 +135,17 @@ def test_access_value_ptr(profile, format):
         cudaMalloc(&dptr, sizeof(data));
         cudaMemcpy(dptr, &data, sizeof(data), cudaMemcpyHostToDevice);
         kernel<<<1, 1>>>(dptr);
-        printf("%p\\n", dptr);
+        
+        size_t value = reinterpret_cast<size_t>(dptr);
+        std::cout << std::uppercase << std::hex << std::setfill('0') << "0x" << std::setw(16) << value << std::endl;
 
         cudaFree(dptr);
         return 0;
     }
     """, format=format, with_metadata=True)
-    accesses = data["mappings"][kernel_file("kernel", format=format)]["accesses"]
+    warps = data["mappings"][kernel_file("kernel", format=format)]["warps"]
 
-    assert data["stdout"].strip() == accesses[0]["value"]
+    assert data["stdout"].strip() == warps[0]["accesses"][0]["value"]
 
 
 @param_all_formats
@@ -157,15 +164,15 @@ def test_access_complex0(profile, format):
         return 0;
     }
     """, format=format, with_metadata=True)
-    accesses = data["mappings"][kernel_file("kernel", format=format)]["accesses"]
+    warps = data["mappings"][kernel_file("kernel", format=format)]["warps"]
 
-    assert accesses[0]["kind"] == AccessType.Read
-    assert accesses[1]["kind"] == AccessType.Read
-    assert accesses[2]["kind"] == AccessType.Write
+    assert warps[0]["kind"] == AccessType.Read
+    assert warps[1]["kind"] == AccessType.Read
+    assert warps[2]["kind"] == AccessType.Write
 
-    assert accesses[0]["size"] == 4
-    assert accesses[1]["size"] == 4
-    assert accesses[2]["size"] == 4
+    assert warps[0]["size"] == 4
+    assert warps[1]["size"] == 4
+    assert warps[2]["size"] == 4
 
 
 @param_all_formats
@@ -185,6 +192,6 @@ def test_access_local(profile, format):
         return 0;
     }
     """, format=format, with_metadata=True)
-    accesses = data["mappings"][kernel_file("kernel", format=format)]["accesses"]
+    accesses = data["mappings"][kernel_file("kernel", format=format)]["warps"][0]["accesses"]
 
     assert len(accesses) == 1

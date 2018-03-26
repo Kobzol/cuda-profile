@@ -1,4 +1,4 @@
-from conftest import kernel_file, param_all_formats
+from conftest import kernel_file, param_all_formats, pointer_matches
 
 
 def validate_allocations(allocations):
@@ -34,7 +34,7 @@ def test_allocation_global(profile, format):
     assert allocations[0]["size"] == 40
     assert allocations[0]["typeString"] == "i32"
     assert allocations[0]["space"] == 0
-    assert allocations[0]["address"] == data["stdout"].strip()
+    assert pointer_matches(allocations[0]["address"], data["stdout"].strip())
     assert allocations[0]["nameString"] == "dptr"
     assert allocations[0]["location"].endswith("input.cu:9")
 
@@ -61,7 +61,7 @@ def test_allocation_shared(profile, format):
     assert allocations[0]["size"] == 40
     assert "typeIndex" in allocations[0]
     assert allocations[0]["space"] == 1
-    assert allocations[0]["address"] == data["stdout"].strip()
+    assert pointer_matches(allocations[0]["address"], data["stdout"].strip())
 
 
 def test_allocation_runtime_tracking_capture(profile):

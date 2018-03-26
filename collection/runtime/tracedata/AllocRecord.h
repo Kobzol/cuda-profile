@@ -28,8 +28,8 @@ namespace cupr
 
         __device__ AllocRecord(void* address, size_t size, size_t elementSize,
                                AddressSpace addressSpace, size_t type, size_t nameIndex)
-                : address(address), size(size), elementSize(elementSize),
-                  addressSpace(addressSpace), typeIndex(type), nameIndex(nameIndex)
+                : address(address), size(size), elementSize(elementSize), addressSpace(addressSpace),
+                  typeIndex(static_cast<int32_t>(type)), nameIndex(static_cast<int32_t>(nameIndex))
         {
 
         }
@@ -40,9 +40,9 @@ namespace cupr
         const char* type = nullptr;
         const char* name = nullptr;
         const char* location = nullptr;
-        size_t typeIndex = 0;
+        int32_t typeIndex = -1;
         bool active = true;
         AddressSpace addressSpace = AddressSpace::Global;
-        size_t nameIndex = 0;
+        int32_t nameIndex = -1;
     };
 }

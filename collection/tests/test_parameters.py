@@ -1,4 +1,4 @@
-from conftest import param_all_formats, kernel_file, run_file, requires_protobuf, metadata_file
+from conftest import param_all_formats, kernel_file, run_file, requires_capnp, metadata_file, requires_protobuf
 
 
 def test_parameters_buffer_size(profile):
@@ -23,6 +23,24 @@ def test_parameters_buffer_size(profile):
 
     data = profile(code, with_metadata=True, buffer_size=20)
     assert data["stdout"].strip() == ""
+
+
+@requires_capnp
+def test_parameters_capnp(profile):
+    data = profile("""
+    __global__ void kernel(int* p) {
+        *p = 5;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int));
+        kernel<<<1, 1>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }
+    """, format="capnp")
+
+    assert "kernel-0.trace.capnp" in data
 
 
 @requires_protobuf
@@ -62,7 +80,7 @@ def test_parameters_compression_content(profile, format):
     compressed = profile(code, format=format, compress=True)
 
     assert (uncompressed[kernel_file("kernel", format=format)]["kernel"] ==
-            compressed[kernel_file("kernel", format=format, compress=True)]["kernel"])
+            compressed[kernel_file("kernel", format=format, compress=format=="json")]["kernel"])
 
 
 @param_all_formats
@@ -89,9 +107,10 @@ def test_parameters_instrument_locals_disabled(profile, format):
         return 0;
     }""", format=format)
 
-    accesses = data[kernel_file("kernel", format=format)]["accesses"]
+    warps = data[kernel_file("kernel", format=format)]["warps"]
 
-    assert len(accesses) == 1
+    assert len(warps) == 1
+    assert len(warps[0]["accesses"]) == 1
 
 
 @param_all_formats
@@ -109,9 +128,9 @@ def test_parameters_instrument_locals_enable(profile, format):
         return 0;
     }""", format=format, instrument_locals=True)
 
-    accesses = data[kernel_file("kernel", format=format)]["accesses"]
+    warps = data[kernel_file("kernel", format=format)]["warps"]
 
-    assert len(accesses) == 4
+    assert len(warps) == 4
 
 
 @param_all_formats
@@ -145,8 +164,8 @@ def test_parameters_kernel_regex(profile, format):
     assert metadata_file("subtractVectors") in mappings
     assert metadata_file("generalKernel") not in mappings
 
-    assert len(mappings[kernel_file("addVectors", format=format)]["accesses"]) == 1
-    assert len(mappings[kernel_file("subtractVectors", format=format)]["accesses"]) == 1
+    assert len(mappings[kernel_file("addVectors", format=format)]["warps"]) == 1
+    assert len(mappings[kernel_file("subtractVectors", format=format)]["warps"]) == 1
     assert kernel_file("generalKernel", format=format) not in mappings
 
 

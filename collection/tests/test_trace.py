@@ -80,7 +80,6 @@ def test_trace_multiple_time(profile, format):
 @param_all_formats
 def test_trace_dimensions(profile, format):
     data = profile("""
-    #include <cstdio>
     __global__ void kernel() {
         int x = threadIdx.x;
     }
@@ -106,7 +105,6 @@ def test_trace_dimensions(profile, format):
 @param_all_formats
 def test_trace_warp_size(profile, format):
     data = profile("""
-    #include <cstdio>
     __global__ void kernel() {
         int x = threadIdx.x;
     }
@@ -121,7 +119,6 @@ def test_trace_warp_size(profile, format):
 @param_all_formats
 def test_trace_bank_size(profile, format):
     data = profile("""
-    #include <cstdio>
     __global__ void kernel() {
         int x = threadIdx.x;
     }
@@ -141,7 +138,6 @@ def test_trace_bank_size(profile, format):
 @param_all_formats
 def test_trace_warp_id(profile, format):
     data = profile("""
-    #include <cstdio>
     __global__ void kernel(int* p) {
         *p = threadIdx.x;
     }
@@ -153,12 +149,31 @@ def test_trace_warp_id(profile, format):
         return 0;
     }
     """, format=format)
-    accesses = data[kernel_file("kernel", format=format)]["accesses"]
-    warps = {0: 0, 1: 0}
-    for access in accesses:
-        warpid = access["warpId"]
-        assert warpid in warps
-        warps[warpid] = warps[warpid] + 1
+    warps = data[kernel_file("kernel", format=format)]["warps"]
+    for warp in warps:
+        assert len(warp["accesses"]) == 32
 
-    assert warps[0] == 32
-    assert warps[1] == 32
+
+@param_all_formats
+def test_trace_thread_id(profile, format):
+    data = profile("""
+    __global__ void kernel(int* p) {
+        *p = threadIdx.x;
+    }
+    int main() {
+        int* dptr;
+        cudaMalloc(&dptr, sizeof(int) * 64);
+        kernel<<<1, 2>>>(dptr);
+        cudaFree(dptr);
+        return 0;
+    }
+    """, format=format)
+    warp = data[kernel_file("kernel", format=format)]["warps"][0]
+    assert warp["blockIdx"]["x"] == 0
+    assert warp["blockIdx"]["y"] == 0
+    assert warp["blockIdx"]["z"] == 0
+
+    ids = ["{}.{}.{}".format(a["threadIdx"]["z"], a["threadIdx"]["y"], a["threadIdx"]["x"]) for a in warp["accesses"]]
+
+    assert "0.0.0" in ids
+    assert "0.0.1" in ids

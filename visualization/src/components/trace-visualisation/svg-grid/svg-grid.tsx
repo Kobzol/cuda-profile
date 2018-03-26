@@ -1,4 +1,4 @@
-import React, {PureComponent, Fragment} from 'react';
+import React, {PureComponent} from 'react';
 import GridLayout from 'd3-v4-grid';
 import styled from 'styled-components';
 import {range} from 'ramda';

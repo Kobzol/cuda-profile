@@ -9,13 +9,22 @@ namespace cupr
     {
     public:
         void formatTrace(std::ostream& os, const std::string& kernel, DeviceDimensions dimensions,
-                         const std::vector<AccessRecord>& accesses, const std::vector<AllocRecord>& allocations,
-                         double start, double end, bool prettify, bool compress) override;
+                         const std::vector<Warp>& warps, const std::vector<AllocRecord>& allocations,
+                         double start, double end, bool prettify, bool compress) final;
 
-        std::string getSuffix() override;
+        std::string getSuffix() final;
+        bool isBinary() final
+        {
+            return false;
+        }
+        bool supportsCompression() final
+        {
+            return true;
+        }
 
     private:
-        picojson::value jsonify(const AccessRecord& record);
+        picojson::value jsonify(const Warp& warp);
+        picojson::value jsonify(const Access& record);
         picojson::value jsonify(const AllocRecord& record);
 
         template<typename T>

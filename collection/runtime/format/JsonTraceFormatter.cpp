@@ -3,28 +3,39 @@
 #ifdef CUPR_USE_ZLIB
     #include "zlib/zstr.hpp"
 #endif
+/*
+ *
+ * */
 
-picojson::value cupr::JsonTraceFormatter::jsonify(const cupr::AccessRecord& record)
+
+picojson::value cupr::JsonTraceFormatter::jsonify(const cupr::Warp& warp)
+{
+    return picojson::value(picojson::object{
+            {"accesses", this->jsonify(warp.accesses)},
+            {"blockIdx",  picojson::value(picojson::object {
+                    {"x", picojson::value((double) warp.blockIndex.x)},
+                    {"y", picojson::value((double) warp.blockIndex.y)},
+                    {"z", picojson::value((double) warp.blockIndex.z)}
+            })},
+            {"warpId",    picojson::value((double) warp.id)},
+            {"debugId",   picojson::value((double) warp.debugId)},
+            {"kind",      picojson::value((double) (warp.accessType == static_cast<uint8_t>(AccessType::Read) ? 0 : 1))},
+            {"size",      picojson::value((double) warp.size)},
+            {"space",     picojson::value((double) warp.space)},
+            {"typeIndex", picojson::value((double) warp.typeId)},
+            {"timestamp", picojson::value(std::to_string(warp.timestamp))},
+    });
+}
+
+picojson::value cupr::JsonTraceFormatter::jsonify(const cupr::Access& record)
 {
     return picojson::value(picojson::object{
             {"threadIdx", picojson::value(picojson::object {
-                    {"x", picojson::value((double) record.threadIdx.x)},
-                    {"y", picojson::value((double) record.threadIdx.y)},
-                    {"z", picojson::value((double) record.threadIdx.z)}
+                    {"x", picojson::value((double) record.threadIndex.x)},
+                    {"y", picojson::value((double) record.threadIndex.y)},
+                    {"z", picojson::value((double) record.threadIndex.z)}
             })},
-            {"blockIdx",  picojson::value(picojson::object {
-                    {"x", picojson::value((double) record.blockIdx.x)},
-                    {"y", picojson::value((double) record.blockIdx.y)},
-                    {"z", picojson::value((double) record.blockIdx.z)}
-            })},
-            {"warpId",    picojson::value((double) record.warpId)},
-            {"debugId",   picojson::value((double) record.debugIndex)},
-            {"address",   picojson::value(this->hexPointer(record.address))},
-            {"kind",      picojson::value((double) (record.kind == AccessType::Read ? 0 : 1))},
-            {"size",      picojson::value((double) record.size)},
-            {"space",     picojson::value((double) record.addressSpace)},
-            {"typeIndex", picojson::value((double) record.type)},
-            {"timestamp", picojson::value(std::to_string(record.timestamp))},
+            {"address",   picojson::value(this->hexPointer(reinterpret_cast<const void*>(record.address)))},
             {"value", picojson::value(this->hexPointer(reinterpret_cast<const void*>(record.value)))}
     });
 }
@@ -64,7 +75,7 @@ picojson::value cupr::JsonTraceFormatter::jsonify(const cupr::AllocRecord& recor
 void cupr::JsonTraceFormatter::formatTrace(std::ostream& os,
                                            const std::string& kernel,
                                            DeviceDimensions dimensions,
-                                           const std::vector<cupr::AccessRecord>& accesses,
+                                           const std::vector<cupr::Warp>& warps,
                                            const std::vector<cupr::AllocRecord>& allocations,
                                            double start,
                                            double end,
@@ -75,7 +86,7 @@ void cupr::JsonTraceFormatter::formatTrace(std::ostream& os,
             {"type", picojson::value("trace")},
             {"kernel", picojson::value(kernel)},
             {"allocations",  this->jsonify(allocations)},
-            {"accesses",   this->jsonify(accesses)},
+            {"warps",   this->jsonify(warps)},
             {"start", picojson::value(start)},
             {"end", picojson::value(end)},
             {"gridDim",  picojson::value(picojson::object {

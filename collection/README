@@ -8,15 +8,15 @@ assumed that you already have CUDA installed (version 8.0 or 9.0).
 
     $ apt-get install build-essential cmake llvm-4.0-dev clang-4.0
 
-If you want to compress the outputted memory accesses and serialize them with Protobuf
-instead of JSON (recommended), you also have to install these dependencies:
+You can compress the outputted memory accesses and serialize them with either Cap'n Proto or
+Protobuf instead of JSON (recommended).
 
-    $ apt-get install libprotobuf-dev protobuf-compiler zlib1g-dev
+    $ apt-get install libprotobuf-dev protobuf-compiler capnproto capnproto-dev zlib1g-dev
 
 To run tests you also need py.test.
 
     $ apt-get install python python-pip python-pytest
-    $ pip install protobuf
+    $ pip install pycapnp
 
 ### Build
     mkdir build
@@ -62,7 +62,7 @@ bool parameters, use `1` for true value and `0` for false value.
 | BUFFER_SIZE | number | 1048576 | program | GPU buffer size for stored accesses |
 | PRETTIFY | bool | false | program | Prettify JSON output |
 | COMPRESS | bool | false | program | Compress stored accesses |
-| PROTOBUF | bool | false | program | Use Protobuf as serialization format (otherwise uses JSON) |
+| FORMAT | string | JSON | program | Serialization format (PROTOBUF, CAPNP or JSON) |
 | HOST_MEMORY | bool | false | program | Use CPU memory for the stored accesses |
 
 ### Tests

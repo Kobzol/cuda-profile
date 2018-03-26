@@ -1,6 +1,6 @@
 import {MemoryAllocation} from './memory-allocation';
-import {MemoryAccess} from './memory-access';
 import {Dim3} from './dim3';
+import {Warp} from './warp';
 
 export interface Trace
 {
@@ -8,7 +8,7 @@ export interface Trace
     kernel: string;
     start: number;
     end: number;
-    accesses: MemoryAccess[];
+    warps: Warp[];
     allocations: MemoryAllocation[];
     gridDim: Dim3;
     blockDim: Dim3;

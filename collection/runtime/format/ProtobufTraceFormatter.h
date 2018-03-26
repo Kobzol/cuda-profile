@@ -8,9 +8,9 @@ namespace cupr
     {
     public:
         void formatTrace(std::ostream& os, const std::string& kernel, DeviceDimensions dimensions,
-                         const std::vector<AccessRecord>& accesses, const std::vector<AllocRecord>& allocations,
-                         double start, double end, bool prettify, bool compress) override;
+                         const std::vector<Warp>& warps, const std::vector<AllocRecord>& allocations,
+                         double start, double end, bool prettify, bool compress) final;
 
-        std::string getSuffix() override;
+        std::string getSuffix() final;
     };
 }

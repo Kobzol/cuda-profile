@@ -1,13 +1,13 @@
 syntax = "proto2";
 
 import "dim3.proto";
-import "memory-access.proto";
+import "warp.proto";
 import "alloc-record.proto";
 
 package cupr.proto;
 
 message KernelTrace {
-    repeated cupr.proto.MemoryAccess accesses = 1;
+    repeated cupr.proto.Warp warps = 1;
     repeated cupr.proto.AllocRecord allocations = 2;
     required string kernel = 3;
     required double start = 4;

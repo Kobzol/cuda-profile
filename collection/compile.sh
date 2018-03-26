@@ -4,7 +4,7 @@ LLVM_DIR=/home/kobzol/libraries/llvm-6.0.0-build
 CLANG=clang++ #${LLVM_DIR}/bin/clang++
 CUDA_DIR=/usr/local/cuda
 SRC_FILES=${1-"../main.cpp ../kernel.cu"} # ../kernel2.cu
-PROTOBUF=${2-0}
+FORMAT=${2-"JSON"}
 COMPRESS=${3-0}
 RUNTIME_TRACKING=${4-0}
 BUILD_DIR=${BUILD_DIR-"cmake-build-debug"}
@@ -34,7 +34,7 @@ pushd ${BUILD_DIR}
     fi
 
     # run instrumented program
-    LD_LIBRARY_PATH=./runtime PROTOBUF=${PROTOBUF} COMPRESS=${COMPRESS} ./cuda
+    LD_LIBRARY_PATH=./runtime FORMAT=${FORMAT} COMPRESS=${COMPRESS} ./cuda
 
     exit 0
 popd

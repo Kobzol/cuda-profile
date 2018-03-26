@@ -11,6 +11,7 @@ import {Run} from '../serialization/run';
 import {Trace} from '../serialization/trace';
 
 import JsonWorker from '../../worker/json.worker';
+import CapnpWorker from '../../worker/capnp.worker';
 import ProtobufWorker from '../../worker/protobuf.worker';
 
 export enum FileType
@@ -60,7 +61,18 @@ function parseFileProtobuf(file: File, decompress: boolean): Observable<Trace>
         .flatMap(data => createWorkerJob(new ProtobufWorker(), data));
 }
 /**
- * Loads file as JSON or Protobuf, according to the extension (.json or .proto).
+ * Loads file and parses its content as Cap'n Proto using a web worker.
+ * @param {File} file
+ * @returns {Observable<Object>}
+ */
+function parseFileCapnp(file: File): Observable<Trace>
+{
+    return readFile(file, true, false)
+        .flatMap(data => createWorkerJob(new CapnpWorker(), data));
+}
+
+/**
+ * Loads file as JSON or Cap'n Proto, according to the extension (.json or .capnp).
  * @param {File} file
  * @returns {Observable<Object>}
  */
@@ -70,9 +82,13 @@ function parseFile(file: File): Observable<Trace | Metadata | Run>
     {
         return parseFileJson(file, file.name.match(/\.gzip\.json$/) !== null);
     }
-    else if (file.name.match(/\.protobuf$/))
+    if (file.name.match(/\.protobuf$/))
     {
         return parseFileProtobuf(file, file.name.match(/\.gzip\.protobuf$/) !== null);
+    }
+    else if (file.name.match(/\.capnp$/))
+    {
+        return parseFileCapnp(file);
     }
     else return Observable.throw(new InvalidFileFormat());
 }
@@ -87,7 +103,7 @@ function validateTrace(content: object): boolean
     return (
         content['type'] === 'trace' &&
         'kernel' in content &&
-        'accesses' in content
+        'warps' in content
     );
 }
 /**

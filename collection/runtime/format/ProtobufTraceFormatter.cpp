@@ -1,8 +1,7 @@
 #include "ProtobufTraceFormatter.h"
 
 #ifdef CUPR_USE_PROTOBUF
-    #include "protobuf/generated/memory-access.pb.h"
-    #include "protobuf/generated/kernel-trace.pb.h"
+    #include <kernel-trace.pb.h>
     #include <google/protobuf/io/gzip_stream.h>
     #include <google/protobuf/io/zero_copy_stream_impl.h>
 
@@ -11,30 +10,35 @@
 #endif
 
 void cupr::ProtobufTraceFormatter::formatTrace(std::ostream& os, const std::string& kernel, DeviceDimensions dimensions,
-                                               const std::vector<cupr::AccessRecord>& accesses,
-                                               const std::vector<cupr::AllocRecord>& allocations, double start,
+                                               const std::vector<Warp>& warps,
+                                               const std::vector<AllocRecord>& allocations, double start,
                                                double end, bool prettify, bool compress)
 {
 #ifdef CUPR_USE_PROTOBUF
     KernelTrace trace;
-    for (auto& access: accesses)
+    for (auto& warp: warps)
     {
-        auto buffer = trace.add_accesses();
-        buffer->set_address(this->hexPointer(access.address));
-        buffer->set_size(static_cast<google::protobuf::int32>(access.size));
-        buffer->set_warpid(access.warpId);
-        buffer->set_debugid(access.debugIndex);
-        buffer->set_kind(static_cast<google::protobuf::int32>(access.kind));
-        buffer->set_space(static_cast<google::protobuf::int32>(access.addressSpace));
-        buffer->set_typeindex(static_cast<google::protobuf::int32>(access.type));
-        buffer->set_timestamp(std::to_string(access.timestamp));
-        buffer->mutable_threadidx()->set_x(access.threadIdx.x);
-        buffer->mutable_threadidx()->set_y(access.threadIdx.y);
-        buffer->mutable_threadidx()->set_z(access.threadIdx.z);
-        buffer->mutable_blockidx()->set_x(access.blockIdx.x);
-        buffer->mutable_blockidx()->set_y(access.blockIdx.y);
-        buffer->mutable_blockidx()->set_z(access.blockIdx.z);
-        buffer->set_value(this->hexPointer(reinterpret_cast<const void*>(access.value)));
+        auto buffer = trace.add_warps();
+        buffer->set_size(static_cast<google::protobuf::int32>(warp.size));
+        buffer->set_warpid(warp.id);
+        buffer->set_debugid(warp.debugId);
+        buffer->set_kind(static_cast<google::protobuf::int32>(warp.accessType));
+        buffer->set_space(static_cast<google::protobuf::int32>(warp.space));
+        buffer->set_typeindex(static_cast<google::protobuf::int32>(warp.typeId));
+        buffer->set_timestamp(std::to_string(warp.timestamp));
+        buffer->mutable_blockidx()->set_x(warp.blockIndex.x);
+        buffer->mutable_blockidx()->set_y(warp.blockIndex.y);
+        buffer->mutable_blockidx()->set_z(warp.blockIndex.z);
+
+        for (auto& access: warp.accesses)
+        {
+            auto accessBuffer = buffer->add_accesses();
+            accessBuffer->set_address(this->hexPointer(reinterpret_cast<const void*>(access.address)));
+            accessBuffer->mutable_threadidx()->set_x(access.threadIndex.x);
+            accessBuffer->mutable_threadidx()->set_y(access.threadIndex.y);
+            accessBuffer->mutable_threadidx()->set_z(access.threadIndex.z);
+            accessBuffer->set_value(this->hexPointer(reinterpret_cast<const void*>(access.value)));
+        }
     }
 
     for (auto& allocation: allocations)

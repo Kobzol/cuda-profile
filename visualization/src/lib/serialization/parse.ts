@@ -1,24 +1,20 @@
 import {FileType, TraceFile} from '../file-load/file';
 import {Run} from '../profile/run';
 import {Trace} from '../profile/trace';
-import {Warp} from '../profile/warp';
+import {getLaneId, getWarpId, getWarpStart, Warp} from '../profile/warp';
 import {Metadata} from '../profile/metadata';
 import {Kernel} from '../profile/kernel';
 import {Profile} from '../profile/profile';
 import {Metadata as MetadataFormat} from './metadata';
 import {Trace as TraceFormat} from './trace';
 import {Run as RunFormat} from './run';
-import {MemoryAccess as MemoryAccessFormat} from './memory-access';
 import {MemoryAllocation as MemoryAllocationFormat} from './memory-allocation';
+import {Warp as WarpFormat} from './warp';
 import {MemoryAllocation} from '../profile/memory-allocation';
-import {hasOwnProperty} from 'tslint/lib/utils';
-import {getLaneId, getWarpId, getWarpStart} from '../profile/warp';
 import {MissingProfileData} from '../profile/errors';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
-import bigInt from 'big-integer';
-import {Dictionary} from 'ramda';
 
 
 function parseMetadata(metadata: MetadataFormat): Metadata
@@ -46,12 +42,39 @@ function parseAllocations(allocations: MemoryAllocationFormat[], metadata: Metad
     }));
 }
 
+function parseWarps(trace: TraceFormat, warps: WarpFormat[], metadata: Metadata): Warp[]
+{
+    return warps.map((warp: WarpFormat, index: number) =>
+    {
+        const key = `${warp.blockIdx.z}.${warp.blockIdx.y}.${warp.blockIdx.x}.${warp.warpId}:${warp.timestamp}`;
+        const id = getWarpId(warp.accesses[0].threadIdx, trace.warpSize, trace.blockDim);
+        const slot = warp.warpId;
+        const type = metadata.typeMap[warp.typeIndex];
+        const location = warp.debugId === -1 ? null : metadata.locations[warp.debugId];
+        const accessType = warp.kind;
+
+        return {
+            key, index, id, slot,
+            type, location, accessType,
+            size: warp.size,
+            space: warp.space,
+            timestamp: warp.timestamp,
+            blockIdx: warp.blockIdx,
+            accesses: warp.accesses.map(access => ({
+                id: getLaneId(access.threadIdx, getWarpStart(id, trace.warpSize, trace.blockDim), trace.blockDim),
+                address: access.address,
+                threadIdx: access.threadIdx
+            }))
+        };
+    });
+}
+
 function parseTrace(trace: TraceFormat, metadata: Metadata): Trace
 {
     return {
         start: trace.start,
         end: trace.end,
-        warps: groupAccessesByWarp(trace, trace.accesses, metadata),
+        warps: parseWarps(trace, trace.warps, metadata),
         allocations: parseAllocations(trace.allocations, metadata),
         gridDimension: trace.gridDim,
         blockDimension: trace.blockDim,
@@ -66,66 +89,6 @@ function parseRun(run: RunFormat): Run
         start: run.start,
         end: run.end
     };
-}
-
-function groupAccessesByWarp(trace: TraceFormat, accesses: MemoryAccessFormat[], metadata: Metadata): Warp[]
-{
-    // imperative implementation to exploit already sorted input
-    if (accesses.length === 0) return [];
-
-    const createWarp = (
-        { size, timestamp, kind, space, debugId, typeIndex, address, threadIdx, blockIdx, warpId }: MemoryAccessFormat,
-        key: string
-    ): Warp => ({
-        index: 0,
-        size,
-        accessType: kind, space,
-        timestamp,
-        location: debugId === -1 ? null : metadata.locations[debugId],
-        type: metadata.typeMap[typeIndex],
-        id: getWarpId(threadIdx, trace.warpSize, trace.blockDim),
-        slot: warpId,
-        blockIdx,
-        key, accesses: []
-    });
-
-    let minTimestamp = bigInt(accesses[0].timestamp);
-    const dict: Dictionary<Warp> = {};
-    for (let i = 0; i < accesses.length; i++)
-    {
-        const {timestamp, address, threadIdx, blockIdx, warpId} = accesses[i];
-        const key = `${blockIdx.z}.${blockIdx.y}.${blockIdx.x}.${warpId}:${timestamp}`;
-
-        if (!hasOwnProperty(dict, key))
-        {
-            dict[key] = createWarp(accesses[i], key);
-
-            const time = bigInt(accesses[i].timestamp);
-            if (time.lt(minTimestamp))
-            {
-                minTimestamp = time;
-            }
-        }
-        dict[key].accesses.push({
-            id: getLaneId(threadIdx, getWarpStart(dict[key].id, trace.warpSize, trace.blockDim), trace.blockDim),
-            address,
-            threadIdx
-        });
-    }
-
-    const warps = Object.keys(dict).map(key => dict[key]);
-    warps.sort((a: Warp, b: Warp) => {
-        if (a.timestamp === b.timestamp) return 0;
-        return a.timestamp < b.timestamp ? -1 : 1;
-    });
-
-    for (let i = 0; i < warps.length; i++)
-    {
-        warps[i].index = i;
-        warps[i].timestamp = bigInt(warps[i].timestamp).minus(minTimestamp).toString(10);
-    }
-
-    return warps;
 }
 
 function validateProfile({run, kernels}: {run: Run; kernels: Kernel[]})

@@ -8,14 +8,6 @@ import shutil
 import subprocess
 import tempfile
 
-try:
-    from google.protobuf import json_format
-    from generated.kernel_trace_pb2 import KernelTrace
-
-    HAS_PROTOBUF = True
-except ImportError:
-    HAS_PROTOBUF = False
-
 BUILD_DIR = os.environ.get("BUILD_DIR", "cmake-build-debug")
 PROJECT_DIR = os.path.dirname(os.path.dirname(__file__))
 INSTRUMENT_LIB = "{0}/instrument/libinstrument.so".format(BUILD_DIR)
@@ -24,6 +16,22 @@ RUNTIME_TRACKING_LIB_DIR = "{0}/runtimetracker".format(BUILD_DIR)
 COMPILER = os.environ.get("COMPILER", "clang++")
 INCLUDE_DIR = "include"
 INPUT_FILENAME = "input.cu"
+
+try:
+    import capnp
+    trace_capnp = capnp.load('{}/runtime/format/capnp/cupr.capnp'.format(PROJECT_DIR))
+
+    HAS_CAPNP = True
+except ImportError:
+    HAS_CAPNP = False
+
+try:
+    from google.protobuf import json_format
+    from generated.kernel_trace_pb2 import KernelTrace
+
+    HAS_PROTOBUF = True
+except ImportError:
+    HAS_PROTOBUF = False
 
 
 def create_test_dir():
@@ -93,6 +101,11 @@ def run(root, dir, exe, env, compress):
     mappings = {}
     cuprdir = find_cupr_dir(dir)
 
+    if HAS_CAPNP:
+        for capnp_file in glob.glob("{}/*.capnp".format(cuprdir)):
+            with (gzip.open(capnp_file) if compress else open(capnp_file)) as f:
+                kernel = trace_capnp.Trace.read_packed(f)
+                mappings[os.path.basename(capnp_file)] = kernel.to_dict()
     if HAS_PROTOBUF:
         for protobuf_file in glob.glob("{}/*.protobuf".format(cuprdir)):
             with (gzip.open(protobuf_file) if compress else open(protobuf_file)) as f:
@@ -125,14 +138,14 @@ def compile_and_run(code,
     env = {}
     if buffer_size is not None:
         env["BUFFER_SIZE"] = str(buffer_size)
-    if format == "protobuf":
-        env["PROTOBUF"] = "1"
     if compress:
         env["COMPRESS"] = "1"
     if disable_output:
         env["DISABLE_OUTPUT"] = "1"
     if runtime_tracking:
         env["LD_PRELOAD"] = os.path.join(PROJECT_DIR, RUNTIME_TRACKING_LIB_DIR, "libruntimetracker.so")
+
+    env["FORMAT"] = format.upper()
 
     prelude = ""
     if add_include:
@@ -195,6 +208,8 @@ def source_file():
 
 def param_all_formats(fn):
     formats = ["json"]
+    if HAS_CAPNP:
+        formats.append("capnp")
     if HAS_PROTOBUF:
         formats.append("protobuf")
 
@@ -204,4 +219,9 @@ def param_all_formats(fn):
     return inner_fn
 
 
+def pointer_matches(a, b):
+    return a[-12].upper() == b[-12].upper()
+
+
+requires_capnp = pytest.mark.skipif(not HAS_CAPNP, reason="Capnp is required")
 requires_protobuf = pytest.mark.skipif(not HAS_PROTOBUF, reason="Protobuf is required")

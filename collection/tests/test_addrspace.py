@@ -13,7 +13,7 @@ def test_addrspace_shared_access(profile, format):
         return 0;
     }
     """, format=format)
-    assert data[kernel_file("kernel", format=format)]["accesses"][0]["space"] == 1
+    assert data[kernel_file("kernel", format=format)]["warps"][0]["space"] == 1
 
 
 @param_all_formats
@@ -28,7 +28,7 @@ def test_addrspace_constant_access(profile, format):
         return 0;
     }
     """, format=format)
-    assert data[kernel_file("kernel", format=format)]["accesses"][0]["space"] == 2
+    assert data[kernel_file("kernel", format=format)]["warps"][0]["space"] == 2
 
 
 @param_all_formats
@@ -45,7 +45,7 @@ def test_addrspace_global_access(profile, format):
         return 0;
     }
     """, format=format)
-    assert data[kernel_file("kernel", format=format)]["accesses"][0]["space"] == 0
+    assert data[kernel_file("kernel", format=format)]["warps"][0]["space"] == 0
 
 
 @param_all_formats
@@ -62,5 +62,5 @@ def test_addrspace_shared_constant_access(profile, format):
     }
     """, format=format)
 
-    assert data[kernel_file("kernel", format=format)]["accesses"][0]["space"] == 2
-    assert data[kernel_file("kernel", format=format)]["accesses"][1]["space"] == 1
+    assert data[kernel_file("kernel", format=format)]["warps"][0]["space"] == 2
+    assert data[kernel_file("kernel", format=format)]["warps"][1]["space"] == 1
