@@ -1,11 +1,14 @@
 #include "Emitter.h"
 #include "../Parameters.h"
 
-#include "json/picojson.h"
-#include "json/json_helper.h"
 #include "warp/WarpGrouper.h"
 
+#define RAPIDJSON_HAS_STDSTRING 1
+#include "json/rapidjson/ostreamwrapper.h"
+#include "json/rapidjson/prettywriter.h"
+
 using namespace cupr;
+using namespace rapidjson;
 
 Emitter::Emitter(std::unique_ptr<TraceFormatter> formatter, bool prettify, bool compress)
         : formatter(std::move(formatter)), prettify(prettify), compress(compress)
@@ -16,16 +19,30 @@ Emitter::Emitter(std::unique_ptr<TraceFormatter> formatter, bool prettify, bool 
 void Emitter::emitProgramRun()
 {
     std::ofstream runFile(this->getFilePath("run.json"));
-    auto value = picojson::value(picojson::object {
-            {"type", picojson::value("run")},
-            {"start", picojson::value((double) this->timestampStart)},
-            {"end", picojson::value((double) getTimestamp())},
-            {"compress", picojson::value(this->compress)},
-            {"traces", jsonify(this->traceFiles)}
-    });
 
-    runFile << value.serialize(true);
-    runFile.flush();
+    OStreamWrapper stream(runFile);
+    PrettyWriter<OStreamWrapper> writer(stream);
+
+    writer.StartObject();
+
+    writer.String("type");
+    writer.String("run");
+    writer.String("start");
+    writer.Double(this->timestampStart);
+    writer.String("end");
+    writer.Double(getTimestamp());
+    writer.String("compress");
+    writer.Bool(this->compress);
+
+    writer.String("traces");
+    writer.StartArray();
+    for (auto& file: this->traceFiles)
+    {
+        writer.String(file);
+    }
+    writer.EndArray();
+
+    writer.EndObject();
 
     this->copyMetadataFiles();
 }

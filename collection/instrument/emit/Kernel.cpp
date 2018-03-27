@@ -17,10 +17,14 @@
 #include "../util/FunctionUtils.h"
 #include "../util/StringUtils.h"
 #include "../util/FunctionContentLoader.h"
-#include "../../runtime/format/json/picojson.h"
 #include "KernelInit.h"
 
+#define RAPIDJSON_HAS_STDSTRING 1
+#include "../../runtime/format/json/rapidjson/prettywriter.h"
+#include "../../runtime/format/json/rapidjson/ostreamwrapper.h"
+
 using namespace llvm;
+using namespace rapidjson;
 
 static bool isLocalStore(StoreInst* store)
 {
@@ -139,44 +143,63 @@ void Kernel::emitKernelMetadata(Function* function, std::vector<DebugInfo> debug
     Demangler demangler;
     std::string name = demangler.demangle(function->getName().str());
 
-    std::vector<picojson::value> jsonRecords;
-    for (auto& info: debugRecods)
-    {
-        jsonRecords.push_back(picojson::value(picojson::object {
-                {"name", picojson::value(info.getName())},
-                {"file", picojson::value(StringUtils::getFullPath(info.getFilename()))},
-                {"line", picojson::value((double) info.getLine())}
-        }));
-    }
-    std::vector<picojson::value> jsonTypes;
-    for (auto& item : typeMapper.getMappedItems())
-    {
-        jsonTypes.emplace_back(item);
-    }
-    std::vector<picojson::value> jsonNames;
-    for (auto& item : nameMapper.getMappedItems())
-    {
-        jsonNames.emplace_back(item);
-    }
-
     std::string kernelName = name.substr(0, name.find('('));
     DebugExtractor extractor;
     auto info = extractor.getDebugInfo(function);
     FunctionContentLoader loader;
 
     std::fstream metadataFile(kernelName + ".metadata.json", std::fstream::out);
-    metadataFile << picojson::value(picojson::object {
-            {"type", picojson::value("metadata")},
-            {"kernel", picojson::value(kernelName)},
-            {"locations", picojson::value(jsonRecords)},
-            {"typeMap", picojson::value(jsonTypes)},
-            {"nameMap", picojson::value(jsonNames)},
-            {"source", picojson::value(picojson::object {
-                    {"file", picojson::value(info->isValid() ? StringUtils::getFullPath(info->getFilename()) : "")},
-                    {"line", picojson::value((double) (info->isValid() ? info->getLine() : 0))},
-                    {"content", picojson::value(info->isValid() ? loader.loadFunction(*info) : "")}
-            })}
-    }).serialize(true);
+    OStreamWrapper stream(metadataFile);
+    PrettyWriter<OStreamWrapper> writer(stream);
+
+    writer.StartObject();
+    writer.String("type");
+    writer.String("metadata");
+    writer.String("kernel");
+    writer.String(kernelName);
+
+    writer.String("locations");
+    writer.StartArray();
+    for (auto& record: debugRecods)
+    {
+        writer.StartObject();
+        writer.String("name");
+        writer.String(record.getName());
+        writer.String("file");
+        writer.String(StringUtils::getFullPath(record.getFilename()));
+        writer.String("line");
+        writer.Int(record.getLine());
+        writer.EndObject();
+    }
+    writer.EndArray();
+
+    writer.String("typeMap");
+    writer.StartArray();
+    for (auto& item : typeMapper.getMappedItems())
+    {
+        writer.String(item);
+    }
+    writer.EndArray();
+
+    writer.String("nameMap");
+    writer.StartArray();
+    for (auto& item : nameMapper.getMappedItems())
+    {
+        writer.String(item);
+    }
+    writer.EndArray();
+
+    writer.String("source");
+    writer.StartObject();
+    writer.String("file");
+    writer.String(info->isValid() ? StringUtils::getFullPath(info->getFilename()) : "");
+    writer.String("line");
+    writer.Int(info->isValid() ? info->getLine() : 0);
+    writer.String("content");
+    writer.String(info->isValid() ? loader.loadFunction(*info) : "");
+    writer.EndObject();
+
+    writer.EndObject();
 }
 
 std::vector<GlobalVariable*> Kernel::extractSharedBuffers(Module* module)

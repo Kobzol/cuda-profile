@@ -1,7 +1,10 @@
 #pragma once
 
+#include <memory>
 #include "TraceFormatter.h"
-#include "json/picojson.h"
+
+#define RAPIDJSON_HAS_STDSTRING 1
+#include "json/rapidjson/writer.h"
 
 namespace cupr
 {
@@ -23,20 +26,31 @@ namespace cupr
         }
 
     private:
-        picojson::value jsonify(const Warp& warp);
-        picojson::value jsonify(const Access& record);
-        picojson::value jsonify(const AllocRecord& record);
+        template <typename Stream>
+        std::unique_ptr<rapidjson::Writer<Stream>> createWriter(bool prettify, Stream& stream);
+        std::unique_ptr<std::ostream> createStream(std::ostream& input, bool compress);
 
-        template<typename T>
-        picojson::value jsonify(const std::vector<T>& items)
-        {
-            std::vector<picojson::value> jsonified;
-            for (auto& item: items)
-            {
-                jsonified.push_back(this->jsonify(item));
-            }
+        template <typename Stream>
+        void jsonify(rapidjson::Writer<Stream>& writer, const uint3& dim);
 
-            return picojson::value(jsonified);
-        }
+        template <typename Stream, typename T>
+        void jsonify(rapidjson::Writer<Stream>& writer, const std::vector<T>& items);
+
+        template <typename Stream>
+        void jsonify(rapidjson::Writer<Stream>& writer, const cupr::Warp& warp);
+
+        template <typename Stream>
+        void jsonify(rapidjson::Writer<Stream>& writer, const cupr::Access& record);
+
+        template <typename Stream>
+        void jsonify(rapidjson::Writer<Stream>& writer, const cupr::AllocRecord& record);
+
+        template <typename Stream>
+        void jsonify(rapidjson::Writer<Stream>& writer, const std::string& kernel,
+                     DeviceDimensions dimensions,
+                     const std::vector<cupr::Warp>& warps,
+                     const std::vector<cupr::AllocRecord>& allocations,
+                     double start,
+                     double end);
     };
 }
