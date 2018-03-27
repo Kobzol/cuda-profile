@@ -17,11 +17,8 @@ namespace cupr
         Emitter(std::unique_ptr<TraceFormatter> formatter, bool prettify, bool compress);
 
         void emitProgramRun();
-        void emitKernelTrace(const std::string& kernelName,
-                             const DeviceDimensions& dimensions,
-                             const std::vector<AccessRecord>& records,
-                             const std::vector<AllocRecord>& allocations,
-                             float duration);
+        void emitKernelTrace(const std::string& kernelName, const DeviceDimensions& dimensions, AccessRecord* records,
+                             size_t recordCount, const std::vector<AllocRecord>& allocations, float duration);
 
     private:
         std::string generateDirectoryName();

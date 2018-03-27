@@ -47,12 +47,13 @@ size_t getBlockId(const uint3& block, const DeviceDimensions& dimensions)
     return block.z * (dimensions.block.x * dimensions.block.y) + block.y * dimensions.block.x + dimensions.block.y;
 }
 
-std::vector<Warp> WarpGrouper::groupWarps(const std::vector<AccessRecord>& records, const DeviceDimensions& dimensions)
+std::vector<Warp> WarpGrouper::groupWarps(AccessRecord* records, size_t recordCount, const DeviceDimensions& dimensions)
 {
     std::unordered_map<WarpId, Warp> warpMap;
 
-    for (const auto& access : records)
+    for (int i = 0; i < static_cast<int>(recordCount); i++)
     {
+        const auto& access = records[i];
         WarpId key(getBlockId(access.blockIdx, dimensions), access.warpId, static_cast<size_t>(access.timestamp));
         auto it = warpMap.find(key);
         if (it == warpMap.end())

@@ -27,11 +27,15 @@
 
 namespace cupr
 {
-    static __device__ uint32_t deviceBufferSize;
     static __device__ cupr::AccessRecord* deviceAccessRecords;
     static __device__ uint32_t deviceAccessRecordIndex;
+    static __device__ uint32_t deviceAccessRecordSize;
     static __device__ cupr::AllocRecord* deviceSharedBuffers;
     static __device__ uint32_t deviceSharedBufferIndex;
+    static __device__ uint32_t deviceSharedBufferSize;
+    static const int SHARED_BUFFER_SIZE = 128;
+
+    static cupr::AccessRecord* deviceAccessRecordsPtr = nullptr;
 
     /**
      * Grid dimension, block dimension, warpSize.
@@ -56,16 +60,23 @@ extern "C"
         typedef cudaError (*cudaAllocateType)(void**, size_t);
 
         cudaAllocateType allocFn = cupr::Parameters::isMappedMemoryEnabled() ? (cudaAllocateType) cudaMallocHost : (cudaAllocateType) cudaMalloc;
-        CHECK_CUDA_CALL(allocFn((void**) &context->deviceAccessRecords, sizeof(cupr::AccessRecord) * bufferSize));
-        CHECK_CUDA_CALL(allocFn((void**) &context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * bufferSize));
+        if (cupr::deviceAccessRecordsPtr == nullptr)
+        {
+            CHECK_CUDA_CALL(allocFn((void**) &cupr::deviceAccessRecordsPtr, sizeof(cupr::AccessRecord) * bufferSize));
+        }
+
+        context->deviceAccessRecords = cupr::deviceAccessRecordsPtr;
+
+        CHECK_CUDA_CALL(allocFn((void**) &context->deviceSharedBuffers, sizeof(cupr::AllocRecord) * cupr::SHARED_BUFFER_SIZE));
         CHECK_CUDA_CALL(allocFn((void**) &context->deviceDimensions, sizeof(DeviceDimensions)));
 
         const uint32_t zero = 0;
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceAccessRecords, &context->deviceAccessRecords, sizeof(context->deviceAccessRecords)));
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceAccessRecordIndex, &zero, sizeof(zero)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceAccessRecordSize, &bufferSize, sizeof(bufferSize)));
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceSharedBuffers, &context->deviceSharedBuffers, sizeof(context->deviceSharedBuffers)));
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceSharedBufferIndex, &zero, sizeof(zero)));
-        CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceBufferSize, &bufferSize, sizeof(bufferSize)));
+        CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceSharedBufferSize, &cupr::SHARED_BUFFER_SIZE, sizeof(cupr::SHARED_BUFFER_SIZE)));
         CHECK_CUDA_CALL(cudaMemcpyToSymbol(cupr::deviceDimensions, &context->deviceDimensions, sizeof(context->deviceDimensions)));
 
         context->timer->start();
@@ -79,10 +90,10 @@ extern "C"
         CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&accessCount, cupr::deviceAccessRecordIndex, sizeof(cupr::deviceAccessRecordIndex)));
         CHECK_CUDA_CALL(cudaMemcpyFromSymbol(&sharedBuffersCount, cupr::deviceSharedBufferIndex, sizeof(cupr::deviceSharedBufferIndex)));
 
-        std::vector<cupr::AccessRecord> records(accessCount);
+        auto* records = static_cast<cupr::AccessRecord*>(::operator new(sizeof(cupr::AccessRecord) * accessCount));
         if (accessCount > 0)
         {
-            CHECK_CUDA_CALL(cudaMemcpy(records.data(), context->deviceAccessRecords, sizeof(cupr::AccessRecord) * accessCount, cudaMemcpyDeviceToHost));
+            CHECK_CUDA_CALL(cudaMemcpy(records, context->deviceAccessRecords, sizeof(cupr::AccessRecord) * accessCount, cudaMemcpyDeviceToHost));
         }
 
         std::vector<cupr::AllocRecord> sharedBuffers(sharedBuffersCount);
@@ -102,7 +113,6 @@ extern "C"
         typedef cudaError (*cudaFreeType)(void*);
 
         cudaFreeType freeFn = cupr::Parameters::isMappedMemoryEnabled() ? (cudaFreeType) cudaFreeHost : (cudaFreeType) cudaFree;
-        CHECK_CUDA_CALL(freeFn(context->deviceAccessRecords));
         CHECK_CUDA_CALL(freeFn(context->deviceSharedBuffers));
         CHECK_CUDA_CALL(freeFn(context->deviceDimensions));
 
@@ -111,8 +121,8 @@ extern "C"
             sharedBuffers.push_back(alloc);
         }
 
-        cupr::state.getEmitter().emitKernelTrace(context->kernelName, dimensions,
-                                            records, sharedBuffers, context->timer->get_time());
+        cupr::state.getEmitter().emitKernelTrace(context->kernelName, dimensions, records, accessCount, sharedBuffers,
+                                                 context->timer->get_time());
     }
 
     static __forceinline__ __device__ uint32_t warpid()
@@ -126,7 +136,7 @@ extern "C"
     {
         ATOMIC_INSERT(cupr::deviceAccessRecords,
                       &cupr::deviceAccessRecordIndex,
-                      cupr::deviceBufferSize,
+                      cupr::deviceAccessRecordSize,
                       cupr::AccessRecord(cupr::AccessType::Write, blockIdx, threadIdx, warpid(),
                                          address, size, static_cast<cupr::AddressSpace>(addressSpace),
                                          static_cast<int64_t>(clock64()), type, debugIndex, value));
@@ -136,7 +146,7 @@ extern "C"
     {
         ATOMIC_INSERT(cupr::deviceAccessRecords,
                       &cupr::deviceAccessRecordIndex,
-                      cupr::deviceBufferSize,
+                      cupr::deviceAccessRecordSize,
                       cupr::AccessRecord(cupr::AccessType::Read, blockIdx, threadIdx, warpid(),
                               address, size, static_cast<cupr::AddressSpace>(addressSpace),
                               static_cast<int64_t>(clock64()), type, debugIndex, value));
@@ -161,7 +171,7 @@ extern "C"
     {
         ATOMIC_INSERT(cupr::deviceSharedBuffers,
                       &cupr::deviceSharedBufferIndex,
-                      cupr::deviceBufferSize,
+                      cupr::deviceSharedBufferSize,
                       cupr::AllocRecord(address, size, elementSize, cupr::AddressSpace::Shared, type, nameIndex));
     }
 }

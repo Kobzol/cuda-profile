@@ -30,9 +30,8 @@ void Emitter::emitProgramRun()
     this->copyMetadataFiles();
 }
 
-void Emitter::emitKernelTrace(const std::string& kernelName, const DeviceDimensions& dimensions,
-                              const std::vector<AccessRecord>& records,
-                              const std::vector<AllocRecord>& allocations, float duration)
+void Emitter::emitKernelTrace(const std::string& kernelName, const DeviceDimensions& dimensions, AccessRecord* records,
+                              size_t recordCount, const std::vector<AllocRecord>& allocations, float duration)
 {
     if (!Parameters::isOutputEnabled()) return;
 
@@ -56,7 +55,7 @@ void Emitter::emitKernelTrace(const std::string& kernelName, const DeviceDimensi
     this->traceFiles.push_back(filename);
 
     WarpGrouper grouper;
-    auto warps = grouper.groupWarps(records, dimensions);
+    auto warps = grouper.groupWarps(records, recordCount, dimensions);
 
     auto mode = std::ios::out;
     if (this->formatter->isBinary())

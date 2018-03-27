@@ -10,6 +10,6 @@ namespace cupr {
     class WarpGrouper
     {
     public:
-        std::vector<Warp> groupWarps(const std::vector<AccessRecord>& records, const DeviceDimensions& dimensions);
+        std::vector<Warp> groupWarps(AccessRecord* records, size_t recordCount, const DeviceDimensions& dimensions);
     };
 }

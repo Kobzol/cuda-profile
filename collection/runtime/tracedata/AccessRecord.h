@@ -7,7 +7,7 @@
 
 namespace cupr
 {
-    enum class AccessType : uint32_t
+    enum class AccessType : uint8_t
     {
         Read = 0,
         Write = 1
@@ -19,29 +19,29 @@ namespace cupr
         AccessRecord() = default;
 
         __universal__ AccessRecord(AccessType accessType, uint3 blockIdx, uint3 threadIdx,
-                                   uint32_t warpId, void* memory, size_t size,
-                                   AddressSpace addressSpace, int64_t timestamp, size_t type,
+                                   uint32_t warpId, void* address, uint8_t size,
+                                   AddressSpace addressSpace, int64_t timestamp, uint8_t type,
                                    int32_t debugIndex, uint64_t value) :
-                kind(accessType), blockIdx(blockIdx), threadIdx(threadIdx),
-                warpId(warpId), address(memory), size(size),
-                addressSpace(addressSpace), timestamp(timestamp), type(type),
-                debugIndex(debugIndex), value(value)
+                blockIdx(blockIdx), threadIdx(threadIdx), address(address), timestamp(timestamp),
+                warpId(warpId), debugIndex(debugIndex), type(type), value(value),
+                addressSpace(addressSpace), kind(accessType), size(size)
         {
 
         }
 
-        uint3 blockIdx{0, 0, 0};
-        uint3 threadIdx{0, 0, 0};
+        uint3 blockIdx;
+        uint3 threadIdx;
 
-        void* address = nullptr;
-        size_t size = 0;
-        int64_t timestamp = 0;
-        uint32_t warpId = 0;
-        AccessType kind = AccessType::Read;
-        int32_t debugIndex = 0;
-        AddressSpace addressSpace = AddressSpace::Global;
+        void* address;
+        int64_t timestamp;
+        uint32_t warpId;
+        int32_t debugIndex;
 
-        size_t type = 0;
-        uint64_t value = 0;
+        size_t type;
+        uint64_t value;
+
+        AddressSpace addressSpace;
+        AccessType kind;
+        uint8_t size;
     };
 }

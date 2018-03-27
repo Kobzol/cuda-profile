@@ -4,7 +4,7 @@
 
 namespace cupr
 {
-    enum class AddressSpace : uint32_t
+    enum class AddressSpace : uint8_t
     {
         Global = 0,
         Shared = 1,
