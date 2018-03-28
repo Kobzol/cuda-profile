@@ -1,0 +1,61 @@
+{
+    "type": "object",
+    "properties": {
+        "type": {
+            "type": "string",
+            "description": "Určuje typ tohoto souboru (hodnota je metadata)"
+        },
+        "kernel": {
+            "type": "string",
+            "description": "Název kernelu, jehož metadata tento soubor obsahuje"
+        },
+        "locations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "file": {
+                        "type": "string"
+                    },
+                    "line": {
+                        "type": "number"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "description": "Seznam ladících informací paměťových přístupů"
+        },
+        "source": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "file": {
+                    "type": "string"
+                },
+                "line": {
+                    "type": "number"
+                }
+            },
+            "description": "Zdrojový kód souboru, ve kterém je daný kernel definován"
+        },
+        "nameMap": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Mapa názvů paměťových alokací na grafické kartě"
+        },
+        "typeMap": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Mapa typů paměťových alokací na grafické kartě"
+        }
+    }
+}
+

@@ -1,0 +1,120 @@
+Instrumentační nástroj zaznamenává veškeré dostupné přístupy do paměti na grafické kartě a pro jeho použití stačí přidat několik přepínačů překladači a vložit hlavičkový soubor do zdrojového kódu. Tímto nástroj splňuje dva hlavní požadavky, které na něho byly kladeny. Pro praktické použití nástroje je ovšem důležitý i jeho vliv na dobu výpočtu programu a velikost souborů, které generuje. Obě vlastnosti by mohly způsobovat problémy, pokud by instrumentovaný program běžel moc dlouho nebo pokud by generoval nepřiměřené množství dat. V této kapitole je nejprve otestován vliv instrumentace na výkon programu a poté je otestována vizualizační aplikace.
+
+\subsection{Vliv instrumentace na výkon}
+Vliv instrumentace na dobu překladu a běhu aplikace byl otestován na vzorových programech, které jsou dodávány s instalací programovacího balíčku CUDA. U jednotlivých programů byla naměřena doba výpočtu a velikost vygenerovaných souborů s paměťovými přístupy, a to pro všechny kombinace výstupních formátů (JSON, Cap'n Proto, Protobuf a jejich komprimované verze). Programy byly testovány s optimalizacemi a zapnutým generováním ladících údajů, které jsou nezbytné pro interpretaci naměřených dat. Každé měření bylo opakováno desetkrát, výsledný čas je dán průměrem z těchto opakovaných měření. Experimenty byly provedeny na počítači s procesorem Intel Core i7–7700HQ (2,8 GHz) a grafickou kartou Nvidia GeForce GTX 1050Ti. Formátování a serializace paměťových přístupů byla paralelizována na 8 vláknech. Programy byly přeloženy překladačem Clang 4.0. Kód, který prováděl měření, a měřené programy jsou k dispozici v repozitáři projektu. Testovány byly následující programy.
+\begin{description}
+	\item[vectorAdd] sečte dva vstupní vektory a uloží výsledek do třetího vektoru. Testovaný program sčítal vektory s 50 tisíci čísly.
+	\item[simpleGL] generuje rasterové obrázky, ve kterých se pohybuje vlna. Výpočet se provádí na obrázku o rozměrech 256x256 pixelů. Při testování nebyl měřen čas vykreslování obrázku, ale pouze jeho vytvoření kernelem na grafické kartě. Za běhu tohoto programu je kernel generující obrázek spuštěn celkem padesátkrát.
+	\item[mandelbrot] iterativně počítá Mandelbrotovu množinu. Celkem se provede 10 iterací výpočtu této množiny.
+	\item[reduction] počítá součet vektoru čísel pomocí paralelní redukce. V testované konfiguraci se sečítá 65 tisíc 64-bitových čísel s plovoucí řadovou čárkou.
+\end{description}
+
+V tabulce \ref{tab:compiletimes} je zaznamenána doba překladu programů bez použití instrumentace a s instrumentací. Instrumentace měla měřitelný, avšak u většiny testovaných programů zanedbatelný vliv na dobu překladu. Nejvíce byl ovlivněn program \texttt{reduction},
+který obsahuje šest kernelů, z nichž některé jsou šablonované. Dohromady všechny jejich kombinace vytváří celkem 132 různých kernelů, které musí projít instrumentací, což se projevilo na času překladu.
+\begin{table}
+	\centering
+	\bgroup
+	\def\arraystretch{1.2}
+	\begin{tabularx}{\textwidth}{@{}|Y|Y|Y|}
+		\hline
+		\textbf{Program} & \textbf{Bez instrumentace [s]} & \textbf{S instrumentací [s]} \\
+		\hline
+		vectorAdd & 1.35 & 1.83 \\
+		\hline
+		simpleGL & 2.47 & 2.91 \\
+		\hline
+		mandelbrot & 4.12 & 4.81 \\
+		\hline
+		reduction & 4.13 & 9.5 \\
+		\hline
+	\end{tabularx}
+	\egroup
+	\caption{Doba překladu instrumentovaných aplikací}
+\label{tab:compiletimes}
+\end{table}
+
+V tabulce \ref{tab:executiontimes} jsou naměřené časy výpočtu instrumentovaných programů. Jako reference pro srovnání slouží doba výpočtu bez použití instrumentace (BEZ). Dále byly měřeny konfigurace, které zapisovaly data ve formátech JSON (JS), komprimovaný JSON (JSK), Protobuf (PR), komprimovaný Protobuf (PRK), Cap'n Proto (CP) a komprimovaný Cap'n Proto (CPK). V posledním sloupci tabulky je uveden celkový počet zaznamenaných paměťových přístupů pro dané spuštění programu.
+
+\begin{table}
+	\centering
+	\bgroup
+	\def\arraystretch{1.2}
+	\begin{minipage}{\textwidth}
+	\begin{tabularx}{\textwidth}{@{}|Y|c|c|c|c|c|c|c|}
+		\hline
+		\textbf{Program} & \textbf{BEZ [s]} & \textbf{JS [s]} & \textbf{JSK [s]} & \textbf{PR [s]} & \textbf{PRK [s]} & \textbf{CP [s]} & \textbf{CPK [s]} \\
+		\hline
+		vectorAdd & 0.02 & 0.36 & 0.46 & 0.36 & 0.46 & 0.26 & 0.36 \\
+		\hline
+		simpleGL & 0.003 & 4.1 & 6.7 & 4.6 & 6.1 & 1.9 & 3.6 \\
+		\hline
+		mandelbrot & 0.1 & 16.7 & 31.7 & 19.7\footnote{\label{protothreads}Formátování proběhlo na 4 vláknech kvůli nedostatku operační paměti} & 28.1\footnoteref{protothreads} & 6.5 & 13.2 \\
+		\hline
+		reduction & 0.12 & 43 & 57 & 21.4 & 25.9 & 12.5 & 16 \\
+		\hline
+	\end{tabularx}
+	\end{minipage}
+	\caption{Doba výpočtu instrumentovaných aplikací}
+	\label{tab:executiontimes}
+	\egroup
+\end{table}
+
+I přes atomické zápisy přístupů do bufferu na grafické karty běžely instrumentované kernely relativně rychle, zpomalení bylo zhruba 1x-10x vzhledem k původnímu programu. Nejvíce času instrumentované aplikace trávily zpracováním naměřených dat a jejich formátováním a serializací. Naměřená data by šlo rychle zapsat na disk v binární podobě, potom by ale bylo složité je zpracovat, z toho důvodu probíhá předzpracování do běžného serializačního formátu už v rámci běhu programu. Z naměřených dat je zřejmé, že čas provádění je silně závislý na použitém formátu dat. Paměťové přístupy můžou generovat at stovky milionů záznamů a naformátovat takto velké množství dat je výpočetně náročné. Dalším úzkým hrdlem je kopírování paměťových přístupů z GPU na CPU.
+
+Tabulka \ref{tab:executionsize} obsahuje velikosti souborů s paměťovými přístupy pro jednotlivé konfigurace. Hodnota v tabulce udává průměrnou velikost souboru s paměťovými přístupy vygenerovaného pro jedno spuštění kernelu. Velikosti jsou udány v jednotkách mebibytů. V posledním sloupci je celkový počet paměťových přístupů provedených daným programem a počet kernelů vykonaných programem. Nejmenší soubory generuje Protobuf a Cap'n Proto, protože se jedná o binární formáty. Pokud se ale použije komprese, tak jsou velikosti výsledných souborů srovnatelné mezi jednotlivými formáty. Komprese ovšem zhruba dvakrát prodlužuje čas serializace.
+
+\begin{table}
+	\centering
+	\bgroup
+	\def\arraystretch{1.2}
+	\begin{tabularx}{\textwidth}{@{}|c|c|c|c|c|c|c|Y|}
+		\hline
+		\textbf{Program} & \textbf{JS} & \textbf{JSK} & \textbf{PR} & \textbf{PRK} & \textbf{CP} & \textbf{CPK} & \textbf{počet přístupů/spuštění} \\
+		\hline
+		vectorAdd & 14.3 & 0.8 & 7.4 & 0.6 & 8.5 & 0.6 & 150000/1  \\
+		\hline
+		simpleGL & 24.6 & 1 & 12.8 & 0.9 & 15.1 & 1 & 262144/50 \\
+		\hline
+		mandelbrot & 372.6 & 16 & 192.4 & 12.4 & 227.5 & 14.4 & 4036113/10 \\
+		\hline
+		reduction & 11.9 & 0.38 & 5.8 & 0.27 & 6.7 & 0.39 & 33301468/301 \\
+		\hline
+	\end{tabularx}
+	\egroup
+	\caption{Velikost souborů vygenerovaných instrumentací}
+	\label{tab:executionsize}
+\end{table}
+
+Serializace do formátu JSON trvá srovnatelně dlouho jako serializace do formátu Protobuf, ale generuje znatelně větší soubory.
+Při použití komprese u ní lze zmenšit velikost vygenerovaných souborů až řádově, za cenu zpomalení serializace. Formát JSON je vhodný pouze pro malé kernely. Nejrychleji probíhá serializace do formátu Cap'n Proto.
+
+Instrumentované programy dle očekávání běží několikrát pomaleji než původní programy. Nicméně pro sledování vzorů přístupů do paměti stačí instrumentovat daný program na malém, testovacím vstupu, který půjde i s instrumentací vyřešit v rozumném čase. Po optimalizaci přístupů na daném vstupu pak lze otestovat, jak změna pomohla na větších vstupech, už bez použití instrumentace. Dle názoru autora práce tak toto zpomalení netvoří limitující faktor pro použití instrumentačního nástroje.
+
+\subsection{Vizualizační aplikace}
+Vizualizační aplikace umožňuje načítat soubory s paměťovými přístupy ve všech podporovaných formátech. Přístupy jsou vizualizovány ve formě warpů, paměťové mapy adresního prostoru a tabulky konfliktů paměťových modulů. Nevýhodou vizualizace je, že naměřené údaje je nutné správně interpretovat. Uživatel musí rozumět, jak jsou vlákna uspořádány do warpů a jak provádí paměťové přístupy, aby mohl tuto vizualizaci použít.
+
+U vizualizační aplikace byl měřen čas načtení souborů s paměťovými přístupy. Konfigurace formátů jsou totožné jako v předchozí sekci. Načtení se skládalo z přečtení souboru z disku (testování probíhalo na lokálním serveru, takže zde neprobíhaly síťové požadavky), případné dekomprimace a převodu do Javascriptových objektů. Naměřené hodnoty si lze prohlédnout v tabulce \ref{tab:visloadtime}. Nejrychleji se načítá formát JSON, což je logické, vzhledem k tomu, že se jedná o reprezentaci Javascriptových objektů, kterou prohlížeče podporují nativně. Jeho soubory jsou však velmi velké, díky čeho může být někdy rychlejší načtení ve formátu Protobufu. Cap'n Proto nemá dobrou podporu pro Javascript, nedokázal tak v prohlížeči načíst soubory z programů \texttt{simpleGL} a \texttt{mandelbrot}.
+Načítání je zpomalené kvůli serializaci dat do Webworkeru a zpátky z něj, nicméně použití Webworkeru je nutné pro zachování responzivity aplikace.
+
+\todo[inline]{Capnp nezvládá načíst soubory ze simpleGL a mandelbrot, dal jsem issue na repo, ale asi se to nestihne vyřešit. Dát tabulku pryč nebo jen okomentovat?}
+\begin{table}
+	\centering
+	\bgroup
+	\def\arraystretch{1.2}
+	\begin{minipage}{\textwidth}
+		\begin{tabularx}{\textwidth}{@{}|Y|c|c|c|c|c|c|}
+			\hline
+			\textbf{Program} & \textbf{JS [s]} & \textbf{JSK [s]} & \textbf{PR [s]} & \textbf{PRK [s]} & \textbf{CP [s]} & \textbf{CPK [s]} \\
+			\hline
+			vectorAdd & 0.5 & 0.8 & 0.7 & 0.9 & 3.3 & 3.5 \\
+			\hline
+			simpleGL & 0.9 & 1.8 & 1.2 & 1.4 & 1.9 & 3.6 \\
+			\hline
+			mandelbrot & 23 & 20 & 17 & 20 & 6.5 & 13.2 \\
+			\hline
+		\end{tabularx}
+	\end{minipage}
+	\caption{Doba načtení souborů s přístupy ve vizualizační aplikaci}
+	\label{tab:visloadtime}
+	\egroup
+\end{table}

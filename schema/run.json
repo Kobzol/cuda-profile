@@ -1,0 +1,29 @@
+{
+    "type": "object",
+    "properties": {
+        "type": {
+            "type": "string",
+            "description": "Určuje typ tohoto souboru (hodnota je run)"
+        },
+        "compress": {
+            "type": "boolean",
+            "description": "Určuje, zda jsou soubory s paměťovými přístupy komprimované"
+        },
+        "start": {
+            "type": "number",
+            "description": "UNIX časové razítko spuštění programu"
+        },
+        "end": {
+            "type": "number",
+            "description": "UNIX časové razítko ukončení programu"
+        },
+        "traces": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Seznam názvů vygenerovaných souborů s paměťovými přístupy"
+        }
+    }
+}
+

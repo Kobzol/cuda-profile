@@ -1,0 +1,143 @@
+\documentclass[czech,master,public,dept460,male,hidelinks,cpp]{diploma}
+
+\usepackage[backend=biber,autolang=other,style=iso-numeric,sorting=none,sortlocale=cs_CZ,bibencoding=UTF8]{biblatex}
+\usepackage[bottom]{footmisc} % footnote dole
+\usepackage{subfig}		% makra pro "podobrazky" a "podtabulky"
+\usepackage{tikz}		% makra pro kresleni
+\usepackage{todonotes}  % TODO
+\usepackage{minted}     % zdrojový kód
+\usepackage[minted]{tcolorbox} % zvýraznění ve zdrojovém kódu
+\usepackage{dirtree}    % adresářový strom
+\usepackage{csquotes}
+\usepackage{protobuf/lang}  % include language definition for protobuf
+\usepackage{protobuf/style} % include custom style for proto declarations.
+\usepackage{tabularx}
+\usepackage{float}
+
+% odstranění barevných linků
+\hypersetup{
+    colorlinks = true,
+    linkcolor = black,
+    citecolor = black,
+    urlcolor = black
+}
+
+\usemintedstyle{borland}
+\usemintedstyle[protobuf]{vs}
+\setminted{fontsize=\small, baselinestretch=1}
+
+\def\tabularxcolumn#1{m{#1}}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+
+\addbibresource{references.bib}
+
+\newcommand{\parspace}[1][]{
+	\ifthenelse{\isempty{#1}}{\vspace{5mm}}{\vspace{#1}}
+	\par
+}
+
+\makeatletter
+\newcommand\footnoteref[1]{\protected@xdef\@thefnmark{\ref{#1}}\@footnotemark}
+\makeatother
+
+\renewcommand{\footnoterule}{%
+  \kern -3pt
+  \hrule width \textwidth height 1pt
+  \kern 2pt
+}
+
+\AtBeginEnvironment{listing}{\setcounter{listing}{\value{lstlisting}}}
+\AtEndEnvironment{listing}{\stepcounter{lstlisting}}
+
+\definecolor{insthighlight}{rgb}{0.85, 0.85, 0.85}
+
+\ThesisAuthor{Bc. Jakub Beránek}
+
+\CzechThesisTitle{Profilování paralelních aplikací}
+\EnglishThesisTitle{Parallel application profiling}
+
+\SubmissionDate{30. dubna 2018}
+
+\Thanks{Chtěl bych poděkovat svému vedoucímu, Ing. Petru Gajdošovi, Ph.D., za předání odborných znalostí o platformě CUDA a pomoc při tvorbě této práce.}
+
+\graphicspath{{./Obrazky/}}
+
+\ThesisAssignmentImagePath{Obrazky/Zadani}
+\AuthorDeclarationImageFile{Obrazky/DeklaraceAutora.jpg}
+
+\CzechAbstract{Tato práce se zabývá vizualizací paměťových přístupů programů na platformě CUDA. Je v ní prezentován profilovací nástroj, který instrumentuje CUDA programy a generuje z nich záznam paměťových přístupů. Ty jsou poté prezentovány uživateli pro odhalení příležitostí pro paměťovou optimalizaci. První část práce popisuje metody profilování programů a technologie použité pro tvorbu profilovacího nástroje. Poté následuje popis existujících nástroj§ pro profilování aplikací pro grafické karty. Třetí část se zabývá návrhem a implementací profilovacího nástroje a webové aplikace pro vizualizaci zaznamenaných přístupů.}
+\CzechKeywords{vizualizace paměťových přístupů, profilování, CUDA, LLVM}
+
+\EnglishAbstract{TODO}
+\EnglishKeywords{memory access visualization, profiling, CUDA, LLVM}
+
+\AddAcronym{CAS}{Compare-and-swap}
+\AddAcronym{CPU}{Central processing unit}
+\AddAcronym{CSS}{Cascading Style Sheets}
+\AddAcronym{DMA}{Direct Memory Access}
+\AddAcronym{DOM}{Document Object Model}
+\AddAcronym{GPU}{Graphics processing unit}
+\AddAcronym{GPGPU}{General-purpose computing on graphics processing units}
+\AddAcronym{HTML}{Hypertext Markup Language}
+\AddAcronym{IDE}{Integrated development environment}
+\AddAcronym{IR}{Intermediate representation}
+\AddAcronym{JIT}{Just-in-time}
+\AddAcronym{JSON}{JavaScript Object Notation}
+\AddAcronym{NUMA}{Non-uniform memory access}
+\AddAcronym{ODR}{One Definition Rule}
+\AddAcronym{OOP}{Object-oriented programming}
+\AddAcronym{PCI}{Peripheral Component Interconnect}
+\AddAcronym{PTX}{Parallel Thread Execution}
+\AddAcronym{RTTI}{Run-time type information}
+\AddAcronym{SSA}{Static single assignment}
+\AddAcronym{SIMT}{Single instruction, multiple threads}
+\AddAcronym{XML}{Extensible Markup Language}
+
+\begin{document}
+
+\MakeTitlePages
+
+\renewcommand\listingscaption{Výpis}
+\renewcommand\listoflistingscaption{Seznam výpisů zdrojového kódu}
+\listoflistings
+
+\section{Úvod}
+\input{Kapitoly/uvod}
+
+\section{Technologie}
+\label{sec:technology}
+    \input{Kapitoly/technologie}
+
+\section{Existující nástroje}
+\label{sec:stateoftheart}
+    \input{Kapitoly/existujicinastroje}
+
+\section{Profilovací nástroj}
+\label{sec:profiler}
+    \input{Kapitoly/profilovacinastroj}
+
+\section{Vizualizační aplikace}
+\label{sec:visualisation}
+    \input{Kapitoly/vizualizace}
+
+\section{Testování dosažených výsledků}
+\label{sec:benchmark}
+    \input{Kapitoly/testovani}
+
+\section{Závěr}
+\label{sec:conclusion}
+    \input{Kapitoly/zaver}
+
+\printbibheading[title=Literatura, heading=bibintoc]
+\printbibliography[heading=none]
+
+\appendix
+
+\section{Struktura projektu}
+    \input{Kapitoly/struktura}
+\section{Instalace projektu}
+    \input{Kapitoly/instalace}
+\section{Ukázky vizualizace paměťových přístupů}
+    \input{Kapitoly/grafickarozhrani}
+
+\end{document}
