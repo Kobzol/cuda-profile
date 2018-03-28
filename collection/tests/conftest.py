@@ -103,12 +103,13 @@ def run(root, dir, exe, env, compress):
 
     if HAS_CAPNP:
         for capnp_file in glob.glob("{}/*.capnp".format(cuprdir)):
-            with (gzip.open(capnp_file) if compress else open(capnp_file)) as f:
-                kernel = trace_capnp.Trace.read_packed(f)
+            with (gzip.open(capnp_file) if compress else open(capnp_file, mode='rb')) as f:
+                buffer = f.read()
+                kernel = trace_capnp.Trace.from_bytes_packed(buffer)
                 mappings[os.path.basename(capnp_file)] = kernel.to_dict()
     if HAS_PROTOBUF:
         for protobuf_file in glob.glob("{}/*.protobuf".format(cuprdir)):
-            with (gzip.open(protobuf_file) if compress else open(protobuf_file)) as f:
+            with (gzip.open(protobuf_file) if compress else open(protobuf_file, mode='rb')) as f:
                 kernel = KernelTrace()
                 kernel.ParseFromString(f.read())
                 mappings[os.path.basename(protobuf_file)] = json_format.MessageToDict(kernel,

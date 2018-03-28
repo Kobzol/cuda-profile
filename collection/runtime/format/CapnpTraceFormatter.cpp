@@ -10,8 +10,9 @@
     #include <format/capnp/cupr.capnp.h>
 
     using namespace capnp;
+    using namespace kj;
 
-    class StdOutputStream: public kj::OutputStream
+    class StdOutputStream: public OutputStream
     {
     public:
         explicit StdOutputStream(std::ostream& os): os(os)
@@ -113,7 +114,8 @@ void cupr::CapnpTraceFormatter::formatTrace(std::ostream& os, const std::string&
         }
     }
 
-    StdOutputStream stream(os);
+    auto out = this->createStream(os, compress);
+    StdOutputStream stream(*out);
     writePackedMessage(stream, message);
 #endif
 }
@@ -121,4 +123,15 @@ void cupr::CapnpTraceFormatter::formatTrace(std::ostream& os, const std::string&
 std::string cupr::CapnpTraceFormatter::getSuffix()
 {
     return "capnp";
+}
+
+std::unique_ptr<std::ostream> cupr::CapnpTraceFormatter::createStream(std::ostream& os, bool compress)
+{
+#ifdef CUPR_USE_ZLIB
+    if (compress)
+    {
+        return std::make_unique<zstr::ostream>(os);
+    }
+#endif
+    return std::make_unique<std::ostream>(os.rdbuf());
 }

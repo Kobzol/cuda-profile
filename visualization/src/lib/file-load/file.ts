@@ -63,11 +63,12 @@ function parseFileProtobuf(file: File, decompress: boolean): Observable<Trace>
 /**
  * Loads file and parses its content as Cap'n Proto using a web worker.
  * @param {File} file
+ * @param {boolean} decompress
  * @returns {Observable<Object>}
  */
-function parseFileCapnp(file: File): Observable<Trace>
+function parseFileCapnp(file: File, decompress: boolean): Observable<Trace>
 {
-    return readFile(file, true, false)
+    return readFile(file, true, decompress)
         .flatMap(data => createWorkerJob(new CapnpWorker(), data));
 }
 
@@ -88,7 +89,7 @@ function parseFile(file: File): Observable<Trace | Metadata | Run>
     }
     else if (file.name.match(/\.capnp$/))
     {
-        return parseFileCapnp(file);
+        return parseFileCapnp(file, file.name.match(/\.gzip\.capnp/) !== null);
     }
     else return Observable.throw(new InvalidFileFormat());
 }

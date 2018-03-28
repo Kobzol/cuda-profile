@@ -2,6 +2,8 @@
 
 #include "TraceFormatter.h"
 
+#include <memory>
+
 namespace cupr {
     class CapnpTraceFormatter: public TraceFormatter
     {
@@ -11,5 +13,7 @@ namespace cupr {
                                  double start, double end, bool prettify, bool compress) final;
 
         std::string getSuffix() final;
+
+        std::unique_ptr<std::ostream> createStream(std::ostream& os, bool compress);
     };
 }

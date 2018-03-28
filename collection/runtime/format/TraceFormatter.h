@@ -17,7 +17,12 @@ namespace cupr
     class TraceFormatter
     {
     public:
-        TraceFormatter() = default;
+        TraceFormatter()
+        {
+            this->hexString.resize(18);
+            this->hexString[0] = '0';
+            this->hexString[1] = 'x';
+        }
         virtual ~TraceFormatter() = default;
 
         virtual void formatTrace(std::ostream& os,
@@ -36,9 +41,11 @@ namespace cupr
         }
         virtual bool supportsCompression()
         {
-            return false;
+            return true;
         }
     protected:
         std::string hexPointer(const void* ptr);
+
+        std::string hexString;
     };
 }

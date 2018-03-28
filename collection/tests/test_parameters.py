@@ -80,7 +80,7 @@ def test_parameters_compression_content(profile, format):
     compressed = profile(code, format=format, compress=True)
 
     assert (uncompressed[kernel_file("kernel", format=format)]["kernel"] ==
-            compressed[kernel_file("kernel", format=format, compress=format=="json")]["kernel"])
+            compressed[kernel_file("kernel", format=format, compress=True)]["kernel"])
 
 
 @param_all_formats

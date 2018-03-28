@@ -20,10 +20,6 @@ namespace cupr
         {
             return false;
         }
-        bool supportsCompression() final
-        {
-            return true;
-        }
 
     private:
         template <typename Stream>

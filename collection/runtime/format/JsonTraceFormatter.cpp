@@ -1,5 +1,6 @@
 #include "JsonTraceFormatter.h"
 
+#include "json/rapidjson/filewritestream.h"
 #include "json/rapidjson/ostreamwrapper.h"
 #include "json/rapidjson/prettywriter.h"
 
