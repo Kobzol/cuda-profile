@@ -10,7 +10,7 @@ const char* Parameters::PROTOBUF_FORMAT = "PROTOBUF";
 const char* Parameters::CAPNP_FORMAT = "CAPNP";
 const char* Parameters::JSON_FORMAT = "JSON";
 
-static uint32_t BUFFER_SIZE_DEFAULT = 1024 * 1024;
+static uint32_t BUFFER_SIZE_DEFAULT = 1000000;
 
 uint32_t Parameters::getBufferSize()
 {
