@@ -16,7 +16,7 @@ pushd ${BUILD_DIR}
     # rm -rf cupr-*
 
     # build pass
-    make
+    make -j
 
     # ${CLANG} -I${CUDA_DIR}/samples/common/inc -O0 -c -emit-llvm -std=c++14 --cuda-gpu-arch=sm_30 ${SRC_FILES}
 

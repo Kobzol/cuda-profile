@@ -63,6 +63,11 @@ bool Parameters::isOutputEnabled()
     return !Parameters::isParameterEnabled("DISABLE_OUTPUT");
 }
 
+bool Parameters::useThreadPool()
+{
+    return !isParameterDisabled("THREAD_POOL");
+}
+
 bool Parameters::isParameterEnabled(const char* name)
 {
     char* parameter = getenv(name);
@@ -70,6 +75,14 @@ bool Parameters::isParameterEnabled(const char* name)
             strlen(parameter) > 0 &&
             parameter[0] == '1';
 }
+bool Parameters::isParameterDisabled(const char* name)
+{
+    char* parameter = getenv(name);
+    return  parameter != nullptr &&
+            strlen(parameter) > 0 &&
+            parameter[0] == '0';
+}
+
 
 std::unique_ptr<std::string> Parameters::getParameterString(const char* name)
 {

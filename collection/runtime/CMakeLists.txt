@@ -5,11 +5,13 @@ set(SOURCE_FILES
         RuntimeState.cpp
         format/CapnpTraceFormatter.cpp
         format/Emitter.cpp
-        format/TraceFormatter.cpp
         format/JsonTraceFormatter.cpp
         format/ProtobufTraceFormatter.cpp
+        format/Trace.cpp
+        format/TraceFormatter.cpp
         format/warp/Warp.cpp
         format/warp/WarpGrouper.cpp
+        format/worker/format-pool.cpp
         tracking/Memtracker.cpp
 )
 

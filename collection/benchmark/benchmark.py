@@ -63,7 +63,7 @@ if __name__ == "__main__":
             file_size = sum(sizes) / len(sizes)
 
             print(out.strip())
-            print("{}{}: duration {} ms, file size {}\n".format(format, "" if comp == "0" else "/gzip",
-                                                                duration, sizeof_fmt(file_size)))
+            print("{}{}: duration {} s, file size {}\n".format(format, "" if comp == "0" else "/gzip",
+                                                               duration, sizeof_fmt(file_size)))
 
             shutil.rmtree(dir, ignore_errors=False)

@@ -20,9 +20,9 @@ void mandelbrot();
 
 int main(int argc, char** argv)
 {
-    BENCHMARK(vectorAdd, 10);
-    BENCHMARK(simpleGL, 5);
-    BENCHMARK(mandelbrot, 2);
+    //BENCHMARK(vectorAdd, 5);
+    BENCHMARK(simpleGL, 1);
+    //BENCHMARK(mandelbrot, 1);
 
     return 0;
 }

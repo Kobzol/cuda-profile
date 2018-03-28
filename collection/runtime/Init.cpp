@@ -8,5 +8,6 @@ namespace cupr
 __attribute__((destructor))
 static void closeEmitter()
 {
+    cupr::state.getEmitter().waitForJobs();
     cupr::state.getEmitter().emitProgramRun();
 }

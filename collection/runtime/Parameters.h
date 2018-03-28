@@ -19,9 +19,12 @@ namespace cupr
         static std::string getFormat();
         static bool isMappedMemoryEnabled();
         static bool isOutputEnabled();
+        static bool useThreadPool();
 
     private:
         static bool isParameterEnabled(const char* name);
+        static bool isParameterDisabled(const char* name);
+
         static std::unique_ptr<std::string> getParameterString(const char* name);
     };
 }
