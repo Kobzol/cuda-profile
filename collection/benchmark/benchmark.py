@@ -61,9 +61,10 @@ if __name__ == "__main__":
             cuprdir = find_cupr_dir(dir)
             sizes = [os.stat(f).st_size for f in glob.glob("{}/*.trace.*".format(cuprdir))]
             file_size = sum(sizes) / len(sizes)
+            print("Files: {}, total: {}".format(len(sizes), sizeof_fmt(sum(sizes))))
 
             print(out.strip())
-            print("{}{}: duration {} s, file size {}\n".format(format, "" if comp == "0" else "/gzip",
+            print("{}{}: duration {} s, average file size {}\n".format(format, "" if comp == "0" else "/gzip",
                                                                duration, sizeof_fmt(file_size)))
 
             shutil.rmtree(dir, ignore_errors=False)

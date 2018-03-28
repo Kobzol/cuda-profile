@@ -10,6 +10,7 @@ int main(int argc, char** argv)
 void vectorAdd();
 void simpleGL();
 void mandelbrot();
+void reduction();
 
 #define BENCHMARK(name, count)\
     Benchmark name##Bench(#name);\
@@ -20,9 +21,10 @@ void mandelbrot();
 
 int main(int argc, char** argv)
 {
-    //BENCHMARK(vectorAdd, 5);
-    BENCHMARK(simpleGL, 1);
-    //BENCHMARK(mandelbrot, 1);
+    BENCHMARK(vectorAdd, 10);
+    BENCHMARK(simpleGL, 5);
+    BENCHMARK(mandelbrot, 5);
+    BENCHMARK(reduction, 5);
 
     return 0;
 }
