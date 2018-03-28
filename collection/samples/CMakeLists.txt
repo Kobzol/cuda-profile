@@ -10,3 +10,6 @@ link_libraries(cudart runtime)
 
 add_subdirectory("bankConflict")
 add_subdirectory("vectorAdd")
+
+SET_TARGET_PROPERTIES(bankConflict PROPERTIES EXCLUDE_FROM_ALL True)
+SET_TARGET_PROPERTIES(vectorAdd PROPERTIES EXCLUDE_FROM_ALL True)

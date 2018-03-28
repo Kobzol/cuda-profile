@@ -25,3 +25,6 @@ add_executable(benchmark-profiled main.cpp ${SOURCE_FILES})
 add_dependencies(benchmark-profiled instrument runtime)
 target_compile_definitions(benchmark-profiled PRIVATE PROFILE)
 target_link_libraries(benchmark-profiled ${LIBRARIES})
+
+SET_TARGET_PROPERTIES(benchmark PROPERTIES EXCLUDE_FROM_ALL True)
+SET_TARGET_PROPERTIES(benchmark-profiled PROPERTIES EXCLUDE_FROM_ALL True)
