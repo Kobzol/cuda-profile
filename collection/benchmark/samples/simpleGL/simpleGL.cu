@@ -456,7 +456,7 @@ void runAutoTest(char **argv, char *ref_file)
     char *reference_file = NULL;
     void *imageData = malloc(mesh_width*mesh_height*sizeof(float));
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 50; i++)
     {
         // execute the kernel
         launch_kernel((float4 *)d_vbo_buffer, mesh_width, mesh_height, g_fAnim);
