@@ -1,8 +1,8 @@
 Profilovací nástroj vytvářený v této práci se skládá ze dvou částí. První, která se stará o sběr dat za běhu programu, je popsána v této kapitole. Druhá část, která naměřená data vizualizuje uživateli, je popsána v kapitole \ref{sec:visualisation}.
 
 \subsection{Specifikace požadavků}
-Cílem této práce je vytvořit nástroj, který by umožnil zaznamenat paměťové přístupy na grafické kartě v CUDA aplikaci. Naměřená data by měla obsahovat detailní informace o paměťovém přístupu a umožnit identifikovat vlákno, které přístup provedlo. Pokud budou údaje k dispozici, měly by se také uchovávat ladící informace o umístění instrukcí ve zdrojovém kódu a datovém typu proměnných.
-Pro účely vizualizace je také nutné, aby nástroj zaznamenával paměťové alokace na grafické kartě a umožnil přiřadit je ke konkrétním přístupům do paměti.
+Cílem této práce bylo vytvořit nástroj, který by umožnil zaznamenat paměťové přístupy na grafické kartě v CUDA aplikaci. Naměřená data by měla obsahovat detailní informace o paměťovém přístupu a umožnit identifikovat vlákno, které přístup provedlo. Pokud budou údaje k dispozici, měly by se také uchovávat ladící informace o umístění instrukcí ve zdrojovém kódu a datovém typu proměnných.
+Pro účely vizualizace bylo také nutné, aby nástroj zaznamenával paměťové alokace na grafické kartě a umožnil přiřadit je ke konkrétním přístupům do paměti.
 Nástroj by měl být jednoduše použitelný a neměl by vyžadovat provádění velkého počtu změn ve zdrojovém kódu aplikace. Jelikož nástroj není určen k měření doby výpočtu programu a zaznamenává velké množství dat, tak se počítá s tím, že může znatelně ovlivnit výkon programu. Profilovaný program by ale neměl být nástrojem zpomalen natolik, aby se nedal použít alespoň pro malé testovací instance určené k experimentování s optimalizováním daného programu.
 
 \subsection{Architektura}
