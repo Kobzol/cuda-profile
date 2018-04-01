@@ -1,17 +1,17 @@
 \subsection{Profilovací nástroj}
-Profilovací nástroj byl primárně vyvíjen pro Linuxové distribuce založené na Debianu, instalační instrukce jsou tedy zaměřené na ně. Jeho kód se nachází ve složce \texttt{collection}, následující příkazy předpokládají spouštění z této složky. 
+Profilovací nástroj byl primárně vyvíjen pro Linuxové distribuce založené na Debianu, instalační instrukce jsou tedy zaměřené na ně. Jeho kód se nachází ve složce \texttt{collection}, následující příkazy předpokládají spouštění z~této složky. 
 
 \subsubsection{Závislosti}
-Projekt lze sestavit pomocí programu \emph{CMake}\footnote{\url{https://cmake.org}}, který ze zdrojového kódu generuje soubory pro konkrétní sestavovací systém (např. \emph{make}). Před sestavením projektu je nutné nainstalovat závislosti CMake a LLVM. Instrumentační nástroj by měl být kompatibilní s LLVM 4, 5 i 6 a s CUDOU ve verzi 8 a 9. Podpora pro CUDA 9.1 je v době tvorby této práce stále ve vývoji.
-Mezi verzí CUDY 8 a 9 vznikly relativně velké změny ve spolupráci CUDY s Clangem, doporučená a nejvíce otestovaná kombinace verzí je pro použití profilovacího nástroje je LLVM 4 a CUDA 8.
+Projekt lze sestavit pomocí programu \emph{CMake}\footnote{\url{https://cmake.org}}, který ze zdrojového kódu generuje soubory pro konkrétní sestavovací systém (např. \emph{make}). Před sestavením projektu je nutné nainstalovat závislosti CMake a~LLVM. Instrumentační nástroj by měl být kompatibilní s~LLVM 4, 5 i~6 a~s~CUDOU ve verzi 8 a~9. Podpora pro CUDA 9.1 je v~době tvorby této práce stále ve vývoji.
+Mezi verzí CUDY 8 a~9 vznikly relativně velké změny ve spolupráci CUDY s~Clangem, doporučená a~nejvíce otestovaná kombinace verzí je pro použití profilovacího nástroje je LLVM 4 a~CUDA 8.
 \begin{minted}{bash}
   $ apt-get install build-essential cmake llvm-4.0-dev clang-4.0
 \end{minted}
-Pro použití komprese a knihoven Protobuf či Cap'n Proto je potřeba doinstalovat tyto balíčky. Aplikace používá Protobuf ve verzi 2 a Cap'n Proto ve verzi 0.6.
+Pro použití komprese a~knihoven Protobuf či Cap'n Proto je potřeba doinstalovat tyto balíčky. Aplikace používá Protobuf ve verzi 2 a~Cap'n Proto ve verzi 0.6.
 \begin{minted}{bash}
   $ apt-get install libprotobuf-dev protobuf-compiler capnproto libcapnp-dev zlib1g-dev
 \end{minted}
-Testy jsou napsány v Pythonu 2.7 a jsou určené pro testovací knihovnu \emph{pytest}\footnote{\url{https://docs.pytest.org/en/latest}}. Pro spuštění testů je nutné doinstalovat balíčky s Pythonem, pytestem a dále nainstalovat Protobuf a Cap'n Proto pro Python.
+Testy jsou napsány v~Pythonu 2.7 a~jsou určené pro testovací knihovnu \emph{pytest}\footnote{\url{https://docs.pytest.org/en/latest}}. Pro spuštění testů je nutné doinstalovat balíčky s~Pythonem, pytestem a~dále nainstalovat Protobuf a~Cap'n Proto pro Python.
 \begin{minted}{bash}
   $ apt-get install python python-pip python-pytest
   $ pip install protobuf pycapnp
@@ -30,27 +30,27 @@ Po sestavení lze spustit testy pomocí příkazu
 \begin{minted}{bash}
   $ py.test tests
 \end{minted}
-v kořenovém adresáři projektu.
+v~kořenovém adresáři projektu.
 
-Pro zjednodušení instalace profilovacího nástroje je v repozitáři k dispozici konfigurační soubor pro \emph{Docker}\footnote{\url{https://www.docker.com}}, který obsahuje všechny potřebné závislosti. Návod pro instalaci Dockeru lze najít například zde: \url{https://docs.docker.com/install/linux/docker-ce/ubuntu}.
-Jelikož profilovací nástroj vyžaduje CUDA grafickou kartu pro své spuštění, musí se Docker kontejner spustit s podporou běhového prostředí CUDA. Pro sestavení projektu v Dockeru a následné spuštění testů lze použít tyto příkazy v kořenovém adresáři projektu:
+Pro zjednodušení instalace profilovacího nástroje je v~repozitáři k~dispozici konfigurační soubor pro \emph{Docker}\footnote{\url{https://www.docker.com}}, který obsahuje všechny potřebné závislosti. Návod pro instalaci Dockeru lze najít například zde: \url{https://docs.docker.com/install/linux/docker-ce/ubuntu}.
+Jelikož profilovací nástroj vyžaduje CUDA grafickou kartu pro své spuštění, musí se Docker kontejner spustit s~podporou běhového prostředí CUDA. Pro sestavení projektu v~Dockeru a~následné spuštění testů lze použít tyto příkazy v~kořenovém adresáři projektu:
 \begin{minted}{bash}
   $ apt-get install nvidia-docker2
   $ docker build -t profiler .
   $ docker run --runtime=nvidia profiler
 \end{minted}
 
-Kontejner je možné zapnout v interaktivním režimu a použít jej k instrumentaci a spuštění CUDA programů.
+Kontejner je možné zapnout v~interaktivním režimu a~použít jej k~instrumentaci a~spuštění CUDA programů.
 
 \subsubsection{Použití}
 \label{manual:usage}
-Pro každý soubor s kernely, které se mají instrumentovat, je nejprve nutné vložit do zdrojového \texttt{.cu} souboru hlavičkový soubor \texttt{CuprRuntime.h} ze složky \texttt{include}.
+Pro každý soubor s~kernely, které se mají instrumentovat, je nejprve nutné vložit do zdrojového \texttt{.cu} souboru hlavičkový soubor \texttt{CuprRuntime.h} ze složky \texttt{include}.
 \begin{minted}{cpp}
   #include <CuprRuntime.h>
 \end{minted}
-Aby šlo takto soubor vložit, tak musí být složka \texttt{include} přidána do seznamu cest ke hlavičkovým souborům v překladači.\footnote{Nestačí zkopírovat hlavičkový soubor do jiného projektu, protože se odkazuje na jiné soubory profilovacího nástroje pomocí relativních cest}
+Aby šlo takto soubor vložit, tak musí být složka \texttt{include} přidána do seznamu cest ke hlavičkovým souborům v~překladači.\footnote{Nestačí zkopírovat hlavičkový soubor do jiného projektu, protože se odkazuje na jiné soubory profilovacího nástroje pomocí relativních cest}
 
-Instrumentovaný program se poté musí přeložit pomocí překladače Clang. Při překladu je nutné přilinkovat knihovny profilovacího nástroje. Následující skript přeloží zdrojové soubory a provede instrumentaci profilovacím nástrojem. Skript předpokládá, že v proměnné prostředí CUPR\_BUILD\_DIR je absolutní cesta k adresáři se sestaveným profilovacím nástrojem (tedy např. adresář \texttt{build}, viz výše).
+Instrumentovaný program se poté musí přeložit pomocí překladače Clang. Při překladu je nutné přilinkovat knihovny profilovacího nástroje. Následující skript přeloží zdrojové soubory a~provede instrumentaci profilovacím nástrojem. Skript předpokládá, že v~proměnné prostředí CUPR\_BUILD\_DIR je absolutní cesta k~adresáři se sestaveným profilovacím nástrojem (tedy např. adresář \texttt{build}, viz výše).
 
 \begin{minted}[escapeinside=\#\#]{bash}
 $ clang++ -std=c++14 --cuda-gpu-arch=sm_30 \
@@ -64,9 +64,9 @@ $ clang++ -std=c++14 --cuda-gpu-arch=sm_30 \
     -xcuda \
     <zdrojové soubory> -o cuda
 \end{minted}
-Zvýrazněné řádky jsou potřeba pro instrumentaci, ostatní přepínače jsou standardní při překládání CUDA programů překladačem Clang. Přepínač \texttt{-z\ muldefs} je nutný pouze pokud je soubor \texttt{CuprRuntime.h} vložen do více než jednoho souboru s kernely. Tento přepínač ignoruje výskyt více definic stejné deklarace a je nutný z důvodu omezení Clangu popsaného v sekci \ref{sec:gpucollection}.
+Zvýrazněné řádky jsou potřeba pro instrumentaci, ostatní přepínače jsou standardní při překládání CUDA programů překladačem Clang. Přepínač \texttt{-z\ muldefs} je nutný pouze pokud je soubor \texttt{CuprRuntime.h} vložen do více než jednoho souboru s~kernely. Tento přepínač ignoruje výskyt více definic stejné deklarace a~je nutný z~důvodu omezení Clangu popsaného v~sekci \ref{sec:gpucollection}.
 
-Níže je pro úplnost ukázka minimálního souboru pro instrumentaci a sestavení CUDA programu překladačem Clang pomocí CMake.
+Níže je pro úplnost ukázka minimálního souboru pro instrumentaci a~sestavení CUDA programu překladačem Clang pomocí CMake.
 
 
 \begin{minted}[fontsize=\small]{cmake}
@@ -96,7 +96,7 @@ target_include_directories(profiled PRIVATE ${CUPR_SRC_DIR}/include)
 \end{minted}
 
 
-Instrumentovaný program potřebuje k běhu dynamickou knihovnu profilovacího nástroje, je tedy nutné buď vytvořit symbolický odkaz ke knihovně pomocí programu \texttt{ldconfig}\footnote{\url{http://man7.org/linux/man-pages/man8/ldconfig.8.html}} nebo použít proměnnou prostředí LD\_LIBRARY\_PATH\footnote{\url{http://man7.org/linux/man-pages/man8/ld.so.8.html}} pro určení umístění knihovny. Následuje kompletní ukázka spuštění programu i s použitím knihovny pro zaznamenání dynamických alokací a předání parametrů.
+Instrumentovaný program potřebuje k~běhu dynamickou knihovnu profilovacího nástroje, je tedy nutné buď vytvořit symbolický odkaz ke knihovně pomocí programu \texttt{ldconfig}\footnote{\url{http://man7.org/linux/man-pages/man8/ldconfig.8.html}} nebo použít proměnnou prostředí LD\_LIBRARY\_PATH\footnote{\url{http://man7.org/linux/man-pages/man8/ld.so.8.html}} pro určení umístění knihovny. Následuje kompletní ukázka spuštění programu i~s~použitím knihovny pro zaznamenání dynamických alokací a~předání parametrů.
 
 \begin{minted}{bash}
 $ LD_PRELOAD=${CUPR_BUILD_DIR}/runtimetracker/libruntimetracker.so \
@@ -106,11 +106,11 @@ $ LD_PRELOAD=${CUPR_BUILD_DIR}/runtimetracker/libruntimetracker.so \
     ./cuda
 \end{minted}
 
-Po ukončení programu se v jeho pracovním adresáři vytvoří složka se zaznamenanými údaji. Ty lze poté zobrazit ve vizualizační aplikaci.
+Po ukončení programu se v~jeho pracovním adresáři vytvoří složka se zaznamenanými údaji. Ty lze poté zobrazit ve vizualizační aplikaci.
 
 \subsubsection{Parametry}
 \label{manual:parameters}
-V tabulce \ref{tab:parameters} jsou vypsány názvy, datové typy a implicitní hodnoty parametrů, kterými lze ovlivnit instrumentaci a běh profilovaných programů. Veškeré parametry se předávají pomocí proměnných prostředí. Pokud je v tabulce uveden kontext \emph{překladač}, tak se parametr předává při překladu programu překladači Clang. Pokud je kontext \emph{program}, tak se parametr předává při spouštění instrumentovaného programu. U parametrů typu \texttt{bool} se pravdivá hodnota zadává jako 1 a nepravdivá hodnota jako 0.
+V~tabulce \ref{tab:parameters} jsou vypsány názvy, datové typy a~implicitní hodnoty parametrů, kterými lze ovlivnit instrumentaci a~běh profilovaných programů. Veškeré parametry se předávají pomocí proměnných prostředí. Pokud je v~tabulce uveden kontext \emph{překladač}, tak se parametr předává při překladu programu překladači Clang. Pokud je kontext \emph{program}, tak se parametr předává při spouštění instrumentovaného programu. U~parametrů typu \texttt{bool} se pravdivá hodnota zadává jako 1 a~nepravdivá hodnota jako 0.
 
 \begin{table}[h]
 \centering
@@ -143,13 +143,13 @@ THREAD\_POOL & bool & zapnuto & program & Paralelizace formátování přístup�
 \end{table}
 
 \subsubsection{Formát generovaných souborů}
-Při instrumentaci a spouštění instrumentovaných programů se generují tři typy souborů. Jejich specifikace ve formátu JSON Schema je v kořenovém adresáři projektu ve složce \texttt{schema}. Soubor s informacemi o běhu celé aplikace má název \texttt{run.json} a vytváří se při každém spuštění instrumentovaného programu. Dalším typem souboru je soubor s metadaty, který je vždy pojmenován \texttt{<kernel>.metadata.json}, kde kernel je název kernelu, jehož metadata soubor obsahuje. Tento soubor je vytvořen pro každý instrumentovaný kernel při překladu aplikace. Posledním a nejdůležitějším typem souboru je soubor s paměťovými alokacemi. Ten se vytváří za běhu programu při každém spuštění instrumentovaného kernelu. Tento soubor by bylo komplikované popsat pomocí JSON Schema, jeho obsah si lze prohlédnout v definici struktur pro Protobuf nebo Cap'n Proto. Ty se nacházejí ve složkách \texttt{collection/runtime/format/protobuf} a \texttt{collection/runtime/format/capnp}.
+Při instrumentaci a~spouštění instrumentovaných programů se generují tři typy souborů. Jejich specifikace ve formátu JSON Schema je v~kořenovém adresáři projektu ve složce \texttt{schema}. Soubor s~informacemi o~běhu celé aplikace má název \texttt{run.json} a~vytváří se při každém spuštění instrumentovaného programu. Dalším typem souboru je soubor s~metadaty, který je vždy pojmenován \texttt{<kernel>.metadata.json}, kde kernel je název kernelu, jehož metadata soubor obsahuje. Tento soubor je vytvořen pro každý instrumentovaný kernel při překladu aplikace. Posledním a~nejdůležitějším typem souboru je soubor s~paměťovými alokacemi. Ten se vytváří za běhu programu při každém spuštění instrumentovaného kernelu. Tento soubor by bylo komplikované popsat pomocí JSON Schema, jeho obsah si lze prohlédnout v~definici struktur pro Protobuf nebo Cap'n Proto. Ty se nacházejí ve složkách \texttt{collection/runtime/format/protobuf} a~\texttt{collection/runtime/format/capnp}.
 
 \subsection{Webová aplikace}
-Vizualizační aplikace se nachází ve složce \texttt{dashboard}, následující příkazy předpokládají spouštění z této složky.
+Vizualizační aplikace se nachází ve složce \texttt{dashboard}, následující příkazy předpokládají spouštění z~této složky.
 
 \subsubsection{Závislosti}
-Pro instalaci a spuštění vizualizační webové aplikace je nutné nainstalovat běhové prostředí Javascriptu \emph{NodeJS}\footnote{\url{https://nodejs.org}} alespoň ve verzi 8 a jeho balíčkovací manažer \emph{npm}\footnote{\url{https://www.npmjs.com}}. Závislosti projektu lze nainstalovat tímto příkazem:
+Pro instalaci a~spuštění vizualizační webové aplikace je nutné nainstalovat běhové prostředí Javascriptu \emph{NodeJS}\footnote{\url{https://nodejs.org}} alespoň ve verzi 8 a~jeho balíčkovací manažer \emph{npm}\footnote{\url{https://www.npmjs.com}}. Závislosti projektu lze nainstalovat tímto příkazem:
 \begin{minted}{bash}
     $ npm install
 \end{minted}
@@ -159,10 +159,10 @@ Aplikaci je poté možno spustit přímo ve vývojářském režimu:
 \begin{minted}{bash}
     $ npm start
 \end{minted}
-nebo ji lze sestavit do statických HTML, CSS a Javascript souborů a poté použít libovolný webový server k servírování aplikace ze složky \texttt{build}:
+nebo ji lze sestavit do statických HTML, CSS a~Javascript souborů a~poté použít libovolný webový server k~servírování aplikace ze složky \texttt{build}:
 \begin{minted}{bash}
     $ npm run build
 \end{minted}
 
-Aplikace při spuštění ve vývojářském režimu běží na portu 3000, lze se na ni tedy dostat v prohlížeči pomocí adresy \url{http://localhost:3000}.
+Aplikace při spuštění ve vývojářském režimu běží na portu 3000, lze se na ni tedy dostat v~prohlížeči pomocí adresy \url{http://localhost:3000}.
 Webovou aplikaci si lze prohlédnout také na této adrese: \url{https://kobzol.github.io/cuda-profile}.
