@@ -13,6 +13,8 @@ V~tabulce \ref{tab:compiletimes} je zaznamenána doba překladu programů bez po
 který obsahuje šest kernelů, z~nichž některé jsou šablonované. Dohromady všechny jejich kombinace vytváří celkem 132 různých kernelů, které musí projít instrumentací, což se projevilo na času překladu.
 \begin{table}
 	\centering
+	\caption{Doba překladu instrumentovaných aplikací}
+	\label{tab:compiletimes}
 	\bgroup
 	\def\arraystretch{1.2}
 	\begin{tabularx}{\textwidth}{@{}|Y|Y|Y|}
@@ -29,14 +31,14 @@ který obsahuje šest kernelů, z~nichž některé jsou šablonované. Dohromady
 		\hline
 	\end{tabularx}
 	\egroup
-	\caption{Doba překladu instrumentovaných aplikací}
-\label{tab:compiletimes}
 \end{table}
 
 V~tabulce \ref{tab:executiontimes} jsou naměřené časy výpočtu instrumentovaných programů. Jako reference pro srovnání slouží doba výpočtu bez použití instrumentace (BEZ). Dále byly měřeny konfigurace, které zapisovaly data ve formátech JSON (JS), komprimovaný JSON (JSK), Protobuf (PR), komprimovaný Protobuf (PRK), Cap'n Proto (CP) a~komprimovaný Cap'n Proto (CPK). V~posledním sloupci tabulky je uveden celkový počet zaznamenaných paměťových přístupů pro dané spuštění programu.
 
 \begin{table}
 	\centering
+	\caption{Doba výpočtu instrumentovaných aplikací}
+	\label{tab:executiontimes}
 	\bgroup
 	\def\arraystretch{1.2}
 	\begin{minipage}{\textwidth}
@@ -54,8 +56,6 @@ V~tabulce \ref{tab:executiontimes} jsou naměřené časy výpočtu instrumentov
 		\hline
 	\end{tabularx}
 	\end{minipage}
-	\caption{Doba výpočtu instrumentovaných aplikací}
-	\label{tab:executiontimes}
 	\egroup
 \end{table}
 
@@ -65,6 +65,8 @@ Tabulka \ref{tab:executionsize} obsahuje velikosti souborů s~paměťovými př�
 
 \begin{table}
 	\centering
+	\caption{Velikost souborů vygenerovaných instrumentací}
+	\label{tab:executionsize}
 	\bgroup
 	\def\arraystretch{1.2}
 	\begin{tabularx}{\textwidth}{@{}|c|c|c|c|c|c|c|Y|}
@@ -81,8 +83,6 @@ Tabulka \ref{tab:executionsize} obsahuje velikosti souborů s~paměťovými př�
 		\hline
 	\end{tabularx}
 	\egroup
-	\caption{Velikost souborů vygenerovaných instrumentací}
-	\label{tab:executionsize}
 \end{table}
 
 Serializace do formátu JSON trvá srovnatelně dlouho jako serializace do formátu Protobuf, ale generuje znatelně větší soubory.
@@ -98,6 +98,8 @@ Načítání je zpomalené kvůli serializaci dat do Webworkeru a~zpátky z~něj
 
 \begin{table}
 	\centering
+	\caption{Doba načtení souborů s~přístupy ve vizualizační aplikaci}
+	\label{tab:visloadtime}
 	\bgroup
 	\def\arraystretch{1.2}
 	\begin{minipage}{\textwidth}
@@ -115,7 +117,5 @@ Načítání je zpomalené kvůli serializaci dat do Webworkeru a~zpátky z~něj
 			\hline
 		\end{tabularx}
 	\end{minipage}
-	\caption{Doba načtení souborů s~přístupy ve vizualizační aplikaci}
-	\label{tab:visloadtime}
 	\egroup
 \end{table}

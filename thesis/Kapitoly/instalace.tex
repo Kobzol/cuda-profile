@@ -113,33 +113,33 @@ Po ukončení programu se v~jeho pracovním adresáři vytvoří složka se zazn
 V~tabulce \ref{tab:parameters} jsou vypsány názvy, datové typy a~implicitní hodnoty parametrů, kterými lze ovlivnit instrumentaci a~běh profilovaných programů. Veškeré parametry se předávají pomocí proměnných prostředí. Pokud je v~tabulce uveden kontext \emph{překladač}, tak se parametr předává při překladu programu překladači Clang. Pokud je kontext \emph{program}, tak se parametr předává při spouštění instrumentovaného programu. U~parametrů typu \texttt{bool} se pravdivá hodnota zadává jako 1 a~nepravdivá hodnota jako 0.
 
 \begin{table}[h]
-\centering
-\bgroup
-\def\arraystretch{1.2}
-\begin{tabularx}{\textwidth}{|c|c|c|c|Y|}
-\hline
-\textbf{Název} & \textbf{Typ} & \textbf{Implicitně} & \textbf{Kontext} & \textbf{Popis} \\
-\hline
-INSTRUMENT\_LOCALS & bool & vypnuto & překladač & Instrumentace lokálních přístupů \\
-\hline
-KERNEL\_REGEX & řetězec & & překladač & Regulární výraz pro filtrování kernelů \\
-\hline
-BUFFER\_SIZE & číslo & 1000000 & program & Velikost bufferu pro přístupy [počet přístupů] \\
-\hline
-PRETTIFY & bool & vypnuto & program & Odsazení pro lepší čitelnost JSONu \\
-\hline
-COMPRESS & bool & vypnuto & program & Gzip komprimace vygenerovaných souborů \\
-\hline
-FORMAT & řetězec & JSON & program & Serializační formát (PROTOBUF, CAPNP, JSON) \\
-\hline
-HOST\_MEMORY & bool & vypnuto & program & Použití paměti CPU pro ukládání přístupů \\
-\hline
-THREAD\_POOL & bool & zapnuto & program & Paralelizace formátování přístupů \\
-\hline
-\end{tabularx}
-\egroup
-\caption{Parametry profilovacího nástroje}
-\label{tab:parameters}
+	\centering
+	\caption{Parametry profilovacího nástroje}
+	\label{tab:parameters}
+	\bgroup
+	\def\arraystretch{1.2}
+	\begin{tabularx}{\textwidth}{|c|c|c|c|Y|}
+		\hline
+		\textbf{Název} & \textbf{Typ} & \textbf{Implicitně} & \textbf{Kontext} & \textbf{Popis} \\
+		\hline
+		INSTRUMENT\_LOCALS & bool & vypnuto & překladač & Instrumentace lokálních přístupů \\
+		\hline
+		KERNEL\_REGEX & řetězec & & překladač & Regulární výraz pro filtrování kernelů \\
+		\hline
+		BUFFER\_SIZE & číslo & 1000000 & program & Velikost bufferu pro přístupy [počet přístupů] \\
+		\hline
+		PRETTIFY & bool & vypnuto & program & Odsazení pro lepší čitelnost JSONu \\
+		\hline
+		COMPRESS & bool & vypnuto & program & Gzip komprimace vygenerovaných souborů \\
+		\hline
+		FORMAT & řetězec & JSON & program & Serializační formát (PROTOBUF, CAPNP, JSON) \\
+		\hline
+		HOST\_MEMORY & bool & vypnuto & program & Použití paměti CPU pro ukládání přístupů \\
+		\hline
+		THREAD\_POOL & bool & zapnuto & program & Paralelizace formátování přístupů \\
+		\hline
+	\end{tabularx}
+	\egroup
 \end{table}
 
 \subsubsection{Formát generovaných souborů}
