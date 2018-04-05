@@ -120,7 +120,7 @@ __global__ void kernel(int* data)
     __cu_load(/* adresa */ data + threadIdx.x, /* velikost */ sizeof(int),
         /* adresní prostor - globální paměť */ 0,
         /* id datového typu */ 0,
-        /* lokace v~kódu */ 0, /* hodnota */ data[threadIdx.x]
+        /* lokace v kódu */ 0, /* hodnota */ data[threadIdx.x]
     );
     __cu_store(sharedMem + threadIdx.x, sizeof(int),
         /* adresní prostor - sdílená paměť */ 1,
@@ -172,18 +172,18 @@ Profilovací nástroj lze ovlivnit pomocí parametrů, které se předávají bu
 message Dim3 {
 	required int32 x = 1;
 	required int32 y = 2;
-	required int32 z~= 3;
+	required int32 z = 3;
 }
 
 message MemoryAccess {
-	required Dim3 threadIdx = 1;			// pozice vlákna v~bloku
+	required Dim3 threadIdx = 1;			// pozice vlákna v bloku
 	required string address = 2;			// adresa přístupu
 	required string value = 3;	  		// čtená/zapisovaná hodnota
 }
 	
 message Warp {
 	repeated MemoryAccess accesses = 1;	 // přístupy
-	required Dim3 blockIdx = 2;			 // pozice warpu v~mřížce
+	required Dim3 blockIdx = 2;			 // pozice warpu v mřížce
 	required int32 warpId = 3;			  // id warpu
 	required int32 debugId = 4;			 // index ladícího údaje
 	required int32 size = 5;			    // počet čtených/zapisovaných bytů
