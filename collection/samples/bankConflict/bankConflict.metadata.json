@@ -1,0 +1,22 @@
+{
+    "type": "metadata",
+    "kernel": "bankConflict",
+    "locations": [
+        {
+            "name": "store",
+            "file": "/home/kobzol/projects/diplomka/collection/samples/bankConflict/source.cu",
+            "line": 19
+        }
+    ],
+    "typeMap": [
+        "float"
+    ],
+    "nameMap": [
+        "mem"
+    ],
+    "source": {
+        "file": "/home/kobzol/projects/diplomka/collection/samples/bankConflict/source.cu",
+        "line": 4,
+        "content": "#include <CuprRuntime.h>\n#include <cuda_runtime_api.h>\n\n__global__ void bankConflict(int *p, int *q)\n{\n    __shared__ float mem[64];\n\n    int index = 0;\n    if (threadIdx.x < 16)\n    {\n        index = threadIdx.x;\n    }\n    else if (threadIdx.x < 20)\n    {\n        index = threadIdx.x + 16;\n    }\n    else index = threadIdx.x;\n\n    mem[index] = threadIdx.x;\n}\n\nint main(int argc, char** argv)\n{\n    const int COUNT = 32;\n\n    int* dPtr;\n    int data[COUNT] = { 0 };\n\n    cudaMalloc((void**) &dPtr, sizeof(data));\n    cudaMemcpy(dPtr, data, sizeof(data), cudaMemcpyHostToDevice);\n\n    bankConflict<<<1, COUNT>>>(dPtr, dPtr);\n\n    int ptr[COUNT];\n    cudaMemcpy(ptr, dPtr, sizeof(data), cudaMemcpyDeviceToHost);\n\n    cudaFree(dPtr);\n\n    return 0;\n}\n"
+    }
+}

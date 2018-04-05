@@ -1,9 +1,9 @@
 {
-  "compress": false,
-  "end": 1521384925293,
-  "start": 1521384925136,
-  "traces": [
-    "kernel-0.trace.json"
-  ],
-  "type": "run"
+    "type": "run",
+    "start": 1522945670657.0,
+    "end": 1522945670831.0,
+    "compress": false,
+    "traces": [
+        "bankConflict-0.trace.json"
+    ]
 }
