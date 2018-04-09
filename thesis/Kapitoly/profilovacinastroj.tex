@@ -43,7 +43,8 @@ call void @__cu_kernelEnd(%"struct.KernelContext"* %7)
 call void @__cu_disposeKernelContext(%"struct.KernelContext"* %7)
 \end{lstlisting}
 
-\begin{minipage}{\linewidth}
+\noindent
+\begin{minipage}{\textwidth}
 \begin{lstlisting}[language=C++,
 caption=Instrumentace spuštění kernelu v~C++,
 label={code:kernelinstrument},
@@ -103,7 +104,7 @@ Ve výpisu \ref{code:instrumentedkernel} je znázorněno, jak by mohl vypadat in
 Intrumentovány jsou opět pouze ty CUDA soubory, do kterých byl vložen hlavičkový soubor nástroje \texttt{CuprRuntime.h}. Tímto lze určit, které kernely se mají profilovat na úrovni zdrojových souborů. Dále lze filtrovat profilované kernely pomocí regulárního výrazu. Parametry ovlivňující instrumentaci jsou uvedeny v~sekci \ref{sec:parameters}.
 
 \begin{listing}
-\begin{minted}{cpp}
+\begin{minted}[escapeinside=||]{cpp}
 __global__ void kernel(int* data)
 {
     __shared__ int sharedMem[10];

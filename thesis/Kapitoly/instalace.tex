@@ -20,17 +20,20 @@ Testy jsou napsány v~Pythonu 2.7 a~jsou určené pro testovací knihovnu \emph{
 \subsubsection{Sestavení}
 Pro sestavení projektu do složky \emph{build} lze použít tyto příkazy:
 
-\begin{minted}{bash}
+\noindent
+\begin{minipage}{\textwidth}
+	\begin{minted}{bash}
   $ mkdir build
   $ cd build
   $ cmake -DCMAKE_BUILD_TYPE=RELEASE ..
   $ make -j
-\end{minted}
-Po sestavení lze spustit testy pomocí příkazu
+	\end{minted}
+\end{minipage}
+
+Po sestavení lze v~kořenovém adresáři projektu spustit testy pomocí tohoto příkazu:
 \begin{minted}{bash}
   $ py.test tests
 \end{minted}
-v~kořenovém adresáři projektu.
 
 Pro zjednodušení instalace profilovacího nástroje je v~repozitáři k~dispozici konfigurační soubor pro \emph{Docker}\footnote{\url{https://www.docker.com}}, který obsahuje všechny potřebné závislosti. Návod pro instalaci Dockeru lze najít například zde: \url{https://docs.docker.com/install/linux/docker-ce/ubuntu}.
 Jelikož profilovací nástroj vyžaduje CUDA grafickou kartu pro své spuštění, musí se Docker kontejner spustit s~podporou běhového prostředí CUDA. Pro sestavení projektu v~Dockeru a~následné spuštění testů lze použít tyto příkazy v~kořenovém adresáři projektu:
@@ -52,19 +55,24 @@ Aby šlo takto soubor vložit, tak musí být složka \texttt{include} přidána
 
 Instrumentovaný program se poté musí přeložit pomocí překladače Clang. Při překladu je nutné přilinkovat knihovny profilovacího nástroje. Následující skript přeloží zdrojové soubory a~provede instrumentaci profilovacím nástrojem. Skript předpokládá, že v~proměnné prostředí CUPR\_BUILD\_DIR je absolutní cesta k~adresáři se sestaveným profilovacím nástrojem (tedy např. adresář \texttt{build}, viz výše).
 
-\begin{minted}[escapeinside=\#\#]{bash}
-$ clang++ -std=c++14 --cuda-gpu-arch=sm_30 \
-    -I/usr/local/cuda/include -L/usr/local/cuda/lib64 \
-    #\colorbox{insthighlight}{-I\$\{CUPR\_BUILD\_DIR\}/include}# \
-    #\colorbox{insthighlight}{-L\$\{CUPR\_BUILD\_DIR\}/runtime}# \
-    #\colorbox{insthighlight}{-Xclang -load -Xclang \$\{CUPR\_BUILD\_DIR\}/instrument/libinstrument.so}# \
-    #\colorbox{insthighlight}{-lruntime}# \
-    #\colorbox{insthighlight}{-z muldefs}# \
-    -lcudart \
-    -xcuda \
-    <zdrojové soubory> -o cuda
+\noindent
+\begin{minipage}{\textwidth}
+\begin{minted}{bash}
+  $ clang++ -std=c++14 --cuda-gpu-arch=sm_30 \
+	-I/usr/local/cuda/include -L/usr/local/cuda/lib64 \
+	-I\$\{CUPR\_BUILD\_DIR\}/include \
+	-L\$\{CUPR\_BUILD\_DIR\}/runtime \
+	-Xclang -load -Xclang \$\{CUPR\_BUILD\_DIR\}/instrument/libinstrument.so \
+	-lruntime \
+	-z muldefs \
+	-lcudart \
+	-xcuda \
+	<zdrojové soubory> -o cuda
 \end{minted}
-Zvýrazněné řádky jsou potřeba pro instrumentaci, ostatní přepínače jsou standardní při překládání CUDA programů překladačem Clang. Přepínač \texttt{-z\ muldefs} je nutný pouze pokud je soubor \texttt{CuprRuntime.h} vložen do více než jednoho souboru s~kernely. Tento přepínač ignoruje výskyt více definic stejné deklarace a~je nutný z~důvodu omezení Clangu popsaného v~sekci \ref{sec:gpucollection}.
+\end{minipage}
+
+\vspace{5mm}
+Přepínač \texttt{-z\ muldefs} je nutný pouze pokud je soubor \texttt{CuprRuntime.h} vložen do více než jednoho souboru s~kernely. Tento přepínač ignoruje výskyt více definic stejné deklarace a~je nutný z~důvodu omezení Clangu popsaného v~sekci \ref{sec:gpucollection}.
 
 Níže je pro úplnost ukázka minimálního souboru pro instrumentaci a~sestavení CUDA programu překladačem Clang pomocí CMake.
 
@@ -99,7 +107,7 @@ target_include_directories(profiled PRIVATE ${CUPR_SRC_DIR}/include)
 Instrumentovaný program potřebuje k~běhu dynamickou knihovnu profilovacího nástroje, je tedy nutné buď vytvořit symbolický odkaz ke knihovně pomocí programu \texttt{ldconfig}\footnote{\url{http://man7.org/linux/man-pages/man8/ldconfig.8.html}} nebo použít proměnnou prostředí LD\_LIBRARY\_PATH\footnote{\url{http://man7.org/linux/man-pages/man8/ld.so.8.html}} pro určení umístění knihovny. Následuje kompletní ukázka spuštění programu i~s~použitím knihovny pro zaznamenání dynamických alokací a~předání parametrů.
 
 \begin{minted}{bash}
-$ LD_PRELOAD=${CUPR_BUILD_DIR}/runtimetracker/libruntimetracker.so \
+  $ LD_PRELOAD=${CUPR_BUILD_DIR}/runtimetracker/libruntimetracker.so \
     LD_LIBRARY_PATH=${CUPR_BUILD_DIR}/runtime \
     FORMAT=PROTOBUF \
     COMPRESS=1 \
@@ -151,17 +159,14 @@ Vizualizační aplikace se nachází ve složce \texttt{dashboard}, následujíc
 \subsubsection{Závislosti}
 Pro instalaci a~spuštění vizualizační webové aplikace je nutné nainstalovat běhové prostředí Javascriptu \emph{NodeJS}\footnote{\url{https://nodejs.org}} alespoň ve verzi 8 a~jeho balíčkovací manažer \emph{npm}\footnote{\url{https://www.npmjs.com}}. Závislosti projektu lze nainstalovat tímto příkazem:
 \begin{minted}{bash}
-    $ npm install
+  $ npm install
 \end{minted}
 
 \subsubsection{Použití}
-Aplikaci je poté možno spustit přímo ve vývojářském režimu:
+Aplikaci je poté možno spustit buď přímo ve vývojářském režimu nebo ji lze sestavit do statických HTML, CSS a~Javascript souborů a~poté použít libovolný webový server k~servírování aplikace ze složky \texttt{build}:
 \begin{minted}{bash}
-    $ npm start
-\end{minted}
-nebo ji lze sestavit do statických HTML, CSS a~Javascript souborů a~poté použít libovolný webový server k~servírování aplikace ze složky \texttt{build}:
-\begin{minted}{bash}
-    $ npm run build
+  $ npm run start # vývojářský režim
+  $ npm run build # sestavení do statických souborů
 \end{minted}
 
 Aplikace při spuštění ve vývojářském režimu běží na portu 3000, lze se na ni tedy dostat v~prohlížeči pomocí adresy \url{http://localhost:3000}.

@@ -515,6 +515,7 @@ tabsize=3,
 columns=flexible,
 showstringspaces=false,
 frame=lines,
+framesep=8pt,
 captionpos=b
 }
 \onehalfspacing
