@@ -2,8 +2,8 @@
 Profilovací nástroj byl primárně vyvíjen pro Linuxové distribuce založené na Debianu, instalační instrukce jsou tedy zaměřené na ně. Jeho kód se nachází ve složce \texttt{collection}, následující příkazy předpokládají spouštění z~této složky. 
 
 \subsubsection{Závislosti}
-Projekt lze sestavit pomocí programu \emph{CMake}\footnote{\url{https://cmake.org}}, který ze zdrojového kódu generuje soubory pro konkrétní sestavovací systém (např. \emph{make}). Před sestavením projektu je nutné nainstalovat závislosti CMake a~LLVM. Instrumentační nástroj by měl být kompatibilní s~LLVM 4, 5 i~6 a~s~CUDOU ve verzi 8 a~9. Podpora pro CUDA 9.1 je v~době tvorby této práce stále ve vývoji.
-Mezi verzí CUDY 8 a~9 vznikly relativně velké změny ve spolupráci CUDY s~Clangem, doporučená a~nejvíce otestovaná kombinace verzí je pro použití profilovacího nástroje je LLVM 4 a~CUDA 8.
+Projekt lze sestavit pomocí programu \emph{CMake}\footnote{\url{https://cmake.org}}, který ze zdrojového kódu generuje soubory pro konkrétní sestavovací systém (např. \emph{make}). Před sestavením projektu je nutné nainstalovat závislosti CMake a~LLVM. Instrumentační nástroj by měl být kompatibilní s~LLVM 4, 5 i~6 a~s~rozhraním CUDA ve verzi 8 a~9. Podpora pro CUDA 9.1 je v~době tvorby této práce stále ve vývoji.
+Mezi verzí CUDA 8 a~9 vznikly relativně velké změny ve spolupráci rozhraní CUDA s~Clangem, doporučená a~nejvíce otestovaná kombinace verzí je pro použití profilovacího nástroje je LLVM 4 a~CUDA 8. Pro rychlou instalaci potřebných závislostí lze použít následující příkaz.
 \begin{minted}{bash}
   $ apt-get install build-essential cmake llvm-4.0-dev clang-4.0
 \end{minted}
@@ -11,7 +11,7 @@ Pro použití komprese a~knihoven Protobuf či Cap'n Proto je potřeba doinstalo
 \begin{minted}{bash}
   $ apt-get install libprotobuf-dev protobuf-compiler capnproto libcapnp-dev zlib1g-dev
 \end{minted}
-Testy jsou napsány v~Pythonu 2.7 a~jsou určené pro testovací knihovnu \emph{pytest}\footnote{\url{https://docs.pytest.org/en/latest}}. Pro spuštění testů je nutné doinstalovat balíčky s~Pythonem, pytestem a~dále nainstalovat Protobuf a~Cap'n Proto pro Python.
+Testy jsou napsány v~Pythonu 2.7 a~jsou určené pro testovací knihovnu \emph{pytest}\footnote{\url{https://docs.pytest.org/en/latest}}. Pro spuštění testů je nutné doinstalovat balíčky Python, pytest a~dále nainstalovat Protobuf a~Cap'n Proto pro Python.
 \begin{minted}{bash}
   $ apt-get install python python-pip python-pytest
   $ pip install protobuf pycapnp
@@ -35,8 +35,7 @@ Po sestavení lze v~kořenovém adresáři projektu spustit testy pomocí tohoto
   $ py.test tests
 \end{minted}
 
-Pro zjednodušení instalace profilovacího nástroje je v~repozitáři k~dispozici konfigurační soubor pro \emph{Docker}\footnote{\url{https://www.docker.com}}, který obsahuje všechny potřebné závislosti. Návod pro instalaci Dockeru lze najít například zde: \url{https://docs.docker.com/install/linux/docker-ce/ubuntu}.
-Jelikož profilovací nástroj vyžaduje CUDA grafickou kartu pro své spuštění, musí se Docker kontejner spustit s~podporou běhového prostředí CUDA. Pro sestavení projektu v~Dockeru a~následné spuštění testů lze použít tyto příkazy v~kořenovém adresáři projektu:
+Pro zjednodušení instalace profilovacího nástroje je v~repozitáři k~dispozici konfigurační soubor pro \emph{Docker}\footnote{\url{https://www.docker.com}}, který obsahuje všechny potřebné závislosti. Jelikož profilovací nástroj vyžaduje CUDA grafickou kartu pro své spuštění, musí se Docker kontejner spustit s~podporou běhového prostředí CUDA. Pro sestavení projektu v~Dockeru a~následné spuštění testů lze použít tyto příkazy v~kořenovém adresáři projektu:
 \begin{minted}{bash}
   $ apt-get install nvidia-docker2
   $ docker build -t profiler .
@@ -47,7 +46,7 @@ Kontejner je možné zapnout v~interaktivním režimu a~použít jej k~instrumen
 
 \subsubsection{Použití}
 \label{manual:usage}
-Pro každý soubor s~kernely, které se mají instrumentovat, je nejprve nutné vložit do zdrojového \texttt{.cu} souboru hlavičkový soubor \texttt{CuprRuntime.h} ze složky \texttt{include}.
+Pro každý kernel, který se má instrumentovat, je nutné vložit do jeho zdrojového \texttt{.cu} souboru hlavičkový soubor \texttt{CuprRuntime.h} ze složky \texttt{include}.
 \begin{minted}{cpp}
   #include <CuprRuntime.h>
 \end{minted}
@@ -60,9 +59,9 @@ Instrumentovaný program se poté musí přeložit pomocí překladače Clang. P
 \begin{minted}{bash}
   $ clang++ -std=c++14 --cuda-gpu-arch=sm_30 \
 	-I/usr/local/cuda/include -L/usr/local/cuda/lib64 \
-	-I\$\{CUPR\_BUILD\_DIR\}/include \
-	-L\$\{CUPR\_BUILD\_DIR\}/runtime \
-	-Xclang -load -Xclang \$\{CUPR\_BUILD\_DIR\}/instrument/libinstrument.so \
+	-I${CUPR_BUILD_DIR}/include \
+	-L${CUPR_BUILD_DIR}/runtime \
+	-Xclang -load -Xclang ${CUPR_BUILD_DIR}/instrument/libinstrument.so \
 	-lruntime \
 	-z muldefs \
 	-lcudart \
@@ -118,7 +117,7 @@ Po ukončení programu se v~jeho pracovním adresáři vytvoří složka se zazn
 
 \subsubsection{Parametry}
 \label{manual:parameters}
-V~tabulce \ref{tab:parameters} jsou vypsány názvy, datové typy a~implicitní hodnoty parametrů, kterými lze ovlivnit instrumentaci a~běh profilovaných programů. Veškeré parametry se předávají pomocí proměnných prostředí. Pokud je v~tabulce uveden kontext \emph{překladač}, tak se parametr předává při překladu programu překladači Clang. Pokud je kontext \emph{program}, tak se parametr předává při spouštění instrumentovaného programu. U~parametrů typu \texttt{bool} se pravdivá hodnota zadává jako 1 a~nepravdivá hodnota jako 0.
+V~tabulce \ref{tab:parameters} jsou vypsány názvy, datové typy a~implicitní hodnoty parametrů, kterými lze ovlivnit instrumentaci a~běh profilovaných programů. Veškeré parametry se předávají pomocí proměnných prostředí. Pokud je v~tabulce uveden kontext \emph{překladač}, tak se parametr předává při překladu programu překladači Clang, kontext \emph{program} značí předání parametru při spouštění instrumentovaného programu. U~parametrů typu \texttt{bool} se pravdivá hodnota zadává jako 1 a~nepra\-vdivá hodnota jako 0.
 
 \begin{table}[h]
 	\centering
@@ -151,7 +150,7 @@ V~tabulce \ref{tab:parameters} jsou vypsány názvy, datové typy a~implicitní 
 \end{table}
 
 \subsubsection{Formát generovaných souborů}
-Při instrumentaci a~spouštění instrumentovaných programů se generují tři typy souborů. Jejich specifikace ve formátu JSON Schema je v~kořenovém adresáři projektu ve složce \texttt{schema}. Soubor s~informacemi o~běhu celé aplikace má název \texttt{run.json} a~vytváří se při každém spuštění instrumentovaného programu. Dalším typem souboru je soubor s~metadaty, který je vždy pojmenován \texttt{<kernel>.metadata.json}, kde kernel je název kernelu, jehož metadata soubor obsahuje. Tento soubor je vytvořen pro každý instrumentovaný kernel při překladu aplikace. Posledním a~nejdůležitějším typem souboru je soubor s~paměťovými alokacemi. Ten se vytváří za běhu programu při každém spuštění instrumentovaného kernelu. Tento soubor by bylo komplikované popsat pomocí JSON Schema, jeho obsah si lze prohlédnout v~definici struktur pro Protobuf nebo Cap'n Proto. Ty se nacházejí ve složkách \texttt{collection/runtime/format/protobuf} a~\texttt{collection/runtime/format/capnp}.
+Při instrumentaci a~spouštění instrumentovaných programů se generují tři typy souborů. Jejich specifikace je umístěna v~kořenovém adresáři projektu ve složce \texttt{schema}. Soubor s~informacemi o~běhu celé aplikace má název \texttt{run.json} a~vytváří se při každém spuštění instrumentovaného programu. Dalším typem souboru je soubor s~metadaty, který je vždy pojmenován \texttt{<nazev>.metadata.json}, kde \texttt{nazev} je název kernelu, jehož metadata soubor obsahuje. Tento soubor je vytvořen pro každý instrumentovaný kernel při překladu aplikace. Posledním a~nej\-důležitějším typem souboru je soubor s~paměťovými přístupy. Ten se vytváří za běhu programu při každém spuštění instrumentovaného kernelu.
 
 \subsection{Webová aplikace}
 Vizualizační aplikace se nachází ve složce \texttt{dashboard}, následující příkazy předpokládají spouštění z~této složky.

@@ -1,0 +1,20 @@
+syntax = "proto2";
+
+package cupr.proto;
+
+message AllocRecord {
+    required string address = 1;
+    required int32 size = 2;
+    required int32 elementSize = 3;
+    required int32 space = 4;
+    oneof type {
+        int32 typeIndex = 5;
+        string typeString = 6;
+    }
+    oneof name {
+        int32 nameIndex = 7;
+        string nameString = 10;
+    }
+    required string location = 8;
+    required bool active = 9;
+}

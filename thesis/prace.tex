@@ -44,6 +44,8 @@
   \kern 2pt
 }
 
+\newcommand\CPP{C\texttt{++}}
+
 \AtBeginEnvironment{listing}{\setcounter{listing}{\value{lstlisting}}}
 \AtEndEnvironment{listing}{\stepcounter{lstlisting}}
 
@@ -63,11 +65,10 @@
 \ThesisAssignmentImagePath{Obrazky/Zadani}
 \AuthorDeclarationImageFile{Obrazky/DeklaraceAutora.jpg}
 
-\CzechAbstract{Tato práce se zabývá vizualizací paměťových přístupů programů na platformě CUDA. Je v~ní prezentován profilovací nástroj, který instrumentuje CUDA programy a generuje z~nich záznam paměťových přístupů. Ty jsou poté prezentovány uživateli pro odhalení příležitostí pro paměťovou optimalizaci. První část práce popisuje metody profilování programů a technologie použité pro tvorbu profilovacího nástroje. Poté následuje popis existujících nástrojů pro profilování aplikací pro grafické karty. Třetí část se zabývá návrhem a implementací profilovacího nástroje a webové aplikace pro vizualizaci zaznamenaných přístupů.}
+\CzechAbstract{Tato práce se zabývá vizualizací paměťových přístupů programů na platformě CUDA. Je v~ní prezentován profilovací nástroj, který instrumentuje CUDA programy a generuje z~nich záznam paměťových přístupů. Ty jsou poté prezentovány uživateli pro odhalení možných paměťových optimalizací. První část práce popisuje metody profilování programů a technologie použité pro tvorbu profilovacího nástroje. Poté následuje popis existujících nástrojů pro profilování aplikací pro grafické karty. Třetí část se zabývá návrhem a implementací profilovacího nástroje a webové aplikace pro vizualizaci zaznamenaných přístupů.}
 \CzechKeywords{vizualizace paměťových přístupů, profilování, instrumentace, paralelní aplikace, CUDA, LLVM}
 
-\EnglishAbstract{This thesis deals with visualising memory accesses of CUDA programs. It presents a profiling tool that instruments CUDA programs and generates their memory access traces. These can then be visualised to exploit memory optimization opportunities.
-First part of the thesis introduces application profiling methods and technologies used to create the profiling tool. The second part describes existing tools that allow profiling graphics processing units. The last part discusses design and implementation of the profiling tool and of a web application that allows visualisation of the stored memory traces.}
+\EnglishAbstract{This thesis deals with visualising memory accesses of CUDA programs. It presents a profiling tool that instruments CUDA programs and generates their memory access traces. These can then be visualised to exploit memory access optimization opportunities. First part of the thesis introduces application profiling methods and technologies used to create the profiling tool. The second part describes existing tools that allow profiling graphics processing units. The last part discusses design and implementation of the profiling tool and introduces a web application that visualises the stored memory traces.}
 \EnglishKeywords{memory access visualization, profiling, instrumentation, parallel applications, CUDA, LLVM}
 
 \AddAcronym{CAS}{Compare And Swap}

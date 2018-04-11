@@ -1,0 +1,23 @@
+syntax = "proto2";
+
+import "dim3.proto";
+
+package cupr.proto;
+
+message MemoryAccess {
+    required cupr.proto.Dim3 threadIdx = 1;
+    required string address = 2;
+    required string value = 3;
+}
+
+message Warp {
+    repeated cupr.proto.MemoryAccess accesses = 1;
+    required cupr.proto.Dim3 blockIdx = 2;
+    required int32 warpId = 3;
+    required int32 debugId = 4;
+    required int32 size = 5;
+    required int32 kind = 6;
+    required int32 space = 7;
+    required int32 typeIndex = 8;
+    required string timestamp = 9;
+}
