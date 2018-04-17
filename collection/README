@@ -75,3 +75,7 @@ you need to have Nvidia graphics card and install the Nvidia Docker runtime.
     $ apt-get install nvidia-docker2
     $ docker build -t cuda-profiler .
     $ docker run --runtime=nvidia cuda-profiler
+
+### Third party code
+- zstr (https://github.com/mateidavid/zstr, MIT)
+- rapidjson (https://github.com/Tencent/rapidjson, MIT)
