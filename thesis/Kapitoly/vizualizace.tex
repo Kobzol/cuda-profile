@@ -36,13 +36,13 @@ class Counter extends Component<Props, Readonly<State>> {
         return (
             <Button
                 onClick={this.increaseCounter}
-                text={this.state.counter} />
+                text={this.state.counter.toString()} />
         );
     }
     increaseCounter = () => {
         this.setState(state => ({
             counter: state.counter + this.props.increment
-        });
+        }));
     }
 }
 \end{minted}

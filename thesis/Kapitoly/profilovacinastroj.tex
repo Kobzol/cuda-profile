@@ -79,12 +79,12 @@ void MemoryAlloc::handleCudaMalloc(CallInst* call)
 
 	auto debug = getCudaMallocDebug(call);
 	emitter.malloc(
-		addressLoad,
-		call->getOperand(1),
-		values.int64(valueType->getPrimitiveSizeInBits() / 8),
-		values.createGlobalCString(typeStr),
-		values.createGlobalCString(debug.getName()),
-		values.createGlobalCString(getFullPath(debug))
+		addressLoad, // adresa
+		call->getOperand(1), // velikost alokace
+		values.int64(valueType->getPrimitiveSizeInBits() / 8), // velikost typu
+		values.createGlobalCString(typeStr), // název typu
+		values.createGlobalCString(debug.getName()), // název proměnné
+		values.createGlobalCString(getFullPath(debug)) // umístění ve zdrojovém kódu
 	);
 }
 \end{minted}
