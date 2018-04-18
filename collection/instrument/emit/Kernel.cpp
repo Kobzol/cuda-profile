@@ -20,8 +20,8 @@
 #include "KernelInit.h"
 
 #define RAPIDJSON_HAS_STDSTRING 1
-#include "../../runtime/format/json/rapidjson/prettywriter.h"
-#include "../../runtime/format/json/rapidjson/ostreamwrapper.h"
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/ostreamwrapper.h>
 
 using namespace llvm;
 using namespace rapidjson;

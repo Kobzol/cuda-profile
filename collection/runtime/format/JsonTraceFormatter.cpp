@@ -1,8 +1,8 @@
 #include "JsonTraceFormatter.h"
 
-#include "json/rapidjson/filewritestream.h"
-#include "json/rapidjson/ostreamwrapper.h"
-#include "json/rapidjson/prettywriter.h"
+#include <rapidjson/filewritestream.h>
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/prettywriter.h>
 
 #ifdef CUPR_USE_ZLIB
     #include "zlib/zstr.hpp"

@@ -21,5 +21,6 @@ set(SOURCE_FILES
 )
 
 add_library(instrument MODULE RegisterPass.cpp ${SOURCE_FILES})
+add_dependencies(instrument rapidjson)
 target_include_directories(instrument PRIVATE ${LLVM_INCLUDE_DIRS})
 set_target_properties(instrument PROPERTIES COMPILE_FLAGS "-fno-rtti")

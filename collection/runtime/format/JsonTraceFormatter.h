@@ -4,7 +4,7 @@
 #include "TraceFormatter.h"
 
 #define RAPIDJSON_HAS_STDSTRING 1
-#include "json/rapidjson/writer.h"
+#include <rapidjson/writer.h>
 
 namespace cupr
 {

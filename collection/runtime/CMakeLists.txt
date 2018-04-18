@@ -28,6 +28,7 @@ if (PROTOBUF_FOUND)
 endif()
 
 add_library(runtime SHARED ${SOURCE_FILES} ${capnpTraceSources} ${protoTraceSources})
+add_dependencies(runtime rapidjson)
 target_link_libraries(runtime ${CUDA_LIBRARIES})
 if (CapnProto_FOUND)
     target_link_libraries(runtime capnp kj)

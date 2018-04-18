@@ -36,6 +36,21 @@ if (CapnProto_FOUND)
     add_definitions(-DCUPR_USE_CAPNP)
 endif()
 
+include(ExternalProject)
+
+set(RAPIDJSON_ROOT ${CMAKE_CURRENT_BINARY_DIR}/rapidjson)
+
+# download rapidjson
+ExternalProject_Add(rapidjson
+        PREFIX ${RAPIDJSON_ROOT}
+        GIT_REPOSITORY https://github.com/Tencent/rapidjson
+        GIT_TAG master
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
+        INSTALL_COMMAND ""
+)
+include_directories(${RAPIDJSON_ROOT}/src/rapidjson/include)
+
 set(CMAKE_CXX_COMPILER "${LLVM_TOOLS_BINARY_DIR}/clang++")
 set(CUDA_HOST_COMPILER "g++")
 

@@ -4,8 +4,8 @@
 #include "warp/WarpGrouper.h"
 
 #define RAPIDJSON_HAS_STDSTRING 1
-#include "json/rapidjson/ostreamwrapper.h"
-#include "json/rapidjson/prettywriter.h"
+#include <rapidjson/ostreamwrapper.h>
+#include <rapidjson/prettywriter.h>
 
 using namespace cupr;
 using namespace rapidjson;
