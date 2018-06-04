@@ -36,9 +36,9 @@ You can also use the one-liner below (it expects that the environment variable
 
     $ clang++ -std=c++14 --cuda-gpu-arch=sm_30 \
         -I/usr/local/cuda/include -L/usr/local/cuda/lib64 \
-        -I\${CUPR_BUILD_DIR\}/include \
-        -L\${CUPR_BUILD_DIR\}/runtime \
-        -Xclang -load -Xclang \${CUPR_BUILD_DIR\}/instrument/libinstrument.so \
+        -I${CUPR_BUILD_DIR}/include \
+        -L${CUPR_BUILD_DIR}/runtime \
+        -Xclang -load -Xclang ${CUPR_BUILD_DIR}/instrument/libinstrument.so \
         -lruntime \
         -z muldefs \
         -lcudart \
